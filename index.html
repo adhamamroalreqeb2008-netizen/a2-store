@@ -113,14 +113,14 @@ footer .ab{flex:2 1 340px}footer>div{flex:1 1 180px}
 .pc.ap{border:1.5px solid #222}
 .pc::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(105deg,transparent,rgba(255,255,255,.9),transparent);transform:skewX(-20deg);animation:ps 4.5s ease-in-out infinite;animation-delay:calc(var(--i)*.6s)}
 .pc:hover{transform:translateY(-6px) scale(1.08);box-shadow:0 12px 26px rgba(0,0,0,.35)}
-@keyframes pi{from{opacity:0;transform:translateY(16px) scale(.9)}}
-@keyframes ps{0%,60%{left:-60%}100%{left:130%}}
+@keyframes pi{from{opact:-60%}100%{left:130%}}
 
 header>a:first-child{position:relative;display:block;border-radius:10px;overflow:hidden;animation:lgin .9s cubic-bezier(.2,1.4,.4,1) both,lgg 3s ease-in-out 1s infinite}
 header>a:first-child img{transition:transform .4s}
 header>a:first-child:hover img{transform:scale(1.12) rotate(-3deg)}
 header>a:first-child::after{content:"";position:absolute;top:0;bottom:0;width:35%;left:-60%;background:linear-gradient(105deg,transparent,rgba(255,255,255,.6),transparent);transform:skewX(-20deg);animation:lgs 4s ease-in-out 1.2s infinite;pointer-events:none}
-@keyframes lgin{from{opacity:0;transform:scale(.4) rotate(-14deg)}}
+@keyframes lgin{from{opacity:0;trity:0;transform:translateY(16px) scale(.9)}}
+@keyframes ps{0%,60%{lefansform:scale(.4) rotate(-14deg)}}
 @keyframes lgg{0%,100%{box-shadow:0 0 0 0 rgba(224,189,116,0)}50%{box-shadow:0 0 18px 2px rgba(224,189,116,.55)}}
 @keyframes lgs{0%,55%{left:-60%}100%{left:140%}}
 </style></head><body>
@@ -257,31 +257,21 @@ app.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const e=cart.find(i=>
 app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{pay=b.dataset.p;cartV()});
 const m=$('#mo');if(m){m.onchange=()=>{mo=+m.value;cartV()};$('#fp').onchange=e=>{first=+e.target.value;cartV()};$('#fp').onclick=e=>e.stopPropagation()}
 $('#nx').onclick = () => {
-alert('طريقة الدفع المختارة: ' + pay);
-  if (pay === 'inst') {
-    const order = {
-      items: cart,
-      total: T,
-      firstPayment: F,
-      months: mo,
-      currency: 'AED'
-    };
+  // حفظ بيانات الطلب الحالية في sessionStorage لإرسالها أو استخدامها في صفحة التحقق
+  const order = {
+    items: cart,
+    total: T,
+    paymentMethod: pay,
+    currency: 'AED'
+  };
 
-    sessionStorage.setItem(
-      'a2_pending_order',
-      JSON.stringify(order)
-    );
+  sessionStorage.setItem(
+    'a2_pending_order',
+    JSON.stringify(order)
+  );
 
-    window.location.href = 'verification.html';
-    return;
-  }
-
-  if (pay === 'tabby' || pay === 'tamara') {
-    alert('سيتم تفعيل بوابة الدفع بعد ربط حساب التاجر.');
-    return;
-  }
-
-  alert('الدفع الكامل يحتاج ربط بوابة دفع إلكترونية.');
+  // الانتقال المباشر لصفحة verification.html بدون أي نوافذ منبثقة
+  window.location.href = 'verification.html';
 };
 }
 function route(){clearInterval(timer);const h=location.hash.slice(1);
