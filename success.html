@@ -294,7 +294,7 @@
         </tr>
       </thead>
       <tbody id="itemsTableBody">
-        <!-- يُعبأ تلقائياً بالمنتجات الحقيقية -->
+        <!-- يُعبأ تلقائياً -->
       </tbody>
     </table>
 
@@ -342,7 +342,6 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    // جلب بيانات ملخص الطلب والسلة المحفوظة
     let orderInfo = JSON.parse(localStorage.getItem('a2_order_info') || '{}');
     let cart = JSON.parse(localStorage.getItem('a2cart') || localStorage.getItem('cart') || '[]');
 
@@ -375,13 +374,15 @@
           </tr>
         `;
       });
-    } else {
-      // الاعتماد المباشر على الإجمالي القادم من ملخص الطلب إذا كانت السلة فارغة
+    }
+
+    // إذا لم تكن هناك سلة أو الإجمالي صفر، نلتقط السعر من orderInfo أو نضع القيمة الافتراضية المضمونة
+    if (rawPrice === 0) {
       rawPrice = parsePrice(orderInfo.total || orderInfo.price || orderInfo.amount || 41700.00);
       let pName = orderInfo.productName || orderInfo.item || 'بطارية لثيوم GoodWe عالية الجهد بقدرة 56.3 كيلوواط/ساعة';
       let q = Number(orderInfo.qty || 1);
 
-      tableHtml += `
+      tableHtml = `
         <tr>
           <td>${pName}</td>
           <td>${q}</td>
@@ -393,7 +394,6 @@
 
     document.getElementById('itemsTableBody').innerHTML = tableHtml;
 
-    // تعبئة رقم الطلب والاتصال
     const invId = orderInfo.invId || Math.floor(100000 + Math.random() * 900000);
     document.getElementById('orderIdNum').textContent = '#' + invId;
     document.getElementById('invNum').textContent = 'SAM-' + invId;
@@ -407,7 +407,6 @@
     document.getElementById('custCity').textContent = orderInfo.city || orderInfo.address || '';
     document.getElementById('payMethodText').textContent = orderInfo.payMethod || 'تقسيط';
 
-    // استخدام الدفعة الأولى المحسوبة من خيار الدفع في ملخص الطلب
     let firstPay = orderInfo.firstPay || (rawPrice > 5000 ? Math.round(rawPrice * 0.1) : 1000.00);
 
     const formattedTotal = rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' د.إ';
