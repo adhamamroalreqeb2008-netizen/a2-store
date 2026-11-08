@@ -170,6 +170,25 @@
       if (o) { orderInfo = o; cartItems = Array.isArray(o.items) ? o.items : []; }
     } catch(e){}
 
+    // احتياطي: لو ما وُجد a2_order نبحث في سلة الموقع (localStorage و sessionStorage)
+    if (!cartItems.length) {
+      [localStorage, sessionStorage].forEach(store => {
+        Object.keys(store).forEach(k => {
+          try {
+            const d = JSON.parse(store.getItem(k));
+            if (Array.isArray(d) && d.length && typeof d[0] === 'object' &&
+                (d[0].price||d[0].p||d[0].cost||d[0].name||d[0].n||d[0].title)) cartItems = d;
+            else if (d && typeof d === 'object' && !Array.isArray(d)) {
+              if (Array.isArray(d.items) && d.items.length && !cartItems.length) cartItems = d.items;
+              ['name','phone','whatsapp','mobile','city','address','payMethod','orderId','invId','total'].forEach(f => {
+                if (d[f] && !orderInfo[f]) orderInfo[f] = d[f];
+              });
+            }
+          } catch(e){}
+        });
+      });
+    }
+
     let raw = 0, html = '';
     const items = cartItems.length ? cartItems : [{
       name: orderInfo.productName || orderInfo.item || 'منتج',
