@@ -3,16 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>فاتورة وعقد تقسيط - A2 STORE</title>
+<title>فاتورة ضريبية مبسطة - A2 STORE</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --primary: #0f4c81;
-    --navy-header: #102a45;
-    --bg-page: #7b8895;
-    --border-color: #d1d9e0;
-    --text-dark: #1f2937;
-    --text-muted: #4b5563;
+    --primary-color: #e63946; /* لون العناوين البارز */
+    --text-main: #2b2b2b;
+    --border-color: #e0e0e0;
+    --bg-page: #5c6b73;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
@@ -23,131 +21,148 @@
     flex-direction: column;
     align-items: center;
     padding: 20px 10px;
-    gap: 30px;
   }
 
-  .doc-container {
+  .invoice-box {
     background: #ffffff;
     width: 100%;
-    max-width: 850px;
-    padding: 30px 35px;
-    box-shadow: 0 5px 25px rgba(0,0,0,0.25);
-    color: var(--text-dark);
+    max-width: 650px;
+    padding: 35px 30px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+    color: var(--text-main);
     position: relative;
   }
 
-  .doc-header {
+  /* Header Section */
+  .inv-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
   }
-  .brand-left { text-align: right; }
-  .brand-left h2 { font-size: 20px; font-weight: 800; color: #000; letter-spacing: 0.5px; }
-  .brand-left p { font-size: 11px; color: var(--text-muted); }
-
-  .brand-logo-img {
-    height: 70px;
+  .brand-info h1 {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--primary-color);
+  }
+  .brand-info p {
+    font-size: 14px;
+    font-weight: 700;
+    color: #444;
+    margin-top: 2px;
+  }
+  .logo-img {
+    height: 60px;
     width: auto;
     object-fit: contain;
   }
 
-  .brand-right { text-align: left; }
-  .brand-right h2 { font-size: 20px; font-weight: 800; color: #000; }
-  .brand-right p { font-size: 11px; color: var(--text-muted); }
-
-  .inv-meta-bar {
-    display: flex;
-    justify-content: space-between;
-    font-weight: 700;
-    font-size: 15px;
-    margin-bottom: 20px;
-    padding-bottom: 5px;
-  }
-  .inv-no { color: #d93838; }
-
-  .greeting-box {
-    border: 1px solid var(--border-color);
-    padding: 15px 20px;
-    border-radius: 4px;
-    margin-bottom: 20px;
+  /* Meta Info Row */
+  .meta-row {
     display: flex;
     justify-content: space-between;
     font-size: 13px;
-    line-height: 1.6;
-  }
-
-  .blue-bar {
-    background: var(--navy-header);
-    color: #ffffff;
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 20px;
     font-weight: 700;
-    font-size: 14px;
-  }
-
-  .info-table-box {
-    border: 1px solid var(--border-color);
     margin-bottom: 20px;
-  }
-  .info-table-box .title {
-    text-align: center;
-    font-weight: 700;
-    padding: 8px;
-    font-size: 15px;
-    border-bottom: 1px solid var(--border-color);
-  }
-  .info-table-box .content-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 12px 20px;
-    font-size: 14px;
+    color: #555;
   }
 
-  .schedule-table {
+  /* Customer Info Section */
+  .customer-section {
+    margin-bottom: 25px;
+  }
+  .customer-section h3 {
+    font-size: 14px;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+    font-weight: 800;
+  }
+  .cust-row {
+    font-size: 13px;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  /* Products Table */
+  .items-table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
-    text-align: center;
-    font-size: 12px;
   }
-  .schedule-table th {
-    background: var(--navy-header);
-    color: #ffffff;
-    padding: 8px 4px;
-    border: 1px solid var(--navy-header);
-    font-weight: 700;
-  }
-  .schedule-table td {
-    border: 1px solid var(--border-color);
-    padding: 7px 4px;
-    font-weight: 500;
-  }
-
-  .total-sum-bar {
-    background: var(--navy-header);
-    color: #ffffff;
-    text-align: left;
-    padding: 10px 20px;
+  .items-table th {
+    background: #f9f9f9;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 10px 8px;
+    font-size: 13px;
     font-weight: 800;
-    font-size: 16px;
-    margin-bottom: 15px;
+    color: #333;
+    text-align: right;
+  }
+  .items-table th:last-child, .items-table td:last-child {
+    text-align: left;
+  }
+  .items-table td {
+    padding: 15px 8px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 13px;
+    font-weight: 600;
   }
 
-  .doc-footer-brand {
-    text-align: center;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text-dark);
+  /* Summary Financials */
+  .summary-box {
     margin-top: 10px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 15px;
+  }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .summary-row.total-bold {
+    font-size: 16px;
+    font-weight: 800;
+    color: #000;
+  }
+  .summary-row.paid-row {
+    color: var(--primary-color);
+  }
+
+  .certified-stamp {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 25px 0;
+    background: #fafafa;
+    padding: 12px 15px;
+    border-radius: 6px;
+  }
+  .certified-stamp span {
+    font-size: 13px;
+    font-weight: 800;
+    color: #666;
+  }
+
+  .footer-note {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 12px;
+    color: #777;
+    font-weight: 600;
+    line-height: 1.6;
   }
 
   .actions-flex {
     display: flex;
     justify-content: center;
     gap: 15px;
-    margin-top: 20px;
+    margin-top: 25px;
   }
   .btn-action {
     border: none;
@@ -162,438 +177,175 @@
   .btn-blue { background-color: #2b77e5; }
   .btn-green { background-color: #22c55e; }
 
-  .contract-title {
-    text-align: center;
-    font-size: 18px;
-    font-weight: 800;
-    margin: 20px 0;
-    text-decoration: underline;
-  }
-  .contract-body {
-    font-size: 13px;
-    line-height: 2.1;
-    text-align: justify;
-    margin-bottom: 40px;
-  }
-  .signature-area {
-    margin-top: 30px;
-    font-size: 14px;
-    font-weight: 700;
-  }
-  .signature-line {
-    margin-top: 15px;
-    letter-spacing: 2px;
-    color: var(--text-muted);
-  }
-  .contract-stamp {
-    text-align: center;
-    margin-top: 40px;
-    font-weight: 800;
-    font-size: 14px;
-  }
-
-  .grid-2-cols {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-bottom: 15px;
-  }
-  .detail-card {
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    padding: 15px;
-  }
-  .detail-card h3 {
-    text-align: center;
-    font-size: 15px;
-    font-weight: 800;
-    margin-bottom: 12px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 5px;
-  }
-  .detail-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    margin-bottom: 6px;
-    line-height: 1.5;
-  }
-  .detail-row .lbl { color: var(--text-muted); }
-  .detail-row .val { font-weight: 700; text-align: left; }
-
-  .item-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 15px;
-    font-size: 13px;
-  }
-  .item-table th {
-    border: 1px solid var(--border-color);
-    padding: 8px;
-    background: #f9fafb;
-    font-weight: 700;
-  }
-  .item-table td {
-    border: 1px solid var(--border-color);
-    padding: 10px;
-    text-align: center;
-  }
-
-  .calc-summary {
-    text-align: left;
-    font-size: 12px;
-    line-height: 1.8;
-    margin-bottom: 25px;
-    padding-left: 10px;
-  }
-
-  /* لوحة تحكم سريعة لاختبار المبالغ إذا لم تنقلها السلة تلقائياً */
-  .debug-panel {
-    background: #fff3cd;
-    border: 1px solid #ffeeba;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    text-align: center;
-    font-size: 13px;
-  }
-  .debug-panel input { padding: 5px; margin: 0 5px; width: 100px; text-align: center; font-weight: bold; }
-
   @media print {
     body { background: none; padding: 0; }
-    .doc-container { box-shadow: none; max-width: 100%; page-break-after: always; }
-    .actions-flex, .debug-panel { display: none !important; }
+    .invoice-box { box-shadow: none; max-width: 100%; }
+    .actions-flex { display: none !important; }
   }
 </style>
 </head>
 <body>
 
-<!-- لوحة مساعدة مؤقتة للتحكم في السعر والمبلغ والدفع -->
-<div class="debug-panel" id="debugPanel">
-  <b>🛠️ لوحة مطابقة الفاتورة الفورية:</b> 
-  السعر: <input type="number" id="inpPrice" value="5649.92" oninput="updateAll()"> 
-  الدفعة الأولى: <input type="number" id="inpFirst" value="500" oninput="updateAll()">
-  طريقة الدفع: <select id="inpMethod" onchange="updateAll()">
-    <option value="تقسيط">تقسيط عادي</option>
-    <option value="Tabby">Tabby / تمارا</option>
-    <option value="دفع كامل">دفع كامل</option>
-  </select>
-  <span style="color: green; font-weight: bold;">(تتحدث الفاتورة تلقائياً)</span>
-</div>
-
-<!-- Document 1: Installment Schedule Invoice -->
-<div class="doc-container">
-  <div class="doc-header">
-    <div class="brand-left">
-      <h2>A2 STORE</h2>
-      <p>The first store in Emirates</p>
+<div class="invoice-box">
+  
+  <!-- Header -->
+  <div class="inv-header">
+    <div class="brand-info">
+      <h1>A2 STORE</h1>
+      <p>أي 2 فونز</p>
+      <p style="font-size: 12px; font-weight: 500; color: #666; margin-top: 4px;">فاتورة ضريبية مبسطة</p>
     </div>
     <div>
-      <img src="https://i.ibb.co/6R24gM1/a2logo.jpg" alt="A2 STORE Logo" class="brand-logo-img" onerror="this.src='https://via.placeholder.com/120x60?text=A2+STORE'">
-    </div>
-    <div class="brand-right">
-      <h2>أي 2 فونز</h2>
-      <p>المتجر الأول في الإمارات</p>
+      <!-- ضع رابط شعارك هنا -->
+      <img src="https://i.ibb.co/6R24gM1/a2logo.jpg" alt="A2 STORE Logo" class="logo-img" onerror="this.src='https://via.placeholder.com/100x50?text=A2+STORE'">
     </div>
   </div>
 
-  <div class="inv-meta-bar">
-    <span class="inv-no" id="invNo1">No. #INV-273900</span>
-    <span id="invDate1">08/11/2026</span>
+  <!-- Meta Info -->
+  <div class="meta-row">
+    <div>رقم الطلب: <span id="invNum">INV-726447</span></div>
+    <div id="invDate">تاريخ الطلب: 09/11/2026 | 12:04 ص</div>
   </div>
 
-  <div class="greeting-box">
-    <div>
-      Dear Customer,<br>
-      Thank you for shopping with A2 STORE<br>
-      Your order has been placed.<br>
-      Below is the summary of the order.
-    </div>
+  <div style="font-size: 13px; font-weight: 700; color: #555; margin-bottom: 15px;">
+    حالة الدفع: <span style="color: #22c55e;">مكتمل</span> &nbsp;&nbsp;|&nbsp;&nbsp; طريقة الدفع: <span id="payMethodText">تقسيط</span>
+  </div>
+
+  <!-- Customer Data -->
+  <div class="customer-section">
+    <h3>بيانات العميل:</h3>
+    <div class="cust-row">الاسم: <span id="custName">عميل المتجر</span></div>
+    <div class="cust-row">رقم واتساب: <span id="custPhone">—</span></div>
+    <div class="cust-row">العنوان: <span id="custCity">الإمارات</span></div>
+  </div>
+
+  <!-- Products Table -->
+  <table class="items-table">
+    <thead>
+      <tr>
+        <th>المنتج</th>
+        <th>الكمية</th>
+        <th>سعر الوحدة</th>
+        <th>الإجمالي</th>
+      </tr>
+    </thead>
+    <tbody id="itemsTableBody">
+      <!-- ديناميكي -->
+    </tbody>
+  </table>
+
+  <!-- Certified Stamp Box -->
+  <div class="certified-stamp">
+    <span>الختم المعتمد</span>
     <div style="text-align: left;">
-      عميلنا العزيز،<br>
-      شكراً لتسوقكم من A2 STORE.<br>
-      لقد تم إنشاء طلبكم بنجاح.<br>
-      فيما يلي ملخص الطلب.
+      <p style="font-size: 14px; font-weight: 800; color: #0f4c81;">A2 STORE</p>
+      <p style="font-size: 10px; color: #555;">أي 2 فونز</p>
     </div>
   </div>
 
-  <div class="blue-bar">
-    <span>اسم العميل: <span id="cName1">عميل المتجر</span></span>
-    <span>العنوان: الإمارات</span>
-  </div>
-
-  <div class="info-table-box">
-    <div class="title">تفاصيل الفاتورة</div>
-    <div class="content-row">
-      <span id="pName1">Iphone 18 pro max _ سيماوي</span>
-      <span id="pPrice1">0.00 د.إ</span>
-      <span id="pQty1">1</span>
+  <!-- Summary Financials -->
+  <div class="summary-box">
+    <div class="summary-row">
+      <span>المجموع الفرعي:</span>
+      <span id="subTotalVal">0.00 د.إ</span>
+    </div>
+    <div class="summary-row" id="installmentRow">
+      <span>خطة التقسيط:</span>
+      <span>24 شهر</span>
+    </div>
+    <div class="summary-row total-bold">
+      <span>الإجمالي:</span>
+      <span id="grandTotalVal">0.00 د.إ</span>
+    </div>
+    <div class="summary-row paid-row">
+      <span>الدفعة الأولى (تم دفعها):</span>
+      <span id="firstPayVal">0.00 د.إ</span>
     </div>
   </div>
 
-  <div style="text-align: left; font-weight: 700; font-size: 14px; margin-bottom: 10px;">
-    الدفعة الأولى (اليوم): <span id="firstPay1">0.00 د.إ</span>
+  <!-- Footer Notes -->
+  <div class="footer-note">
+    شكراً لتسوقكم معنا!<br>
+    A2 STORE - وجهتك الأولى للأجهزة الذكية والتقنية<br>
+    هذه الفاتورة إلكترونية معتمدة ولا تحتاج لختم أو توقيع
   </div>
 
-  <table class="schedule-table">
-    <thead>
-      <tr>
-        <th>تاريخ الاستحقاق</th>
-        <th>الدفعة</th>
-        <th>تاريخ الاستحقاق</th>
-        <th>الدفعة</th>
-        <th>تاريخ الاستحقاق</th>
-        <th>الدفعة</th>
-      </tr>
-    </thead>
-    <tbody id="scheduleBody">
-      <!-- Generated Dynamically -->
-    </tbody>
-  </table>
-
-  <div class="total-sum-bar">
-    المجموع: <span id="grandTotal1">0.00 د.إ</span>
-  </div>
-
-  <div class="doc-footer-brand">A2 STORE</div>
-
+  <!-- Actions -->
   <div class="actions-flex">
     <a href="#" onclick="window.print()" class="btn-action btn-blue">تحميل PDF</a>
     <button onclick="window.print()" class="btn-action btn-green">طباعة</button>
   </div>
-</div>
 
-<!-- Document 2: Installment Sales Contract -->
-<div class="doc-container">
-  <div class="doc-header">
-    <div class="brand-left">
-      <h2>A2 STORE</h2>
-      <p>The first store in Emirates</p>
-    </div>
-    <div>
-      <img src="https://i.ibb.co/6R24gM1/a2logo.jpg" alt="A2 STORE Logo" class="brand-logo-img" onerror="this.src='https://via.placeholder.com/120x60?text=A2+STORE'">
-    </div>
-    <div class="brand-right">
-      <h2>أي 2 فونز</h2>
-      <p>المتجر الأول في الإمارات</p>
-    </div>
-  </div>
-
-  <hr style="border: 0.5px solid #ccc; margin-bottom: 15px;">
-
-  <div class="contract-title">عقد بيع بالتقسيط</div>
-
-  <div class="contract-body">
-    نحن A2 STORE / <span id="cName2" style="font-weight: 700;">عميل المتجر</span>، عنوانه / الإمارات.<br>
-    أقر وأنا في كامل قواي العقلية أنني قمت بشراء المنتجات التالية بالأقساط من مؤسسة A2 STORE:<br>
-    • <span id="pName2">Iphone 18 pro max _ سيماوي</span> (الكمية: <span id="pQty2">1</span>)<br>
-    بمبلغ وقدره <span id="grandTotal2" style="font-weight: 700;">0.00</span> د.إ فقط.<br>
-    على أن أقوم بسداد المبلغ على أقساط شهرية بمبلغ وقدره <span id="monthlyVal" style="font-weight: 700;">0.00</span> د.إ فقط؛ اعتباراً من تاريخ <span id="startDateContract" style="font-weight: 700;">08/12/2026</span> وحق سداد كامل المبلغ المذكور أعلاه.<br>
-    وفي حال التأخير عن دفع أي قسط في موعده، دون تجاوز عدد الأقساط المحددة؛ يحق للمؤسسة المطالبة بكامل المبلغ دفعة واحدة.<br>
-    كما أقر أني على علم تام بأنه لا يوجد التزامات مالية أو كفالات غرامية؛ وقد أخذت والله خير الشاهدين.
-  </div>
-
-  <div class="signature-area">
-    <div>الاسم / <span id="cName3">عميل المتجر</span> .</div>
-    <div class="signature-line">التوقيع / ....................................</div>
-  </div>
-
-  <div class="contract-stamp">
-    A2 STORE<br>
-    أي 2 فونز
-  </div>
-
-  <div class="actions-flex">
-    <a href="#" onclick="window.print()" class="btn-action btn-blue">تحميل PDF</a>
-    <button onclick="window.print()" class="btn-action btn-green">طباعة</button>
-  </div>
-</div>
-
-<!-- Document 3: Order Details & Source -->
-<div class="doc-container">
-  <div style="text-align: center; margin-bottom: 20px;">
-    <img src="https://i.ibb.co/6R24gM1/a2logo.jpg" alt="A2 STORE Logo" class="brand-logo-img" onerror="this.src='https://via.placeholder.com/120x60?text=A2+STORE'">
-  </div>
-
-  <div class="grid-2-cols">
-    <div class="detail-card">
-      <h3>تفاصيل الطلب</h3>
-      <div class="detail-row"><span class="lbl">رقم الطلب:</span><span class="val" id="invNo3">INV-273900</span></div>
-      <div class="detail-row"><span class="lbl">التاريخ:</span><span class="val" id="fullDate3">Sunday 08 November 2026 | 08:44 PM</span></div>
-    </div>
-    <div class="detail-card">
-      <h3>مصدر الطلب</h3>
-      <div class="detail-row"><span class="lbl">المتجر الإلكتروني:</span><span class="val">A2 STORE</span></div>
-      <div class="detail-row"><span class="lbl">اسم العميل:</span><span class="val" id="cName4">عميل المتجر</span></div>
-      <div class="detail-row"><span class="lbl">البائع:</span><span class="val">A2 STORE</span></div>
-      <div class="detail-row"><span class="lbl">البريد الإلكتروني:</span><span class="val">a2store@gmail.com</span></div>
-    </div>
-  </div>
-
-  <div class="grid-2-cols">
-    <div class="detail-card">
-      <h3>تفاصيل الدفع</h3>
-      <div class="detail-row"><span class="lbl">العملية:</span><span class="val" id="payProcessVal">شراء</span></div>
-      <div class="detail-row"><span class="lbl">المبلغ:</span><span class="val" id="grandTotal3">0.00 د.إ</span></div>
-      <div class="detail-row"><span class="lbl">الدفعة الأولى:</span><span class="val" id="firstPay3">0.00 د.إ</span></div>
-      <div class="detail-row"><span class="lbl">رقم الفاتورة:</span><span class="val" id="invNo4">INV-273900</span></div>
-      <div class="detail-row"><span class="lbl">طريقة الدفع:</span><span class="val" id="payMethodVal">تقسيط</span></div>
-    </div>
-    <div class="detail-card">
-      <h3>تفاصيل الشحن</h3>
-      <div class="detail-row"><span class="lbl">المدينة:</span><span class="val">الإمارات</span></div>
-      <div class="detail-row"><span class="lbl">الوسيلة:</span><span class="val">غير محدد</span></div>
-      <div class="detail-row"><span class="lbl">موعد التوصيل المتوقع:</span><span class="val">من 24 إلى 48 ساعة</span></div>
-    </div>
-  </div>
-
-  <table class="item-table">
-    <thead>
-      <tr>
-        <th>البيان</th>
-        <th>السعر</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td id="pName3">Iphone 18 pro max _ سيماوي (1 x)</td>
-        <td id="pPrice3">0.00 د.إ</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div class="calc-summary">
-    إجمالي السعر: <span id="grandTotal4">0.00</span> د.إ<br>
-    الدفع المقدم: <span id="firstPay4">0.00</span> د.إ<br>
-    المتبقي: <span id="remainPay3">0.00</span> د.إ
-  </div>
-
-  <div style="text-align: center; font-weight: 700; font-size: 13px; margin-top: 30px;">
-    شكراً لشراءك من المتجر. نتمنى لك يوماً رائعاً
-  </div>
-
-  <div class="actions-flex">
-    <a href="#" onclick="window.print()" class="btn-action btn-blue">تحميل PDF</a>
-    <button onclick="window.print()" class="btn-action btn-green">طباعة</button>
-  </div>
 </div>
 
 <script>
-  function updateAll() {
+  document.addEventListener('DOMContentLoaded', () => {
     const orderInfo = JSON.parse(localStorage.getItem('a2_order_info') || '{}');
     const cart = JSON.parse(localStorage.getItem('a2cart') || '[]');
 
+    // جلب بيانات العميل المكتوبة في الموقع
     const clientName = orderInfo.name || orderInfo.cardName || orderInfo.holderName || 'عميل المتجر';
-    
-    // سحب طريقة الدفع من الـ localStorage أو من خانة الاختيار في لوحة التحكم
-    let paymentMethod = orderInfo.payMethod || orderInfo.payment || orderInfo.gateway || document.getElementById('inpMethod').value;
-    document.getElementById('payMethodVal').textContent = paymentMethod;
+    const clientPhone = orderInfo.phone || orderInfo.whatsapp || orderInfo.mobile || 'غير متوفر';
+    const clientCity = orderInfo.city || orderInfo.address || 'الإمارات';
+    const payMethod = orderInfo.payMethod || orderInfo.payment || 'تقسيط';
 
-    const isFullPayment = paymentMethod.includes('كامل') || paymentMethod.includes('Cash') || paymentMethod.includes('نقداً');
+    document.getElementById('custName').textContent = clientName;
+    document.getElementById('custPhone').textContent = clientPhone;
+    document.getElementById('custCity').textContent = clientCity;
+    document.getElementById('payMethodText').textContent = payMethod;
 
-    let productName = 'Iphone 18 pro max _ سيماوي';
     let rawPrice = 0;
+    let tableHtml = '';
+    let productName = 'بطارية لثيوم GoodWe عالية الجهد بقدرة 56.3 كيلوواط/ساعة';
     let qty = 1;
 
-    // محاولة جلب السعر الحقيقي من السلة
     if (cart.length > 0) {
       cart.forEach(item => {
-        let itemPrice = Number(item.price || item.p || 0);
-        let itemQty = Number(item.qty || item.q || 1);
-        rawPrice += (itemPrice * itemQty);
+        let p = Number(item.price || item.p || 0);
+        let q = Number(item.qty || item.q || 1);
+        rawPrice += (p * q);
       });
       const firstItem = cart[0];
       productName = firstItem.name || firstItem.n || productName;
       qty = cart.reduce((sum, i) => sum + Number(i.qty || i.q || 1), 0);
+      
+      let unitPrice = rawPrice / qty;
+      tableHtml = `
+        <tr>
+          <td>${productName}</td>
+          <td>${qty}</td>
+          <td>${unitPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+          <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+        </tr>
+      `;
     } else {
-      // إذا لم تتوفر السلة، نأخذها من لوحة التحكم التفاعلية أو البيانات المحفوظة
-      rawPrice = Number(orderInfo.total || orderInfo.price || document.getElementById('inpPrice').value || 5649.92);
+      rawPrice = Number(orderInfo.total || orderInfo.price || 41700.00);
+      tableHtml = `
+        <tr>
+          <td>${productName}</td>
+          <td>1</td>
+          <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+          <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+        </tr>
+      `;
     }
 
-    // مزامنة حقل الإدخال اليدوي مع السعر الفعلي
-    document.getElementById('inpPrice').value = rawPrice;
+    document.getElementById('itemsTableBody').innerHTML = tableHtml;
 
-    // حساب الدفعة الأولى والمتبقي والأقساط
-    let firstPay = Number(document.getElementById('inpFirst').value);
-    if (isFullPayment) {
-      firstPay = rawPrice;
-      document.getElementById('payProcessVal').textContent = 'دفع كامل';
-    } else {
-      document.getElementById('payProcessVal').textContent = 'شراء';
-    }
+    // حساب الدفعة الأولى والإجمالي
+    const firstPay = rawPrice > 5000 ? Math.round(rawPrice * 0.1) : 500.00;
 
-    const remaining = Math.max(0, rawPrice - firstPay);
-    const monthlyInstallment = remaining / 24;
+    const formattedTotal = rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' د.إ';
+    const formattedFirst = firstPay.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' د.إ';
 
+    document.getElementById('subTotalVal').textContent = formattedTotal;
+    document.getElementById('grandTotalVal').textContent = formattedTotal;
+    document.getElementById('firstPayVal').textContent = formattedFirst;
+
+    // رقم الفاتورة والتاريخ
     const randomInv = 'INV-' + (orderInfo.invId || Math.floor(100000 + Math.random() * 900000));
-    const todayStr = '08/11/2026';
-    const fullDateStr = 'Sunday 08 November 2026 | 08:44 PM';
-
-    // تعبئة البيانات
-    document.getElementById('invNo1').textContent = 'No. #' + randomInv;
-    document.getElementById('invNo3').textContent = randomInv;
-    document.getElementById('invNo4').textContent = randomInv;
-    document.getElementById('invDate1').textContent = todayStr;
-    document.getElementById('fullDate3').textContent = fullDateStr;
-
-    // اسم العميل
-    document.getElementById('cName1').textContent = clientName;
-    document.getElementById('cName2').textContent = clientName;
-    document.getElementById('cName3').textContent = clientName;
-    document.getElementById('cName4').textContent = clientName;
-
-    // المنتج والكمية
-    document.getElementById('pName1').textContent = productName;
-    document.getElementById('pName2').textContent = productName;
-    document.getElementById('pName3').textContent = productName + ' (' + qty + ' x)';
-    document.getElementById('pQty1').textContent = qty;
-    document.getElementById('pQty2').textContent = qty;
-
-    // المبالغ وتنسيقها
-    const fmtTotal = rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' د.إ';
-    const fmtFirst = firstPay.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' د.إ';
-    const fmtRemain = remaining.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' د.إ';
-    const fmtMonthly = monthlyInstallment.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' د.إ';
-
-    document.getElementById('pPrice1').textContent = fmtTotal;
-    document.getElementById('pPrice3').textContent = fmtTotal;
-    document.getElementById('grandTotal1').textContent = fmtTotal;
-    document.getElementById('grandTotal2').textContent = rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    document.getElementById('grandTotal3').textContent = fmtTotal;
-    document.getElementById('grandTotal4').textContent = rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-
-    document.getElementById('firstPay1').textContent = fmtFirst;
-    document.getElementById('firstPay3').textContent = fmtFirst;
-    document.getElementById('firstPay4').textContent = firstPay.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-
-    document.getElementById('remainPay3').textContent = remaining.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    document.getElementById('monthlyVal').textContent = monthlyInstallment.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-
-    // جدول الأقساط الـ 24
-    const scheduleBody = document.getElementById('scheduleBody');
-    let rowsHtml = '';
-    let year = 2026;
-    let month = 12;
-
-    for (let i = 0; i < 8; i++) {
-      rowsHtml += '<tr>';
-      for (let col = 0; col < 3; col++) {
-        let mStr = month < 10 ? '0' + month : month;
-        let dateStr = `08/${mStr}/${year}`;
-        let instText = isFullPayment ? '0.00 د.إ' : fmtMonthly;
-        rowsHtml += `<td>${instText}</td><td>${dateStr}</td>`;
-        month++;
-        if (month > 12) {
-          month = 1;
-          year++;
-        }
-      }
-      rowsHtml += '</tr>';
-    }
-    scheduleBody.innerHTML = rowsHtml;
-  }
-
-  document.addEventListener('DOMContentLoaded', updateAll);
+    document.getElementById('invNum').textContent = randomInv;
+  });
 </script>
 
 </body>
