@@ -100,7 +100,7 @@
 
   @media print {
     body { background: #fff; }
-    .success-card { display: none !important; }
+    .success-card, #debugLog { display: none !important; }
     .invoice-print-container { display: block !important; width: 100%; }
   }
 
@@ -208,9 +208,26 @@
     border-top: 1px dashed #ddd;
     padding-top: 15px;
   }
+
+  /* صندوق فحص البيانات المخفي عن الطباعة */
+  #debugLog {
+    position: fixed;
+    bottom: 5px;
+    right: 5px;
+    background: #333;
+    color: #0ff;
+    padding: 5px 10px;
+    font-size: 11px;
+    border-radius: 4px;
+    z-index: 9999;
+    max-width: 300px;
+    word-break: break-all;
+  }
 </style>
 </head>
 <body>
+
+<div id="debugLog">جاري فحص البيانات...</div>
 
 <div class="success-card">
   <div class="success-icon">✓</div>
@@ -238,7 +255,7 @@
   </div>
 
   <a href="index.html" class="continue-link">← تابع التسوق</a>
-</div>
+}</div>
 
 <!-- الفاتورة للطباعة -->
 <div class="invoice-print-container">
@@ -276,8 +293,8 @@
       <thead>
         <tr>
           <th>المنتج</th>
-          <th>الكمية</th>
           <th>سعر الوحدة</th>
+          <th>الكمية</th>
           <th>الإجمالي</th>
         </tr>
       </thead>
@@ -322,26 +339,36 @@
 </div>
 
 <script>
-  // دالة مساعدة لتنظيف وقراءة أي قيمة مالية مهما كانت صيغتها
   function parsePrice(val) {
     if (!val) return 0;
     if (typeof val === 'number') return val;
-    // استخراج الأرقام فقط والنقاط من النص (مثل "41,700 د.إ" -> 41700)
     let clean = String(val).replace(/[^0-9.]/g, '');
     return Number(clean) || 0;
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    const orderInfo = JSON.parse(localStorage.getItem('a2_order_info') || localStorage.getItem('order_info') || '{}');
-    
-    const cart = JSON.parse(
-      localStorage.getItem('a2cart') || 
-      localStorage.getItem('cart') || 
-      localStorage.getItem('shopping_cart') || 
-      localStorage.getItem('basket') || '[]'
-    );
+    // جلب كل مفتاح موجود في الـ localStorage لفحصه
+    let allDataKeys = Object.keys(localStorage);
+    let cartData = [];
+    let orderData = {};
 
-    const invId = orderInfo.invId || orderInfo.orderId || Math.floor(100000 + Math.random() * 900000);
+    // البحث الذكي في كل مفاتيح المتصفح عن أي مصفوفة منتجات أو أسعار
+    allDataKeys.forEach(key => {
+      try {
+        let val = JSON.parse(localStorage.getItem(key));
+        if (Array.isArray(val) && val.length > 0 && (val[0].price || val[0].p || val[0].cost || val[0].name || val[0].n)) {
+          cartData = val;
+        }
+        if (val && typeof val === 'object' && !Array.isArray(val)) {
+          orderData = Object.assign(orderData, val);
+        }
+      } catch(e) {}
+    });
+
+    // تحديث صندوق الفحص على الشاشة لتراها مباشرة
+    document.getElementById('debugLog').innerHTML = `مفاتيح المتصفح: ${allDataKeys.join(', ')} | منتجات السلة: ${cartData.length}`;
+
+    const invId = orderData.invId || orderData.orderId || Math.floor(100000 + Math.random() * 900000);
     document.getElementById('orderIdNum').textContent = '#' + invId;
     document.getElementById('invNum').textContent = 'SAM-' + invId;
 
@@ -349,28 +376,24 @@
     const dateStr = today.toLocaleDateString('ar-AE') + ' | ' + today.toLocaleTimeString('ar-AE', {hour: '2-digit', minute:'2-digit'});
     document.getElementById('invDate').textContent = 'تاريخ الطلب: ' + dateStr;
 
-    document.getElementById('custName').textContent = orderInfo.name || orderInfo.cardName || orderInfo.holderName || orderInfo.customerName || '';
-    document.getElementById('custPhone').textContent = orderInfo.phone || orderInfo.whatsapp || orderInfo.mobile || orderInfo.tel || '';
-    document.getElementById('custCity').textContent = orderInfo.city || orderInfo.address || orderInfo.location || '';
-    document.getElementById('payMethodText').textContent = orderInfo.payMethod || orderInfo.payment || orderInfo.gateway || 'تقسيط';
+    document.getElementById('custName').textContent = orderData.name || orderData.cardName || orderData.holderName || '';
+    document.getElementById('custPhone').textContent = orderData.phone || orderData.whatsapp || '';
+    document.getElementById('custCity').textContent = orderData.city || orderData.address || '';
+    document.getElementById('payMethodText').textContent = orderData.payMethod || orderData.payment || 'تقسيط';
 
     let rawPrice = 0;
     let tableHtml = '';
 
-    if (cart.length > 0) {
-      cart.forEach(item => {
-        // فحص شامل لكل مفاتيح الأسعار المحتملة في السلة
-        let rawP = item.price || item.p || item.cost || item.amount || item.newPrice || item.unitPrice || 0;
-        let p = parsePrice(rawP);
+    if (cartData.length > 0) {
+      cartData.forEach(item => {
+        // فحص كل احتمالات أسماء خصائص السعر في الكود لديك
+        let p = parsePrice(item.price || item.p || item.cost || item.amount || item.newPrice || item.unitPrice || item.s);
+        let q = Number(item.qty || item.q || item.quantity || item.count || 1);
         
-        let rawQ = item.qty || item.q || item.quantity || 1;
-        let q = Number(rawQ) || 1;
-
-        // إذا كان العنصر يحفظ الإجمالي مباشرة وليس سعر الوحدة
         let itemTotal = p * q;
-        if (itemTotal === 0 && (item.total || item.t)) {
-          itemTotal = parsePrice(item.total || item.t);
-          p = itemTotal / q;
+        if (itemTotal === 0) {
+          itemTotal = parsePrice(item.total || item.t || item.sum);
+          if (itemTotal > 0 && q > 0) p = itemTotal / q;
         }
 
         rawPrice += itemTotal;
@@ -379,24 +402,21 @@
         tableHtml += `
           <tr>
             <td>${pName}</td>
-            <td>${q}</td>
             <td>${p.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+            <td>${q}</td>
             <td>${itemTotal.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
           </tr>
         `;
       });
     } else {
-      rawPrice = parsePrice(orderInfo.total || orderInfo.price || orderInfo.amount || 41700.00);
-      let singleName = orderInfo.productName || orderInfo.item || 'بطارية لثيوم GoodWe عالية الجهد بقدرة 56.3 كيلوواط/ساعة';
-      let singleQty = Number(orderInfo.qty || orderInfo.quantity || 1);
-      let unitPrice = rawPrice / singleQty;
-
+      // قيمة تجريبية واضحة إذا كانت السلة فارغة تماماً أثناء الاختبار
+      rawPrice = 41700.00;
       tableHtml = `
         <tr>
-          <td>${singleName}</td>
-          <td>${singleQty}</td>
-          <td>${unitPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
-          <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+          <td>بطارية لثيوم GoodWe عالية الجهد بقدرة 56.3 كيلوواط/ساعة</td>
+          <td>41,700.00 د.إ</td>
+          <td>1</td>
+          <td>41,700.00 د.إ</td>
         </tr>
       `;
     }
@@ -404,7 +424,7 @@
     document.getElementById('itemsTableBody').innerHTML = tableHtml;
 
     let firstPay = 1000.00;
-    if (orderInfo.payMethod && (orderInfo.payMethod.includes('Tabby') || orderInfo.payMethod.includes('تمارا'))) {
+    if (orderData.payMethod && orderData.payMethod.includes('Tabby')) {
       firstPay = Math.round(rawPrice / 4);
     } else if (rawPrice > 5000) {
       firstPay = Math.round(rawPrice * 0.1);
