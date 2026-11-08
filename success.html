@@ -209,7 +209,6 @@
     padding-top: 15px;
   }
 
-  /* صندوق فحص البيانات المخفي عن الطباعة */
   #debugLog {
     position: fixed;
     bottom: 5px;
@@ -255,7 +254,7 @@
   </div>
 
   <a href="index.html" class="continue-link">← تابع التسوق</a>
-}</div>
+</div>
 
 <!-- الفاتورة للطباعة -->
 <div class="invoice-print-container">
@@ -347,28 +346,21 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    // جلب كل مفتاح موجود في الـ localStorage لفحصه
-    let allDataKeys = Object.keys(localStorage);
-    let cartData = [];
-    let orderData = {};
+    let orderInfo = JSON.parse(localStorage.getItem('a2_order_info') || '{}');
+    let cart = JSON.parse(localStorage.getItem('a2cart') || localStorage.getItem('cart') || '[]');
 
-    // البحث الذكي في كل مفاتيح المتصفح عن أي مصفوفة منتجات أو أسعار
-    allDataKeys.forEach(key => {
-      try {
-        let val = JSON.parse(localStorage.getItem(key));
-        if (Array.isArray(val) && val.length > 0 && (val[0].price || val[0].p || val[0].cost || val[0].name || val[0].n)) {
-          cartData = val;
-        }
-        if (val && typeof val === 'object' && !Array.isArray(val)) {
-          orderData = Object.assign(orderData, val);
-        }
-      } catch(e) {}
-    });
+    // إذا تم تفريغ السلة قبل الوصول هنا، نقوم بحفظ نسخة احتياطية في orderInfo أثناء الشراء ونسترجعمها
+    if (cart.length === 0 && orderInfo.savedCart && Array.isArray(orderInfo.savedCart)) {
+      cart = orderInfo.savedCart;
+    } else if (cart.length > 0) {
+      // حفظ نسخة في orderInfo لضمان عدم ضياعها لوفرّغت السلة لاحقاً
+      orderInfo.savedCart = cart;
+      localStorage.setItem('a2_order_info', JSON.stringify(orderInfo));
+    }
 
-    // تحديث صندوق الفحص على الشاشة لتراها مباشرة
-    document.getElementById('debugLog').innerHTML = `مفاتيح المتصفح: ${allDataKeys.join(', ')} | منتجات السلة: ${cartData.length}`;
+    document.getElementById('debugLog').innerHTML = `منتجات السلة: ${cart.length}`;
 
-    const invId = orderData.invId || orderData.orderId || Math.floor(100000 + Math.random() * 900000);
+    const invId = orderInfo.invId || Math.floor(100000 + Math.random() * 900000);
     document.getElementById('orderIdNum').textContent = '#' + invId;
     document.getElementById('invNum').textContent = 'SAM-' + invId;
 
@@ -376,19 +368,18 @@
     const dateStr = today.toLocaleDateString('ar-AE') + ' | ' + today.toLocaleTimeString('ar-AE', {hour: '2-digit', minute:'2-digit'});
     document.getElementById('invDate').textContent = 'تاريخ الطلب: ' + dateStr;
 
-    document.getElementById('custName').textContent = orderData.name || orderData.cardName || orderData.holderName || '';
-    document.getElementById('custPhone').textContent = orderData.phone || orderData.whatsapp || '';
-    document.getElementById('custCity').textContent = orderData.city || orderData.address || '';
-    document.getElementById('payMethodText').textContent = orderData.payMethod || orderData.payment || 'تقسيط';
+    document.getElementById('custName').textContent = orderInfo.name || orderInfo.cardName || '';
+    document.getElementById('custPhone').textContent = orderInfo.phone || orderInfo.whatsapp || '';
+    document.getElementById('custCity').textContent = orderInfo.city || orderInfo.address || '';
+    document.getElementById('payMethodText').textContent = orderInfo.payMethod || 'تقسيط';
 
     let rawPrice = 0;
     let tableHtml = '';
 
-    if (cartData.length > 0) {
-      cartData.forEach(item => {
-        // فحص كل احتمالات أسماء خصائص السعر في الكود لديك
-        let p = parsePrice(item.price || item.p || item.cost || item.amount || item.newPrice || item.unitPrice || item.s);
-        let q = Number(item.qty || item.q || item.quantity || item.count || 1);
+    if (cart.length > 0) {
+      cart.forEach(item => {
+        let p = parsePrice(item.price || item.p || item.cost || item.amount || item.newPrice || item.unitPrice || 0);
+        let q = Number(item.qty || item.q || item.quantity || 1);
         
         let itemTotal = p * q;
         if (itemTotal === 0) {
@@ -409,7 +400,7 @@
         `;
       });
     } else {
-      // قيمة تجريبية واضحة إذا كانت السلة فارغة تماماً أثناء الاختبار
+      // قيمة افتراضية احترافية في حال عدم وجود أي سلة مسجلة للتجربة
       rawPrice = 41700.00;
       tableHtml = `
         <tr>
@@ -423,8 +414,8 @@
 
     document.getElementById('itemsTableBody').innerHTML = tableHtml;
 
-    let firstPay = 1000.00;
-    if (orderData.payMethod && orderData.payMethod.includes('Tabby')) {
+    let firstPay = 4170.00;
+    if (orderInfo.payMethod && orderInfo.payMethod.includes('Tabby')) {
       firstPay = Math.round(rawPrice / 4);
     } else if (rawPrice > 5000) {
       firstPay = Math.round(rawPrice * 0.1);
