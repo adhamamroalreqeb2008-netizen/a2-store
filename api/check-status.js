@@ -1,4 +1,3 @@
-// تخزين مؤقت لحالات المستخدمين في الذاكرة (Memory Store)
 global.userStatuses = global.userStatuses || {};
 
 export default async function handler(req, res) {
@@ -9,9 +8,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   const { user_id } = req.query;
-  if (!user_id) {
-    return res.status(400).json({ error: 'Missing user_id' });
-  }
+  if (!user_id) return res.status(400).json({ status: 'pending' });
 
   const status = global.userStatuses[user_id] || 'pending';
   return res.status(200).json({ status });
