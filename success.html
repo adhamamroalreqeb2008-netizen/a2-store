@@ -104,7 +104,7 @@
     .invoice-print-container { display: block !important; width: 100%; }
   }
 
-  /* تصميم الفاتورة المطابق لصورة البي دي إف تماماً */
+  /* تصميم الفاتورة */
   .invoice-box {
     background: #ffffff;
     width: 100%;
@@ -121,7 +121,7 @@
     padding-bottom: 15px;
     margin-bottom: 20px;
   }
-  .logo-img { height: 50px; width: auto; object-fit: contain; }
+  .logo-img { height: 55px; width: auto; object-fit: contain; }
   .invoice-title {
     text-align: center;
     font-size: 20px;
@@ -250,13 +250,14 @@
   <a href="index.html" class="continue-link">← تابع التسوق</a>
 </div>
 
-<!-- الفاتورة المطابقة لصورة البي دي إف تماماً -->
+<!-- الفاتورة للطباعة / PDF -->
 <div class="invoice-print-container">
   <div class="invoice-box">
     
+    <!-- رأس الفاتورة (الشعار الجديد في الأعلى) -->
     <div class="inv-header">
       <div>
-        <img src="https://i.ibb.co/6R24gM1/a2logo.jpg" alt="A2 STORE Logo" class="logo-img" onerror="this.src='https://via.placeholder.com/100x50?text=A2+STORE'">
+        <img src="https://i.ibb.co/6R24gM1/a2logo.jpg" alt="A2 STORE Logo" class="logo-img" onerror="this.src='https://via.placeholder.com/120x50?text=A2+STORE'">
       </div>
       <div style="text-align: left;">
         <p style="font-size: 16px; font-weight: 800; color: #000;">A2 STORE</p>
@@ -294,7 +295,7 @@
         </tr>
       </thead>
       <tbody id="itemsTableBody">
-        <!-- يُعبأ تلقائياً من الموقع -->
+        <!-- يُعبأ تلقائياً من سلة الموقع -->
       </tbody>
     </table>
 
@@ -318,9 +319,10 @@
         </div>
       </div>
 
+      <!-- الشعار الجديد عند خانة الختم المعتمد في الأسفل -->
       <div class="certified-stamp-box">
         <span>الختم المعتمد</span>
-        <img src="https://i.ibb.co/6R24gM1/a2logo.jpg" alt="Stamp" style="height: 40px; object-fit: contain;">
+        <img src="https://i.ibb.co/6R24gM1/a2logo.jpg" alt="Stamp" style="height: 45px; object-fit: contain;" onerror="this.src='https://via.placeholder.com/100x40?text=A2+STORE'">
       </div>
     </div>
 
@@ -342,7 +344,6 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    // 1. فحص شامل في كل مفاتيح التخزين بالمتصفح لجلب البيانات تلقائياً
     let allKeys = Object.keys(localStorage);
     let cartItems = [];
     let orderInfo = {};
@@ -351,7 +352,6 @@
       try {
         let data = JSON.parse(localStorage.getItem(k));
         if (Array.isArray(data) && data.length > 0) {
-          // التحقق إن كانت مصفوفة منتجات سلة
           if (data[0].price || data[0].p || data[0].cost || data[0].name || data[0].n || data[0].title) {
             cartItems = data;
           }
@@ -362,14 +362,12 @@
       } catch(e) {}
     });
 
-    // جلب احتياطي من المفاتيح المباشرة المعروفة
     if (cartItems.length === 0) {
       try {
         cartItems = JSON.parse(localStorage.getItem('a2cart') || localStorage.getItem('cart') || '[]');
       } catch(e) {}
     }
 
-    // 2. حساب السعر الإجمالي والمنتجات تلقائياً
     let rawPrice = 0;
     let tableHtml = '';
 
@@ -396,37 +394,22 @@
         `;
       });
     } else {
-      // إذا لم توجد سلة، نحاول أخذ السعر المباشر من بيانات الطلب
-      rawPrice = parsePrice(orderInfo.total || orderInfo.price || orderInfo.amount || 0);
-      let pName = orderInfo.productName || orderInfo.item || 'طلب إلكتروني من المتجر';
+      rawPrice = parsePrice(orderInfo.total || orderInfo.price || orderInfo.amount || 41700.00);
+      let pName = orderInfo.productName || orderInfo.item || 'بطارية لثيوم GoodWe عالية الجهد بقدرة 56.3 كيلوواط/ساعة';
       let q = Number(orderInfo.qty || 1);
 
-      if (rawPrice > 0) {
-        tableHtml += `
-          <tr>
-            <td>${pName}</td>
-            <td>${q}</td>
-            <td>0.00 د.إ</td>
-            <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
-          </tr>
-        `;
-      } else {
-        // قيمة افتراضية فقط في حال لم يمرر الموقع أي سعر
-        rawPrice = 41700.00;
-        tableHtml = `
-          <tr>
-            <td>بطارية لثيوم GoodWe عالية الجهد بقدرة 56.3 كيلوواط/ساعة</td>
-            <td>1</td>
-            <td>0.00 د.إ</td>
-            <td>41,700.00 د.إ</td>
-          </tr>
-        `;
-      }
+      tableHtml += `
+        <tr>
+          <td>${pName}</td>
+          <td>${q}</td>
+          <td>0.00 د.إ</td>
+          <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+        </tr>
+      `;
     }
 
     document.getElementById('itemsTableBody').innerHTML = tableHtml;
 
-    // 3. تعبئة رقم الطلب والتاريخ والعميل تلقائياً
     const invId = orderInfo.invId || orderInfo.orderId || Math.floor(100000 + Math.random() * 900000);
     document.getElementById('orderIdNum').textContent = '#' + invId;
     document.getElementById('invNum').textContent = 'SAM-' + invId;
@@ -440,7 +423,6 @@
     document.getElementById('custCity').textContent = orderInfo.city || orderInfo.address || '';
     document.getElementById('payMethodText').textContent = orderInfo.payMethod || orderInfo.payment || 'تقسيط';
 
-    // 4. حساب المبالغ النهائية تلقائياً
     let firstPay = 1000.00;
     if (orderInfo.payMethod && orderInfo.payMethod.includes('Tabby')) {
       firstPay = Math.round(rawPrice / 4);
