@@ -1,5 +1,3 @@
-global.userStatuses = global.userStatuses || {};
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -10,38 +8,57 @@ export default async function handler(req, res) {
 
   const update = req.body;
 
-  if (update.callback_query) {
+  if (update && update.callback_query) {
     const data = update.callback_query.data;
     const chatId = update.callback_query.message.chat.id;
     const messageId = update.callback_query.message.message_id;
     const BOT_TOKEN = "9287234458:AAELwciHtjDTWTwq_IfWxEpqADMI49LEo7U";
+    
+    // ضع مفتاح الـ API و الـ Bin ID هنا
+    const BIN_ID = "6af041a3ffd5d16053b0b102";
+    const API_KEY = "$2a$10$KdTTWrgsRm/Rk01Njf6HmurDvGeNyAcYaUsLuCIWF20baDFcigsQ6";
+
+    let action = '';
+    let userId = '';
 
     if (data.startsWith('approve_')) {
-      const userId = data.replace('approve_', '');
-      global.userStatuses[userId] = 'approved';
-
-      // تحديث رسالة تليجرام لإزالة الأزرار وإظهار أنه تم قبول الطلب
-      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: chatId,
-          message_id: messageId,
-          text: update.callback_query.message.text + "\n\n✅ *حالة الطلب: تم الموافقة بنجاح*",
-          parse_mode: 'Markdown'
-        })
-      });
+      action = 'approved';
+      userId = data.replace('approve_', '');
     } else if (data.startsWith('reject_')) {
-      const userId = data.replace('reject_', '');
-      global.userStatuses[userId] = 'rejected';
+      action = 'rejected';
+      userId = data.replace('reject_', '');
+    }
 
+    if (userId) {
+      // 1. جلب البيانات الحالية من السحابة
+      const getRes = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+        headers: { 'X-Master-Key': API_KEY }
+      });
+      const currentData = await getRes.json();
+      const record = currentData.record || {};
+
+      // 2. تحديث حالة المستخدم
+      record[userId] = action;
+
+      // 3. حفظ الحالة الجديدة في السحابة
+      await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': API_KEY
+        },
+        body: JSON.stringify(record)
+      });
+
+      // 4. تحديث نص الرسالة في تليجرام
+      const statusText = action === 'approved' ? "✅ *حالة الطلب: تم الموافقة بنجاح*" : "❌ *حالة الطلب: تم الرفض*";
       await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           chat_id: chatId,
           message_id: messageId,
-          text: update.callback_query.message.text + "\n\n❌ *حالة الطلب: تم الرفض*",
+          text: update.callback_query.message.text + `\n\n${statusText}`,
           parse_mode: 'Markdown'
         })
       });
