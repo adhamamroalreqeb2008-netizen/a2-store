@@ -1,148 +1,82 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تم استلام طلبك - A2 Store</title>
+    <title>Payment Successful - Invoice</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { font-family: 'Tajawal', 'Cairo', sans-serif; background: #f8fafc; }
-        .invoice-box { background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-    </style>
 </head>
-<body class="min-h-screen py-10 px-4 flex flex-col items-center">
+<body class="bg-gray-50 min-h-screen flex items-center justify-center px-4 py-8">
 
-    <!-- حاوية صفحة نجاح الطلب -->
-    <div id="successView" class="w-full max-w-md text-center">
-        <div class="bg-emerald-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-100">
-            <svg class="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
+    <div class="w-full max-w-md bg-white border border-gray-200 shadow-lg rounded-xl p-6 sm:p-8 text-center text-black">
+        
+        <!-- Success Icon -->
+        <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-inner">
+            ✓
         </div>
 
-        <h1 class="text-2xl font-bold text-gray-900 mb-2">تم استلام طلبك!</h1>
-        <p class="text-gray-600 text-sm mb-6">شكراً لتسوقك معنا. طلبك قيد المعالجة الآن وسنقوم بإرسال تحديثات التتبع قريباً.</p>
+        <h1 class="text-2xl font-bold text-gray-800">Payment Successful!</h1>
+        <p class="text-sm text-gray-500 mt-1">Thank you for your transaction. Your payment has been processed successfully.</p>
 
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6 text-right">
-            <div class="flex justify-between items-center py-2 border-b border-gray-50">
-                <span class="text-gray-500 text-sm">رقم الطلب</span>
-                <span id="orderId" class="font-bold text-gray-800">#958692</span>
+        <!-- Invoice Details Box -->
+        <div class="mt-6 border-t border-b border-gray-200 py-4 text-left text-sm space-y-3">
+            <div class="flex justify-between">
+                <span class="text-gray-500">Order Reference:</span>
+                <span id="orderId" class="font-mono font-semibold text-gray-800">#A2-98421</span>
             </div>
-            <div class="flex justify-between items-center py-2 border-b border-gray-50">
-                <span class="text-gray-500 text-sm">حالة الدفع</span>
-                <span class="font-bold text-emerald-600">مقبول بنجاح</span>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Transaction Date:</span>
+                <span id="date" class="font-medium text-gray-800">-</span>
             </div>
-            <div class="flex justify-between items-center py-2">
-                <span class="text-gray-500 text-sm">وقت التوصيل المتوقع</span>
-                <span class="font-bold text-gray-800">24-48 ساعة</span>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Card Holder:</span>
+                <span id="cardHolder" class="font-medium text-gray-800">-</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Card Number:</span>
+                <span id="cardNumber" class="font-mono font-medium text-gray-800">-</span>
+            </div>
+            <div class="flex justify-between border-t pt-3">
+                <span class="text-gray-600 font-bold">Status:</span>
+                <span class="bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full text-xs font-bold">Approved</span>
             </div>
         </div>
 
-        <!-- أزرار الإجراءات -->
-        <button id="downloadBtn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 px-6 rounded-xl mb-3 shadow-lg transition flex items-center justify-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-            تحميل الفاتورة
+        <!-- Action Button -->
+        <button id="homeBtn" class="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg w-full transition-all shadow-md">
+            Return to Store
         </button>
 
-        <a href="index.html" class="block w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 font-bold py-3 px-6 rounded-xl transition text-center mb-4">
-            🏠 الرئيسية
-        </a>
-
-        <a href="#" class="text-emerald-600 font-semibold text-sm hover:underline">تابع التسوق ←</a>
-    </div>
-
-    <!-- نافذة الفاتورة المخفية التي ستطبع أو تُحفظ كـ PDF عند الضغط على زر التحميل -->
-    <div id="invoiceContent" class="hidden max-w-xl w-full bg-white p-8 rounded-xl shadow-lg border border-gray-200 text-right mx-auto mt-10" dir="rtl">
-        <div class="text-center border-b pb-4 mb-4">
-            <h2 class="text-xl font-extrabold text-blue-600">A2 STORE</h2>
-            <p class="text-lg font-bold text-gray-800">فاتورة ضريبية مبسطة</p>
-        </div>
-
-        <div class="flex justify-between text-sm text-gray-600 mb-4">
-            <div>
-                <p><strong>رقم الطلب:</strong> <span id="invOrderId">A2-958692</span></p>
-                <p><strong>تاريخ الطلب:</strong> <span id="invDate"></span></p>
-            </div>
-            <div>
-                <p><strong>حالة الدفع:</strong> <span class="text-emerald-600 font-bold">مكتمل</span></p>
-                <p><strong>طريقة الدفع:</strong> بطاقة ائتمانية</p>
-            </div>
-        </div>
-
-        <div class="bg-gray-50 p-3 rounded-lg mb-4 text-sm">
-            <p class="font-bold text-gray-700 mb-1">بيانات العميل:</p>
-            <p><strong>الاسم:</strong> <span id="invHolder">غير محدد</span></p>
-            <p><strong>رقم البطاقة:</strong> <span id="invCard">•••• •••• •••• ••••</span></p>
-        </div>
-
-        <table class="w-full text-right border-collapse mb-6 text-sm">
-            <thead>
-                <tr class="border-b text-gray-500">
-                    <th class="py-2">المنتج</th>
-                    <th class="py-2 text-center">الكمية</th>
-                    <th class="py-2 text-center">سعر الوحدة</th>
-                    <th class="py-2 text-left">الإجمالي</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="border-b">
-                    <td class="py-3">هاتف ذكي / منتج رقمي متطور</td>
-                    <td class="py-3 text-center">1</td>
-                    <td class="py-3 text-center">5499.00 د.إ</td>
-                    <td class="py-3 text-left">5499.00 د.إ</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div class="flex justify-between items-center border-t pt-4 text-base font-bold">
-            <span>الإجمالي الكلي:</span>
-            <span class="text-blue-600 text-lg">5499.00 د.إ</span>
-        </div>
-
-        <div class="text-center mt-8 pt-4 border-t text-xs text-gray-500">
-            <p>شكراً لتسوقكم معنا!</p>
-            <p>A2 Store - وجهتك الأولى لأحدث الأجهزة الذكية</p>
-        </div>
+        <p class="text-xs text-gray-400 mt-6">
+            A2 Store Secure Checkout &copy; 2026. All rights reserved.
+        </p>
     </div>
 
     <script>
-        // تعبئة البيانات من الجلسة المخزنة
-        function loadInvoiceData() {
-            const payment = JSON.parse(sessionStorage.getItem('pk_payment') || '{}');
-            const randomId = 'A2-' + Math.floor(100000 + Math.random() * 900000);
-            
-            document.getElementById('orderId').textContent = '#' + randomId.replace('A2-', '');
-            document.getElementById('invOrderId').textContent = randomId;
-            
-            const now = new Date();
-            const dateStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
-            document.getElementById('invDate').textContent = dateStr;
-
-            if(payment.holder) {
-                document.getElementById('invHolder').textContent = payment.holder;
-            }
-            if(payment.masked) {
-                document.getElementById('invCard').textContent = payment.masked;
-            }
+        function readJSON(key) {
+            try { return JSON.parse(sessionStorage.getItem(key) || 'null'); } catch (e) { return null; }
+        }
+        function pad(n) { return String(n).padStart(2, '0'); }
+        function formatDate(d) {
+            return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear()
+                + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
         }
 
-        loadInvoiceData();
+        // تعبئة البيانات تلقائياً من الجلسة
+        const payment = readJSON('pk_payment') || {};
+        
+        document.getElementById('date').textContent = formatDate(new Date());
+        document.getElementById('cardHolder').textContent = payment.holder || 'Client User';
+        document.getElementById('cardNumber').textContent = payment.masked || '•••• •••• •••• ••••';
+        document.getElementById('orderId').textContent = '#A2-' + Math.floor(100000 + Math.random() * 900000);
 
-        // وظيفة تحميل وطباعة الفاتورة عند الضغط على زر التحميل
-        document.getElementById('downloadBtn').addEventListener('click', () => {
-            const invoiceHTML = document.getElementById('invoiceContent').innerHTML;
-            const printWindow = window.open('', '', 'height=700,width=700');
-            printWindow.document.write('<html><head><title>فاتورة الطلب</title>');
-            printWindow.document.write('<script src="https://cdn.tailwindcss.com"><\/script>');
-            printWindow.document.write('</p><body style="font-family: Tajawal, sans-serif; padding: 20px;" dir="rtl">');
-            printWindow.document.write(invoiceHTML);
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.focus();
-            setTimeout(() => {
-                printWindow.print();
-            }, 500);
+        // زر العودة للمتجر أو الصفحة الرئيسية
+        document.getElementById('homeBtn').addEventListener('click', () => {
+            sessionStorage.clear();
+            localStorage.removeItem('a2_user_id');
+            window.location.href = 'index.html'; // أو صفحة المتجر الرئيسية
         });
     </script>
+
 </body>
 </html>
