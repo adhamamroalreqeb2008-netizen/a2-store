@@ -247,14 +247,39 @@
     padding-left: 10px;
   }
 
+  /* لوحة تحكم سريعة لاختبار المبالغ إذا لم تنقلها السلة تلقائياً */
+  .debug-panel {
+    background: #fff3cd;
+    border: 1px solid #ffeeba;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 13px;
+  }
+  .debug-panel input { padding: 5px; margin: 0 5px; width: 100px; text-align: center; font-weight: bold; }
+
   @media print {
     body { background: none; padding: 0; }
     .doc-container { box-shadow: none; max-width: 100%; page-break-after: always; }
-    .actions-flex { display: none !important; }
+    .actions-flex, .debug-panel { display: none !important; }
   }
 </style>
 </head>
 <body>
+
+<!-- لوحة مساعدة مؤقتة للتحكم في السعر والمبلغ والدفع -->
+<div class="debug-panel" id="debugPanel">
+  <b>🛠️ لوحة مطابقة الفاتورة الفورية:</b> 
+  السعر: <input type="number" id="inpPrice" value="5649.92" oninput="updateAll()"> 
+  الدفعة الأولى: <input type="number" id="inpFirst" value="500" oninput="updateAll()">
+  طريقة الدفع: <select id="inpMethod" onchange="updateAll()">
+    <option value="تقسيط">تقسيط عادي</option>
+    <option value="Tabby">Tabby / تمارا</option>
+    <option value="دفع كامل">دفع كامل</option>
+  </select>
+  <span style="color: green; font-weight: bold;">(تتحدث الفاتورة تلقائياً)</span>
+</div>
 
 <!-- Document 1: Installment Schedule Invoice -->
 <div class="doc-container">
@@ -454,25 +479,23 @@
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+  function updateAll() {
     const orderInfo = JSON.parse(localStorage.getItem('a2_order_info') || '{}');
     const cart = JSON.parse(localStorage.getItem('a2cart') || '[]');
 
-    // 1. جلب اسم العميل من بيانات الفيزا / الطلب
     const clientName = orderInfo.name || orderInfo.cardName || orderInfo.holderName || 'عميل المتجر';
-
-    // 2. جلب طريقة الدفع المختارة (مثل تابي، تمارا، تقسيط، دفع كامل)
-    const paymentMethod = orderInfo.payMethod || orderInfo.payment || orderInfo.gateway || 'تقسيط';
+    
+    // سحب طريقة الدفع من الـ localStorage أو من خانة الاختيار في لوحة التحكم
+    let paymentMethod = orderInfo.payMethod || orderInfo.payment || orderInfo.gateway || document.getElementById('inpMethod').value;
     document.getElementById('payMethodVal').textContent = paymentMethod;
 
-    // هل الدفع بالكامل أم تقسيط (تابي / تمارا / تقسيط عادي)؟
     const isFullPayment = paymentMethod.includes('كامل') || paymentMethod.includes('Cash') || paymentMethod.includes('نقداً');
 
     let productName = 'Iphone 18 pro max _ سيماوي';
     let rawPrice = 0;
     let qty = 1;
 
-    // 3. حساب إجمالي السعر من السلة بدقة
+    // محاولة جلب السعر الحقيقي من السلة
     if (cart.length > 0) {
       cart.forEach(item => {
         let itemPrice = Number(item.price || item.p || 0);
@@ -483,37 +506,30 @@
       productName = firstItem.name || firstItem.n || productName;
       qty = cart.reduce((sum, i) => sum + Number(i.qty || i.q || 1), 0);
     } else {
-      rawPrice = orderInfo.total || orderInfo.price || 5649.92;
+      // إذا لم تتوفر السلة، نأخذها من لوحة التحكم التفاعلية أو البيانات المحفوظة
+      rawPrice = Number(orderInfo.total || orderInfo.price || document.getElementById('inpPrice').value || 5649.92);
     }
 
-    // 4. تحديد الدفعة الأولى والمتبقي بناءً على نوع الدفع
-    let firstPay = 0;
-    let remaining = 0;
-    let monthlyInstallment = 0;
+    // مزامنة حقل الإدخال اليدوي مع السعر الفعلي
+    document.getElementById('inpPrice').value = rawPrice;
 
+    // حساب الدفعة الأولى والمتبقي والأقساط
+    let firstPay = Number(document.getElementById('inpFirst').value);
     if (isFullPayment) {
       firstPay = rawPrice;
-      remaining = 0;
-      monthlyInstallment = 0;
       document.getElementById('payProcessVal').textContent = 'دفع كامل';
     } else {
-      // إذا كان تقسيط (مثل تابي، تمارا، أو تقسيط عادي)
-      if (paymentMethod.includes('Tabby') || paymentMethod.includes('tabby') || paymentMethod.includes('تمارا')) {
-        // تابي/تمارا غالباً تقسم على 4 دفعات أو دفعة أولى محددة
-        firstPay = Math.round(rawPrice / 4);
-      } else {
-        // التقسيط العادي (دفعة أولى تقريبية 10% أو 500)
-        firstPay = rawPrice > 2000 ? Math.round(rawPrice * 0.1) : 500.00;
-      }
-      remaining = rawPrice - firstPay;
-      monthlyInstallment = remaining / 24;
+      document.getElementById('payProcessVal').textContent = 'شراء';
     }
+
+    const remaining = Math.max(0, rawPrice - firstPay);
+    const monthlyInstallment = remaining / 24;
 
     const randomInv = 'INV-' + (orderInfo.invId || Math.floor(100000 + Math.random() * 900000));
     const todayStr = '08/11/2026';
     const fullDateStr = 'Sunday 08 November 2026 | 08:44 PM';
 
-    // 5. تعبئة البيانات في كافة العناصر
+    // تعبئة البيانات
     document.getElementById('invNo1').textContent = 'No. #' + randomInv;
     document.getElementById('invNo3').textContent = randomInv;
     document.getElementById('invNo4').textContent = randomInv;
@@ -526,31 +542,34 @@
     document.getElementById('cName3').textContent = clientName;
     document.getElementById('cName4').textContent = clientName;
 
-    // اسم المنتج والكمية
+    // المنتج والكمية
     document.getElementById('pName1').textContent = productName;
     document.getElementById('pName2').textContent = productName;
     document.getElementById('pName3').textContent = productName + ' (' + qty + ' x)';
-
     document.getElementById('pQty1').textContent = qty;
     document.getElementById('pQty2').textContent = qty;
 
-    // المبالغ المالية
-    const formattedTotal = rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' د.إ';
-    document.getElementById('pPrice1').textContent = formattedTotal;
-    document.getElementById('pPrice3').textContent = formattedTotal;
-    document.getElementById('grandTotal1').textContent = formattedTotal;
+    // المبالغ وتنسيقها
+    const fmtTotal = rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' د.إ';
+    const fmtFirst = firstPay.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' د.إ';
+    const fmtRemain = remaining.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' د.إ';
+    const fmtMonthly = monthlyInstallment.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' د.إ';
+
+    document.getElementById('pPrice1').textContent = fmtTotal;
+    document.getElementById('pPrice3').textContent = fmtTotal;
+    document.getElementById('grandTotal1').textContent = fmtTotal;
     document.getElementById('grandTotal2').textContent = rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    document.getElementById('grandTotal3').textContent = formattedTotal;
+    document.getElementById('grandTotal3').textContent = fmtTotal;
     document.getElementById('grandTotal4').textContent = rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-    document.getElementById('firstPay1').textContent = firstPay.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' د.إ';
-    document.getElementById('firstPay3').textContent = firstPay.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' د.إ';
+    document.getElementById('firstPay1').textContent = fmtFirst;
+    document.getElementById('firstPay3').textContent = fmtFirst;
     document.getElementById('firstPay4').textContent = firstPay.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
     document.getElementById('remainPay3').textContent = remaining.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     document.getElementById('monthlyVal').textContent = monthlyInstallment.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-    // 6. جدول الأقساط الشهرية الـ 24
+    // جدول الأقساط الـ 24
     const scheduleBody = document.getElementById('scheduleBody');
     let rowsHtml = '';
     let year = 2026;
@@ -561,8 +580,8 @@
       for (let col = 0; col < 3; col++) {
         let mStr = month < 10 ? '0' + month : month;
         let dateStr = `08/${mStr}/${year}`;
-        let installmentText = isFullPayment ? '0.00 د.إ' : (monthlyInstallment.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' د.إ');
-        rowsHtml += `<td>${installmentText}</td><td>${dateStr}</td>`;
+        let instText = isFullPayment ? '0.00 د.إ' : fmtMonthly;
+        rowsHtml += `<td>${instText}</td><td>${dateStr}</td>`;
         month++;
         if (month > 12) {
           month = 1;
@@ -572,7 +591,9 @@
       rowsHtml += '</tr>';
     }
     scheduleBody.innerHTML = rowsHtml;
-  });
+  }
+
+  document.addEventListener('DOMContentLoaded', updateAll);
 </script>
 
 </body>
