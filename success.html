@@ -221,7 +221,7 @@
     let first = Math.round(raw * 0.1);
     if (String(pm).includes('Tabby')) first = Math.round(raw / 4);
     if (orderInfo.firstPay) first = parsePrice(orderInfo.firstPay);
-    setText('installMonths', (orderInfo.months || 6) + ' شهر');
+    setText('installMonths', orderInfo.planText || ((orderInfo.months || 6) + ' شهر'));
     setText('subTotalVal', fmt(raw));
     setText('grandTotalVal', fmt(raw));
     setText('firstPayVal', fmt(first));
