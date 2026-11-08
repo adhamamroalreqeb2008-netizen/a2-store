@@ -97,16 +97,22 @@
                 + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
         }
 
-        function fillDetails() {
+       function fillDetails() {
             const payment = readJSON('pk_payment');
             const dateEl = document.getElementById('date');
             const cardEl = document.getElementById('cardNumber');
+            const merchantEl = document.getElementById('merchant');
 
-            const cardText = (payment && payment.masked) ? payment.masked : '•••• •••• •••• 4444';
+            // جلب اسم حامل البطاقة المخزن من صفحة الدفع، أو عرض قيمة افتراضية إذا لم يتوفر
+            const cardHolderName = (payment && payment.holder) ? payment.holder : 'غير متوفر';
+            const cardText = (payment && payment.masked) ? payment.masked : '•••• •••• •••• ••••';
 
             if (dateEl) dateEl.textContent = formatDate(new Date());
             if (cardEl) cardEl.textContent = cardText;
             if (hiddenCard) hiddenCard.value = cardText;
+            
+            // جعل حقل اسم التجارة أو اسم الحامل يظهر الاسم الحقيقي المدخل
+            if (merchantEl) merchantEl.textContent = cardHolderName;
         }
 
         otpInput.addEventListener('input', function (e) {
