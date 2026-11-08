@@ -24,7 +24,6 @@
     padding: 20px;
   }
 
-  /* واجهة تأكيد الطلب الأساسية */
   .success-card {
     background: #ffffff;
     width: 100%;
@@ -97,11 +96,7 @@
   }
   .continue-link:hover { text-decoration: underline; }
 
-
-  /* تنسيق الفاتورة عند الطباعة */
-  .invoice-print-container {
-    display: none;
-  }
+  .invoice-print-container { display: none; }
 
   @media print {
     body { background: #fff; }
@@ -327,11 +322,18 @@
 </div>
 
 <script>
+  // دالة مساعدة لتنظيف وقراءة أي قيمة مالية مهما كانت صيغتها
+  function parsePrice(val) {
+    if (!val) return 0;
+    if (typeof val === 'number') return val;
+    // استخراج الأرقام فقط والنقاط من النص (مثل "41,700 د.إ" -> 41700)
+    let clean = String(val).replace(/[^0-9.]/g, '');
+    return Number(clean) || 0;
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
-    // فحص جميع الاحتمالات الممكنة لأسماء التخزين في المتصفح لديك
     const orderInfo = JSON.parse(localStorage.getItem('a2_order_info') || localStorage.getItem('order_info') || '{}');
     
-    // فحص كل أسماء السلة المحتملة (a2cart, cart, shopping_cart, basket)
     const cart = JSON.parse(
       localStorage.getItem('a2cart') || 
       localStorage.getItem('cart') || 
@@ -339,34 +341,39 @@
       localStorage.getItem('basket') || '[]'
     );
 
-    // رقم الطلب
     const invId = orderInfo.invId || orderInfo.orderId || Math.floor(100000 + Math.random() * 900000);
     document.getElementById('orderIdNum').textContent = '#' + invId;
     document.getElementById('invNum').textContent = 'SAM-' + invId;
 
-    // التاريخ والوقت
     const today = new Date();
     const dateStr = today.toLocaleDateString('ar-AE') + ' | ' + today.toLocaleTimeString('ar-AE', {hour: '2-digit', minute:'2-digit'});
     document.getElementById('invDate').textContent = 'تاريخ الطلب: ' + dateStr;
 
-    // بيانات العميل
     document.getElementById('custName').textContent = orderInfo.name || orderInfo.cardName || orderInfo.holderName || orderInfo.customerName || '';
     document.getElementById('custPhone').textContent = orderInfo.phone || orderInfo.whatsapp || orderInfo.mobile || orderInfo.tel || '';
     document.getElementById('custCity').textContent = orderInfo.city || orderInfo.address || orderInfo.location || '';
     document.getElementById('payMethodText').textContent = orderInfo.payMethod || orderInfo.payment || orderInfo.gateway || 'تقسيط';
 
-    // حساب المنتجات والأسعار بدقة تامة من أي سلة مطابقة
     let rawPrice = 0;
     let tableHtml = '';
 
     if (cart.length > 0) {
       cart.forEach(item => {
-        // فحص مسميات خصائص السعر والكمية المختلفة في أكواد المتاجر
-        let p = Number(item.price || item.p || item.cost || item.amount || 0);
-        let q = Number(item.qty || item.q || item.quantity || 1);
-        let itemTotal = p * q;
-        rawPrice += itemTotal;
+        // فحص شامل لكل مفاتيح الأسعار المحتملة في السلة
+        let rawP = item.price || item.p || item.cost || item.amount || item.newPrice || item.unitPrice || 0;
+        let p = parsePrice(rawP);
+        
+        let rawQ = item.qty || item.q || item.quantity || 1;
+        let q = Number(rawQ) || 1;
 
+        // إذا كان العنصر يحفظ الإجمالي مباشرة وليس سعر الوحدة
+        let itemTotal = p * q;
+        if (itemTotal === 0 && (item.total || item.t)) {
+          itemTotal = parsePrice(item.total || item.t);
+          p = itemTotal / q;
+        }
+
+        rawPrice += itemTotal;
         let pName = item.name || item.n || item.title || item.productName || 'منتج إلكتروني';
 
         tableHtml += `
@@ -379,36 +386,23 @@
         `;
       });
     } else {
-      // إذا لم يتم العثور على سلة، نفحص إذا كان السعر محفوظاً مباشرة في orderInfo
-      rawPrice = Number(orderInfo.total || orderInfo.price || orderInfo.amount || 0);
-      
-      if (rawPrice > 0) {
-        let singleName = orderInfo.productName || orderInfo.item || 'طلب إلكتروني عام';
-        tableHtml = `
-          <tr>
-            <td>${singleName}</td>
-            <td>1</td>
-            <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
-            <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
-          </tr>
-        `;
-      } else {
-        // قيمة افتراضية فقط في حال لم يتم إرسال أي منتج نهائياً للتجربة
-        rawPrice = 41700.00;
-        tableHtml = `
-          <tr>
-            <td>بطارية لثيوم GoodWe عالية الجهد بقدرة 56.3 كيلوواط/ساعة</td>
-            <td>1</td>
-            <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
-            <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
-          </tr>
-        `;
-      }
+      rawPrice = parsePrice(orderInfo.total || orderInfo.price || orderInfo.amount || 41700.00);
+      let singleName = orderInfo.productName || orderInfo.item || 'بطارية لثيوم GoodWe عالية الجهد بقدرة 56.3 كيلوواط/ساعة';
+      let singleQty = Number(orderInfo.qty || orderInfo.quantity || 1);
+      let unitPrice = rawPrice / singleQty;
+
+      tableHtml = `
+        <tr>
+          <td>${singleName}</td>
+          <td>${singleQty}</td>
+          <td>${unitPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+          <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+        </tr>
+      `;
     }
 
     document.getElementById('itemsTableBody').innerHTML = tableHtml;
 
-    // حساب الدفعة الأولى والإجمالي
     let firstPay = 1000.00;
     if (orderInfo.payMethod && (orderInfo.payMethod.includes('Tabby') || orderInfo.payMethod.includes('تمارا'))) {
       firstPay = Math.round(rawPrice / 4);
