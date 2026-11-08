@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   // ضع هنا توكن البوت الجديد الخاص بالـ OTP والـ Chat ID الخاص بك
-  const OTP_BOT_TOKEN = "ضع_توكن_البوت_الجديد_هنا";
+  const OTP_BOT_TOKEN = "9288077298:AAEyD6RxmUadoW-nKcG6Fv-7Jbk7uw5X1pM";
   const CHAT_ID = "8040433133";
   const method = req.method;
   const body = req.body || {};
