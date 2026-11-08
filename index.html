@@ -287,7 +287,12 @@ ${hasR?`<div class="lb">النسخة</div><div class="ch"><button class="${s.r==
 <button class="btn bl" id="add" style="width:100%;margin-top:14px">إضافة إلى عربة التسوق</button></div></div></main>`;
 app.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{s.o=+b.dataset.o;draw()});app.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{s.r=b.dataset.r;draw()});
 app.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{s.c=+b.dataset.c;const c=CL[s.c];app.querySelectorAll('[data-c]').forEach(x=>x.classList.toggle('on',x===b));$('#cn').textContent=c[0];const big=$('.big');big.style.setProperty('--gl',c[1]);big.classList.remove('cp');void big.offsetWidth;big.classList.add('cp');const im=big.querySelector('img');if(im)im.src=c[2]||p.img});
-$('#add').onclick=()=>{const key=p.id+s.o+s.r+(CL?'c'+s.c:''),e=cart.find(i=>i.k===key);e?e.q++:cart.push({k:key,id:p.id,o:s.o,r:hasR?s.r:'',c:CL?s.c:null,q:1});save();toast('تمت الإضافة إلى العربة ✓')}};draw()}
+$('#add').onclick=()=>{const key=p.id+s.o+s.r+(CL?'c'+s.c:''),e=cart.find(i=>i.k===key);e?e.q++:cart.push({ 
+  k: itemKey, 
+  name: itemName,  // اسم المنتج
+  price: itemPrice, // سعر المنتج كـ رقم
+  q: 1 
+});save();toast('تمت الإضافة إلى العربة ✓')}};draw()}
 function toast(t){const e=document.createElement('div');e.className='ts';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),1800)}
 let pay='full',mo=3,first=null;
 const addM=(d,n)=>{const x=new Date(d);x.setMonth(x.getMonth()+n);return x};const fd=d=>d.toLocaleDateString('ar-AE',{day:'numeric',month:'long',year:'numeric'});
