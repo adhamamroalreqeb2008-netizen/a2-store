@@ -37,7 +37,6 @@
     box-shadow: 0 10px 30px rgba(0,0,0,0.08);
   }
 
-  /* البانر العلوي الأزرق المتدرج مع اللوجو والنص */
   .invoice-header {
     background: linear-gradient(135deg, var(--header-start), var(--header-end));
     padding: 25px 20px;
@@ -58,7 +57,6 @@
 
   .invoice-body { padding: 24px; }
 
-  /* الكروت التعريفية والتفاصيل */
   .info-box {
     background: #ffffff;
     border: 1px solid var(--border-color);
@@ -100,7 +98,6 @@
     margin-bottom: 12px;
   }
 
-  /* جدول المنتجات بالتصميم الأزرق المطابق للصورة */
   .table-container {
     border: 1px solid var(--border-color);
     border-radius: 12px;
@@ -115,7 +112,6 @@
   .prod-name { font-weight: 700; display: block; }
   .prod-sub { font-size: 12px; color: var(--gray-text); display: block; }
 
-  /* قسم ملخص الحسابات والشعار في الأسفل بجانب بعضهما */
   .summary-section {
     display: grid;
     grid-template-columns: 1.3fr 0.7fr;
@@ -137,13 +133,11 @@
   .summary-row:last-child { border-bottom: none; }
   .summary-row.total { background: var(--primary-blue); color: #ffffff; font-weight: 800; font-size: 15px; }
 
-  /* اللوجو الجانبي أسفل الفاتورة */
   .brand-stamp { text-align: center; padding: 10px; }
   .brand-stamp h2 { color: var(--primary-blue); font-size: 28px; font-weight: 800; }
   .brand-stamp p { color: var(--primary-blue); font-size: 13px; font-weight: 700; }
   .brand-stamp small { font-size: 9px; color: var(--gray-text); letter-spacing: 1px; }
 
-  /* رسالة الشكر بالأسفل */
   .invoice-footer {
     background: #e8f2fe;
     border: 1px solid #cbe0fa;
@@ -155,7 +149,6 @@
     font-size: 14px;
   }
 
-  /* زر العودة للصفحة الرئيسية */
   .actions-bar {
     display: flex;
     gap: 12px;
@@ -186,7 +179,6 @@
 <body>
 
 <div class="invoice-card">
-  <!-- البانر العلوي -->
   <div class="invoice-header">
     <h2>A2 STORE</h2>
     <p>MOBILES & ELECTRONICS</p>
@@ -198,7 +190,7 @@
   </div>
 
   <div class="invoice-body">
-    <!-- تفاصيل الطلب ورقم الفاتورة -->
+    <!-- تفاصيل الطلب -->
     <div class="info-box grid-2">
       <div>
         <div class="info-row">
@@ -229,15 +221,15 @@
     <!-- بيانات العميل -->
     <div class="info-box">
       <div class="section-badge">👤 بيانات العميل</div>
-      <div class="info-row" style="max-width: 350px;">
+      <div class="info-row" style="max-width: 380px;">
         <span class="label">الاسم:</span>
         <span class="value" id="custName">عميل المتجر</span>
       </div>
-      <div class="info-row" style="max-width: 350px;">
+      <div class="info-row" style="max-width: 380px;">
         <span class="label">رقم الهاتف:</span>
         <span class="value" id="custPhone">—</span>
       </div>
-      <div class="info-row" style="max-width: 350px;">
+      <div class="info-row" style="max-width: 380px;">
         <span class="label">العنوان:</span>
         <span class="value" id="custCity">—</span>
       </div>
@@ -251,17 +243,17 @@
             <th>المنتج</th>
             <th>الكمية</th>
             <th>السعر الفردي</th>
-            <th>الضريبة (14%)</th>
+            <th>الضريبة (0%)</th>
             <th>الإجمالي</th>
           </tr>
         </thead>
         <tbody id="itemsTable">
-          <!-- يتم جلب البيانات ديناميكياً هنا -->
+          <!-- البيانات تُعبأ تلقائياً هنا -->
         </tbody>
       </table>
     </div>
 
-    <!-- الحسابات الإجمالية وشعار الختم -->
+    <!-- الحسابات الإجمالية والشعار -->
     <div class="summary-section">
       <div class="summary-box">
         <div class="summary-row">
@@ -269,7 +261,7 @@
           <span id="subTotal">0.00 د.إ</span>
         </div>
         <div class="summary-row">
-          <span>قيمة الضريبة (14%):</span>
+          <span>قيمة الضريبة (0%):</span>
           <span id="taxAmount">0.00 د.إ</span>
         </div>
         <div class="summary-row total">
@@ -285,7 +277,6 @@
       </div>
     </div>
 
-    <!-- رسالة الشكر -->
     <div class="invoice-footer">
       🛍️ شكراً لتسوقك من A2 STORE<br>
       <span style="font-weight: 500; font-size: 13px;">نتطلع لخدمتك دائماً</span>
@@ -293,13 +284,11 @@
   </div>
 </div>
 
-<!-- زر العودة للصفحة الرئيسية -->
 <div class="actions-bar">
   <a href="index.html" class="btn-home">🏠 العودة إلى الصفحة الرئيسية</a>
 </div>
 
 <script>
-  // جلب البيانات والحسابات التلقائية للمنتج والسلة والعميل
   document.addEventListener('DOMContentLoaded', () => {
     const today = new Date().toISOString().split('T')[0].replace(/-/g, '/');
     const randomInv = 'INV-' + Math.floor(100000 + Math.random() * 900000);
@@ -308,39 +297,47 @@
     document.getElementById('invDate').textContent = today;
     document.getElementById('orderDate').textContent = today;
 
+    // جلب البيانات من التخزين المحلي مع دعم كافة التسميات المحتملة
     const cart = JSON.parse(localStorage.getItem('a2cart') || '[]');
     const orderInfo = JSON.parse(localStorage.getItem('a2_order_info') || '{}');
 
+    // تعبئة بيانات العميل مع التحقق من وجودها
     if (orderInfo.name) document.getElementById('custName').textContent = orderInfo.name;
     if (orderInfo.phone) document.getElementById('custPhone').textContent = orderInfo.phone;
-    if (orderInfo.city) document.getElementById('custCity').textContent = orderInfo.city;
+    if (orderInfo.city || orderInfo.address) document.getElementById('custCity').textContent = orderInfo.city || orderInfo.address;
     if (orderInfo.payMethod) document.getElementById('payMethod').textContent = orderInfo.payMethod;
 
     const tbody = document.getElementById('itemsTable');
     let totalGross = 0;
 
     if (cart.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" style="padding:20px; color:#5f7188;">لا توجد عناصر مضافة في الفاتورة</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5" style="padding:20px; color:#5f7188;">لا توجد عناصر مضافة في السلة</td></tr>`;
       return;
     }
 
     let rowsHtml = '';
     cart.forEach(item => {
-      const itemTotal = item.price * item.qty;
-      totalGross += itemTotal;
+      // التعامل مع مختلف أسماء الخصائص في الكود (مثل n بدل name وسعر السلعة)
+      const productName = item.name || item.n || 'منتج رقمي';
+      const productOption = item.option || item.o || '';
+      const productQty = Number(item.qty || item.q || 1);
+      
+      // جلب السعر الفردي بشكل صحيح وسليم
+      let unitPrice = Number(item.price || item.p || 0);
+      if (!unitPrice && item.pr) unitPrice = Number(item.pr);
 
-      const basePrice = item.price / 1.14;
-      const taxPerUnit = item.price - basePrice;
+      const itemTotal = unitPrice * productQty;
+      totalGross += itemTotal;
 
       rowsHtml += `
         <tr>
           <td>
-            <span class="prod-name">${item.name || item.n}</span>
-            <span class="prod-sub">${item.option || ''}</span>
+            <span class="prod-name">${productName}</span>
+            <span class="prod-sub">${productOption}</span>
           </td>
-          <td>${item.qty}</td>
-          <td>${basePrice.toFixed(2)} د.إ</td>
-          <td>${(taxPerUnit * item.qty).toFixed(2)} د.إ</td>
+          <td>${productQty}</td>
+          <td>${unitPrice.toLocaleString()} د.إ</td>
+          <td>0.00 د.إ</td>
           <td style="font-weight: 700;">${itemTotal.toLocaleString()} د.إ</td>
         </tr>
       `;
@@ -348,11 +345,9 @@
 
     tbody.innerHTML = rowsHtml;
 
-    const netTotal = totalGross / 1.14;
-    const totalTax = totalGross - netTotal;
-
-    document.getElementById('subTotal').textContent = netTotal.toFixed(2) + ' د.إ';
-    document.getElementById('taxAmount').textContent = totalTax.toFixed(2) + ' د.إ';
+    // تعبئة الحسابات الإجمالية مع جعل الضريبة 0 والإجمالي مطابقاً بدقة
+    document.getElementById('subTotal').textContent = totalGross.toLocaleString() + ' د.إ';
+    document.getElementById('taxAmount').textContent = '0.00 د.إ';
     document.getElementById('grandTotal').textContent = totalGross.toLocaleString() + ' د.إ';
   });
 </script>
