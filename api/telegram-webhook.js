@@ -7,7 +7,7 @@ export default async function handler(req, res) {
 
   if (update.callback_query) {
     const callback = update.callback_query;
-    const data = callback.data; // مثل approve_otp_user123
+    const data = callback.data; // مثل approve_otp_xyz123
     const chatId = callback.message.chat.id;
     const messageId = callback.message.message_id;
 
@@ -25,7 +25,7 @@ export default async function handler(req, res) {
       responseText += "\n\n❌ **[تم الرفض - تم إظهار خطأ للعميل]**";
     }
 
-    // تعديل الرسالة في تليجرام لإزالة الأزرار
+    // تعديل الرسالة في تليجرام لإزالة الأزرار وتأكيد القرار
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -40,7 +40,7 @@ export default async function handler(req, res) {
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ callback_query_id: callback.id, text: "تم تسجيل قرارك!" })
+      body: JSON.stringify({ callback_query_id: callback.id, text: "تم تسجيل قرارك بنجاح!" })
     });
   }
 
