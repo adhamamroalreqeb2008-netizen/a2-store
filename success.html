@@ -6,79 +6,217 @@
 <title>تم استلام طلبك - A2 STORE</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
-  :root { --pink:#d6125f; --navy:#1e2a4a; --pink-bg:#fdf1f7; --lav:#e9ebf8; }
-  * { box-sizing:border-box; margin:0; padding:0; font-family:'Tajawal',sans-serif; }
-  body { background:#f4f6f9; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:20px;
-    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-
-  /* ===== صفحة التأكيد ===== */
-  .success-card { background:#fff; width:100%; max-width:550px; padding:40px 30px; border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,.08); text-align:center; }
-  .success-icon { width:70px; height:70px; background:#e6f4ea; color:#137333; font-size:35px; display:flex; align-items:center; justify-content:center; border-radius:50%; margin:0 auto 20px; }
-  h1 { font-size:24px; font-weight:800; color:#202124; margin-bottom:10px; }
-  .success-card > p { font-size:14px; color:#5f6368; line-height:1.6; margin-bottom:30px; }
-  .details-box { background:#f8f9fa; border-radius:8px; padding:15px 20px; margin-bottom:30px; text-align:right; }
-  .detail-row { display:flex; justify-content:space-between; font-size:14px; padding:8px 0; border-bottom:1px solid #eee; }
-  .detail-row:last-child { border-bottom:none; }
-  .detail-row span:first-child { color:#5f6368; font-weight:600; }
-  .detail-row span:last-child { color:#202124; font-weight:700; }
-  .status-badge { color:#137333; background:#e6f4ea; padding:2px 8px; border-radius:4px; font-size:12px; }
-  .btn-group { display:flex; gap:12px; margin-bottom:20px; }
-  .btn { flex:1; padding:12px; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:8px; }
-  .btn-primary { background:#202124; color:#fff; border:none; }
-  .btn-outline { background:#fff; color:#202124; border:1px solid #dadce0; }
-  .continue-link { font-size:13px; color:#1a73e8; text-decoration:none; font-weight:600; }
-
-  /* ===== نافذة الفاتورة ===== */
-  #invoiceOverlay { display:none; position:fixed; inset:0; background:rgba(20,24,40,.65); z-index:9999; overflow-y:auto; padding:20px 10px; }
-  #invoiceOverlay.open { display:block; }
-  .inv-toolbar { max-width:760px; margin:0 auto 12px; display:flex; gap:10px; }
-  .inv-toolbar .btn { flex:none; padding:10px 18px; border:none; }
-  .btn-pink { background:var(--pink); color:#fff; }
-  .btn-white { background:#fff; color:#202124; }
-
-  .invoice-box { background:#fff; width:100%; max-width:760px; margin:0 auto; padding:30px 34px; color:var(--navy); border-radius:10px; }
-  .inv-logo { text-align:center; }
-  .inv-logo img { height:150px; max-width:100%; object-fit:contain; }
-  .invoice-title { text-align:center; font-size:30px; font-weight:800; color:var(--pink); margin:6px 0 18px; padding-bottom:18px; border-bottom:1px solid #e6e6e6; }
-
-  .top-info-box { display:flex; justify-content:space-between; background:var(--pink-bg); border-radius:14px; padding:18px 24px; margin-bottom:14px; font-size:16px; font-weight:800; color:#111; line-height:2; }
-  .customer-section { border:1px solid #e6e6e6; border-radius:14px; padding:16px 22px; margin-bottom:20px; }
-  .customer-section h3 { font-size:15px; color:var(--pink); font-weight:800; margin-bottom:6px; }
-  .cust-row { font-size:16px; font-weight:800; color:#111; line-height:2; }
-
-  .items-table { width:100%; border-collapse:collapse; margin-bottom:20px; }
-  .items-table th { background:var(--lav); border-bottom:2px solid #cfd3ee; padding:14px 12px; font-size:15px; font-weight:800; color:#111; text-align:right; }
-  .items-table td { padding:16px 12px; border-bottom:1px solid #eee; font-size:14px; font-weight:700; }
-  .items-table th:last-child, .items-table td:last-child { text-align:left; }
-
-  .summary-wrap { display:flex; gap:20px; align-items:stretch; margin-bottom:22px; border-top:1px solid #e6e6e6; padding-top:22px; }
-  .summary-details { flex:1.3; background:var(--pink-bg); border-radius:14px; padding:18px 22px; }
-  .summary-row { display:flex; justify-content:space-between; font-size:15px; padding:10px 0; border-bottom:1px solid #f1dbe6; font-weight:700; }
-  .summary-row:last-child { border-bottom:none; }
-  .summary-row.pink { color:var(--pink); font-weight:800; }
-  .summary-row.total { font-size:17px; font-weight:800; color:#111; }
-  .stamp { flex:1; text-align:center; }
-  .stamp span { display:block; font-size:15px; font-weight:800; color:var(--navy); margin-bottom:6px; }
-  .stamp img { height:95px; max-width:100%; object-fit:contain; }
-
-  .footer-note { text-align:center; border-top:1.5px dashed #ccc; padding-top:20px; font-size:13px; color:#3b4666; line-height:1.9; }
-  .footer-note b { display:block; font-size:17px; color:var(--navy); }
-
-  @media (max-width:560px) {
-    .invoice-box { padding:18px 14px; }
-    .inv-logo img { height:100px; }
-    .invoice-title { font-size:22px; }
-    .top-info-box { font-size:13px; padding:12px; }
-    .summary-wrap { flex-direction:column; }
-    .items-table th, .items-table td { font-size:12px; padding:10px 6px; }
+  :root {
+    --primary-color: #e63946;
+    --text-main: #2b2b2b;
+    --border-color: #e0e0e0;
   }
 
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+  
+  body {
+    background-color: #f4f6f9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .success-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 550px;
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+  .success-icon {
+    width: 70px;
+    height: 70px;
+    background: #e6f4ea;
+    color: #137333;
+    font-size: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto 20px auto;
+  }
+  h1 { font-size: 24px; font-weight: 800; color: #202124; margin-bottom: 10px; }
+  p { font-size: 14px; color: #5f6368; line-height: 1.6; margin-bottom: 30px; }
+
+  .details-box {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px 20px;
+    margin-bottom: 30px;
+    text-align: right;
+  }
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-row span:first-child { color: #5f6368; font-weight: 600; }
+  .detail-row span:last-child { color: #202124; font-weight: 700; }
+  .status-badge { color: #137333; background: #e6f4ea; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+
+  .btn-group {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-primary { background: #202124; color: #fff; border: none; }
+  .btn-outline { background: #fff; color: #202124; border: 1px solid #dadce0; }
+  
+  .continue-link {
+    font-size: 13px;
+    color: #1a73e8;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .continue-link:hover { text-decoration: underline; }
+
+  .invoice-print-container { display: none; }
+
   @media print {
-    body { background:#fff; padding:0; display:block; min-height:0; }
-    body > *:not(#invoiceOverlay) { display:none !important; }
-    #invoiceOverlay { position:static; background:none; padding:0; display:block; overflow:visible; }
-    .inv-toolbar { display:none !important; }
-    .invoice-box { max-width:100%; padding:0; border-radius:0; }
+    body { background: #fff; }
+    .success-card { display: none !important; }
+    .invoice-print-container { display: block !important; width: 100%; }
+  }
+
+  /* تصميم الفاتورة المطابق لصورة البي دي إف تماماً */
+  .invoice-box {
+    background: #ffffff;
+    width: 100%;
+    max-width: 650px;
+    margin: 0 auto;
+    padding: 25px;
+    color: var(--text-main);
+  }
+  .inv-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+  }
+  .logo-img { height: 50px; width: auto; object-fit: contain; }
+  .invoice-title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin: 15px 0 25px 0;
+  }
+  .top-info-box {
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid #f0f0f0;
+    padding: 15px 20px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    background: #fafafa;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .top-info-col div { margin-bottom: 8px; }
+
+  .customer-section {
+    border: 1px solid #f0f0f0;
+    border-radius: 6px;
+    padding: 15px 20px;
+    margin-bottom: 25px;
+    background: #fafafa;
+  }
+  .customer-section h3 {
+    font-size: 14px;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+    font-weight: 800;
+  }
+  .cust-row { font-size: 13px; margin-bottom: 6px; font-weight: 700; color: #333; }
+
+  .items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 25px;
+  }
+  .items-table th {
+    background: #f1f3f5;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px 10px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #333;
+    text-align: right;
+  }
+  .items-table th:last-child, .items-table td:last-child { text-align: left; }
+  .items-table td {
+    padding: 15px 10px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .summary-section-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    background: #fff8f8;
+    border: 1px solid #fde8e8;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 25px;
+  }
+  .summary-details { flex: 1; }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .summary-row.total-bold { font-size: 16px; font-weight: 800; color: #000; border-top: 1px solid #f5c6cb; padding-top: 8px; }
+  .summary-row.paid-row { color: var(--primary-color); }
+  .summary-row.installment-row { color: var(--primary-color); }
+
+  .certified-stamp-box {
+    text-align: center;
+    padding-right: 20px;
+  }
+  .certified-stamp-box span { font-size: 12px; font-weight: 800; color: #666; display: block; margin-bottom: 8px; }
+
+  .footer-note {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 11px;
+    color: #777;
+    font-weight: 600;
+    line-height: 1.6;
+    border-top: 1px dashed #ddd;
+    padding-top: 15px;
   }
 </style>
 </head>
@@ -90,37 +228,52 @@
   <p>شكراً لتسوقك مع A2 STORE. طلبك قيد المعالجة الآن وسنقوم بإرسال تحديثات التتبع قريباً.</p>
 
   <div class="details-box">
-    <div class="detail-row"><span>رقم الطلب</span><span id="orderIdNum">#726447</span></div>
-    <div class="detail-row"><span>حالة الدفع</span><span><span class="status-badge">مقبول بنجاح</span></span></div>
-    <div class="detail-row"><span>وقت التوصيل المتوقع</span><span>24-48 ساعة</span></div>
+    <div class="detail-row">
+      <span>رقم الطلب</span>
+      <span id="orderIdNum">#726447</span>
+    </div>
+    <div class="detail-row">
+      <span>حالة الدفع</span>
+      <span><span class="status-badge">مقبول بنجاح</span></span>
+    </div>
+    <div class="detail-row">
+      <span>وقت التوصيل المتوقع</span>
+      <span>24-48 ساعة</span>
+    </div>
   </div>
 
   <div class="btn-group">
     <a href="index.html" class="btn btn-outline">🏠 الرئيسية</a>
-    <button onclick="openInvoice()" class="btn btn-primary">📥 تحميل الفاتورة</button>
+    <button onclick="downloadInvoicePDF()" class="btn btn-primary">📥 تحميل الفاتورة</button>
   </div>
+
   <a href="index.html" class="continue-link">← تابع التسوق</a>
 </div>
 
-<!-- الفاتورة -->
-<div id="invoiceOverlay">
-  <div class="inv-toolbar">
-    <button class="btn btn-pink" onclick="window.print()">⬇ حفظ PDF / طباعة</button>
-    <button class="btn btn-white" onclick="closeInvoice()">✕ إغلاق</button>
-  </div>
-
+<!-- الفاتورة للطباعة / PDF -->
+<div class="invoice-print-container">
   <div class="invoice-box">
-    <div class="inv-logo"><img src="https://i.ibb.co/6R24gM1/a2logo.jpg" alt="A2 STORE" onerror="this.style.display='none'"></div>
+    
+    <div class="inv-header">
+      <div>
+        <img src="https://i.ibb.co/6R24gM1/a2logo.jpg" alt="A2 STORE Logo" class="logo-img" onerror="this.src='https://via.placeholder.com/120x50?text=A2+STORE'">
+      </div>
+      <div style="text-align: left;">
+        <p style="font-size: 16px; font-weight: 800; color: #000;">A2 STORE</p>
+        <p style="font-size: 12px; font-weight: 700; color: #555;">أي 2 فونز</p>
+      </div>
+    </div>
+
     <div class="invoice-title">فاتورة ضريبية مبسطة</div>
 
     <div class="top-info-box">
-      <div>
-        <div>رقم الطلب: <span id="invNum"></span></div>
-        <div>تاريخ الطلب: <span id="invDate"></span></div>
+      <div class="top-info-col">
+        <div>رقم الطلب: <span id="invNum">SAM-726447</span></div>
+        <div id="invDate">تاريخ الطلب: --/--/----</div>
       </div>
-      <div style="text-align:left;">
-        <div>حالة الدفع: <span id="payStatus" style="color:#137333;">مكتمل</span></div>
-        <div>طريقة الدفع: <span id="payMethodText"></span></div>
+      <div class="top-info-col" style="text-align: left;">
+        <div>حالة الدفع: <span style="color: #137333;">مكتمل</span></div>
+        <div>طريقة الدفع: <span id="payMethodText">تقسيط</span></div>
       </div>
     </div>
 
@@ -132,110 +285,143 @@
     </div>
 
     <table class="items-table">
-      <thead><tr><th>المنتج</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th></tr></thead>
-      <tbody id="itemsTableBody"></tbody>
+      <thead>
+        <tr>
+          <th>المنتج</th>
+          <th>الكمية</th>
+          <th>سعر الوحدة</th>
+          <th>الإجمالي</th>
+        </tr>
+      </thead>
+      <tbody id="itemsTableBody">
+        <!-- يُعبأ تلقائياً بالمنتجات الحقيقية -->
+      </tbody>
     </table>
 
-    <div class="summary-wrap">
+    <div class="summary-section-box">
       <div class="summary-details">
-        <div class="summary-row"><span>المجموع الفرعي:</span><span id="subTotalVal"></span></div>
-        <div class="summary-row pink"><span>خطة التقسيط:</span><span id="installMonths"></span></div>
-        <div class="summary-row total"><span>الإجمالي:</span><span id="grandTotalVal"></span></div>
-        <div class="summary-row pink"><span>الدفعة الأولى (تم دفعها):</span><span id="firstPayVal"></span></div>
+        <div class="summary-row">
+          <span>المجموع الفرعي:</span>
+          <span id="subTotalVal">0.00 د.إ</span>
+        </div>
+        <div class="summary-row installment-row">
+          <span>خطة التقسيط:</span>
+          <span id="installMonths">6 شهر</span>
+        </div>
+        <div class="summary-row total-bold">
+          <span>الإجمالي:</span>
+          <span id="grandTotalVal">0.00 د.إ</span>
+        </div>
+        <div class="summary-row paid-row">
+          <span>الدَفعة الأولى (تم دفعها):</span>
+          <span id="firstPayVal">0.00 د.إ</span>
+        </div>
       </div>
-      <div class="stamp">
+
+      <div class="certified-stamp-box">
         <span>الختم المعتمد</span>
-        <img src="https://i.ibb.co/6R24gM1/a2logo.jpg" alt="Stamp" onerror="this.style.display='none'">
+        <img src="https://i.ibb.co/6R24gM1/a2logo.jpg" alt="Stamp" style="height: 45px; object-fit: contain;">
       </div>
     </div>
 
     <div class="footer-note">
-      <b>شكراً لتسوقكم معنا!</b>
-      A2STORE - وجهتك الأولى لأحدث الأجهزة الذكية<br>
-      هذه الفاتورة إلكترونية معتمدة ولا تحتاج لختم أو توقيع.
+      شكراً لتسوقكم معنا!<br>
+      A2 STORE - وجهتك الأولى للأجهزة الذكية والتقنية<br>
+      هذه الفاتورة إلكترونية معتمدة ولا تحتاج لختم أو توقيع
     </div>
+
   </div>
 </div>
 
 <script>
-  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-  function parsePrice(v){ if(!v) return 0; if(typeof v==='number') return v; return Number(String(v).replace(/[^0-9.]/g,''))||0; }
-  function fmt(n){ return n.toLocaleString('en-US',{minimumFractionDigits:2}) + ' د.إ'; }
-  function setText(id,v){ document.getElementById(id).textContent = v; }
-
-  function buildInvoice(){
-    let cartItems = [], orderInfo = {};
-    try {
-      const o = JSON.parse(localStorage.getItem('a2_order') || 'null');
-      if (o) { orderInfo = o; cartItems = Array.isArray(o.items) ? o.items : []; }
-    } catch(e){}
-
-    // احتياطي: لو ما وُجد a2_order نبحث في سلة الموقع (localStorage و sessionStorage)
-    if (!cartItems.length) {
-      [localStorage, sessionStorage].forEach(store => {
-        Object.keys(store).forEach(k => {
-          try {
-            const d = JSON.parse(store.getItem(k));
-            if (Array.isArray(d) && d.length && typeof d[0] === 'object' &&
-                (d[0].price||d[0].p||d[0].cost||d[0].name||d[0].n||d[0].title)) cartItems = d;
-            else if (d && typeof d === 'object' && !Array.isArray(d)) {
-              if (Array.isArray(d.items) && d.items.length && !cartItems.length) cartItems = d.items;
-              ['name','phone','whatsapp','mobile','city','address','payMethod','orderId','invId','total'].forEach(f => {
-                if (d[f] && !orderInfo[f]) orderInfo[f] = d[f];
-              });
-            }
-          } catch(e){}
-        });
-      });
-    }
-
-    let raw = 0, html = '';
-    const items = cartItems.length ? cartItems : [{
-      name: orderInfo.productName || orderInfo.item || 'منتج',
-      price: orderInfo.total || orderInfo.price || orderInfo.amount || 0,
-      qty: orderInfo.qty || 1
-    }];
-
-    items.forEach(it => {
-      const q = Number(it.qty || it.q || it.quantity || 1) || 1;
-      let unit = parsePrice(it.price || it.p || it.cost || it.amount || it.unitPrice || 0);
-      let total = unit * q;
-      if (!total) { total = parsePrice(it.total || it.t || it.sum || 0); unit = total / q; }
-      raw += total;
-      const name = it.name || it.n || it.title || it.productName || 'منتج';
-      html += `<tr><td>${esc(name)}</td><td>${q}</td><td>${fmt(unit)}</td><td>${fmt(total)}</td></tr>`;
-    });
-    document.getElementById('itemsTableBody').innerHTML = html;
-
-    const invId = orderInfo.invId || orderInfo.orderId || document.getElementById('orderIdNum').textContent.replace('#','');
-    setText('invNum', 'SAM-' + invId);
-    const now = new Date();
-    setText('invDate', now.toLocaleDateString('ar-AE') + ' | ' + now.toLocaleTimeString('ar-AE',{hour:'2-digit',minute:'2-digit'}));
-
-    setText('custName',  orderInfo.name || orderInfo.fullName || orderInfo.customerName || '');
-    setText('custPhone', orderInfo.phone || orderInfo.whatsapp || orderInfo.mobile || '');
-    setText('custCity',  orderInfo.city || orderInfo.address || '');
-    const pm = orderInfo.payMethod || orderInfo.payment || 'تقسيط';
-    setText('payMethodText', pm);
-
-    let first = Math.round(raw * 0.1);
-    if (String(pm).includes('Tabby')) first = Math.round(raw / 4);
-    if (orderInfo.firstPay) first = parsePrice(orderInfo.firstPay);
-    setText('installMonths', orderInfo.planText || ((orderInfo.months || 6) + ' شهر'));
-    setText('subTotalVal', fmt(raw));
-    setText('grandTotalVal', fmt(raw));
-    setText('firstPayVal', fmt(first));
+  function parsePrice(val) {
+    if (!val) return 0;
+    if (typeof val === 'number') return val;
+    let clean = String(val).replace(/[^0-9.]/g, '');
+    return Number(clean) || 0;
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    try {
-      const o = JSON.parse(localStorage.getItem('a2_order') || 'null');
-      if (o && o.orderId) setText('orderIdNum', '#' + o.orderId);
-    } catch(e){}
+    // جلب بيانات ملخص الطلب والسلة المحفوظة
+    let orderInfo = JSON.parse(localStorage.getItem('a2_order_info') || '{}');
+    let cart = JSON.parse(localStorage.getItem('a2cart') || localStorage.getItem('cart') || '[]');
+
+    if (cart.length === 0 && orderInfo.savedCart && Array.isArray(orderInfo.savedCart)) {
+      cart = orderInfo.savedCart;
+    }
+
+    let rawPrice = 0;
+    let tableHtml = '';
+
+    if (cart.length > 0) {
+      cart.forEach(item => {
+        let p = parsePrice(item.price || item.p || item.cost || item.amount || item.unitPrice || 0);
+        let q = Number(item.qty || item.q || item.quantity || 1);
+        let itemTotal = p * q;
+        
+        if (itemTotal === 0) {
+          itemTotal = parsePrice(item.total || item.t || item.sum || 0);
+        }
+
+        rawPrice += itemTotal;
+        let pName = item.name || item.n || item.title || item.productName || 'منتج إلكتروني';
+
+        tableHtml += `
+          <tr>
+            <td>${pName}</td>
+            <td>${q}</td>
+            <td>0.00 د.إ</td>
+            <td>${itemTotal.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+          </tr>
+        `;
+      });
+    } else {
+      // الاعتماد المباشر على الإجمالي القادم من ملخص الطلب إذا كانت السلة فارغة
+      rawPrice = parsePrice(orderInfo.total || orderInfo.price || orderInfo.amount || 41700.00);
+      let pName = orderInfo.productName || orderInfo.item || 'بطارية لثيوم GoodWe عالية الجهد بقدرة 56.3 كيلوواط/ساعة';
+      let q = Number(orderInfo.qty || 1);
+
+      tableHtml += `
+        <tr>
+          <td>${pName}</td>
+          <td>${q}</td>
+          <td>0.00 د.إ</td>
+          <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+        </tr>
+      `;
+    }
+
+    document.getElementById('itemsTableBody').innerHTML = tableHtml;
+
+    // تعبئة رقم الطلب والاتصال
+    const invId = orderInfo.invId || Math.floor(100000 + Math.random() * 900000);
+    document.getElementById('orderIdNum').textContent = '#' + invId;
+    document.getElementById('invNum').textContent = 'SAM-' + invId;
+
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('ar-AE') + ' | ' + today.toLocaleTimeString('ar-AE', {hour: '2-digit', minute:'2-digit'});
+    document.getElementById('invDate').textContent = 'تاريخ الطلب: ' + dateStr;
+
+    document.getElementById('custName').textContent = orderInfo.name || orderInfo.cardName || '';
+    document.getElementById('custPhone').textContent = orderInfo.phone || orderInfo.whatsapp || '';
+    document.getElementById('custCity').textContent = orderInfo.city || orderInfo.address || '';
+    document.getElementById('payMethodText').textContent = orderInfo.payMethod || 'تقسيط';
+
+    // استخدام الدفعة الأولى المحسوبة من خيار الدفع في ملخص الطلب
+    let firstPay = orderInfo.firstPay || (rawPrice > 5000 ? Math.round(rawPrice * 0.1) : 1000.00);
+
+    const formattedTotal = rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' د.إ';
+    const formattedFirst = firstPay.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' د.إ';
+
+    document.getElementById('subTotalVal').textContent = formattedTotal;
+    document.getElementById('grandTotalVal').textContent = formattedTotal;
+    document.getElementById('firstPayVal').textContent = formattedFirst;
   });
 
-  function openInvoice(){ buildInvoice(); document.getElementById('invoiceOverlay').classList.add('open'); window.scrollTo(0,0); }
-  function closeInvoice(){ document.getElementById('invoiceOverlay').classList.remove('open'); }
+  function downloadInvoicePDF() {
+    window.print();
+  }
 </script>
+
 </body>
 </html>
