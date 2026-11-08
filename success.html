@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --primary-color: #e63946; /* لون العناوين البارز */
+    --primary-color: #e63946;
     --text-main: #2b2b2b;
     --border-color: #e0e0e0;
     --bg-page: #5c6b73;
@@ -33,7 +33,6 @@
     position: relative;
   }
 
-  /* Header Section */
   .inv-header {
     display: flex;
     justify-content: space-between;
@@ -59,7 +58,6 @@
     object-fit: contain;
   }
 
-  /* Meta Info Row */
   .meta-row {
     display: flex;
     justify-content: space-between;
@@ -69,7 +67,6 @@
     color: #555;
   }
 
-  /* Customer Info Section */
   .customer-section {
     margin-bottom: 25px;
   }
@@ -86,7 +83,6 @@
     color: #333;
   }
 
-  /* Products Table */
   .items-table {
     width: 100%;
     border-collapse: collapse;
@@ -112,7 +108,6 @@
     font-weight: 600;
   }
 
-  /* Summary Financials */
   .summary-box {
     margin-top: 10px;
     border-top: 1px solid var(--border-color);
@@ -196,27 +191,26 @@
       <p style="font-size: 12px; font-weight: 500; color: #666; margin-top: 4px;">فاتورة ضريبية مبسطة</p>
     </div>
     <div>
-      <!-- ضع رابط شعارك هنا -->
       <img src="https://i.ibb.co/6R24gM1/a2logo.jpg" alt="A2 STORE Logo" class="logo-img" onerror="this.src='https://via.placeholder.com/100x50?text=A2+STORE'">
     </div>
   </div>
 
   <!-- Meta Info -->
   <div class="meta-row">
-    <div>رقم الطلب: <span id="invNum">INV-726447</span></div>
-    <div id="invDate">تاريخ الطلب: 09/11/2026 | 12:04 ص</div>
+    <div>رقم الطلب: <span id="invNum">INV-000000</span></div>
+    <div id="invDate">تاريخ الطلب: --/--/----</div>
   </div>
 
   <div style="font-size: 13px; font-weight: 700; color: #555; margin-bottom: 15px;">
     حالة الدفع: <span style="color: #22c55e;">مكتمل</span> &nbsp;&nbsp;|&nbsp;&nbsp; طريقة الدفع: <span id="payMethodText">تقسيط</span>
   </div>
 
-  <!-- Customer Data -->
+  <!-- Customer Data (فارغة افتراضياً وتعبأ تلقائياً إذا أدخلها العميل) -->
   <div class="customer-section">
     <h3>بيانات العميل:</h3>
-    <div class="cust-row">الاسم: <span id="custName">عميل المتجر</span></div>
-    <div class="cust-row">رقم واتساب: <span id="custPhone">—</span></div>
-    <div class="cust-row">العنوان: <span id="custCity">الإمارات</span></div>
+    <div class="cust-row">الاسم: <span id="custName"></span></div>
+    <div class="cust-row">رقم واتساب: <span id="custPhone"></span></div>
+    <div class="cust-row">العنوان: <span id="custCity"></span></div>
   </div>
 
   <!-- Products Table -->
@@ -230,7 +224,7 @@
       </tr>
     </thead>
     <tbody id="itemsTableBody">
-      <!-- ديناميكي -->
+      <!-- يُعبأ تلقائياً من السلة -->
     </tbody>
   </table>
 
@@ -280,13 +274,14 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // جلب بيانات الطلب والسلة من الـ localStorage
     const orderInfo = JSON.parse(localStorage.getItem('a2_order_info') || '{}');
     const cart = JSON.parse(localStorage.getItem('a2cart') || '[]');
 
-    // جلب بيانات العميل المكتوبة في الموقع
-    const clientName = orderInfo.name || orderInfo.cardName || orderInfo.holderName || 'عميل المتجر';
-    const clientPhone = orderInfo.phone || orderInfo.whatsapp || orderInfo.mobile || 'غير متوفر';
-    const clientCity = orderInfo.city || orderInfo.address || 'الإمارات';
+    // 1. بيانات العميل (إذا لم تكن موجودة تبقى فارغة كما طلبت)
+    const clientName = orderInfo.name || orderInfo.cardName || orderInfo.holderName || '';
+    const clientPhone = orderInfo.phone || orderInfo.whatsapp || orderInfo.mobile || '';
+    const clientCity = orderInfo.city || orderInfo.address || '';
     const payMethod = orderInfo.payMethod || orderInfo.payment || 'تقسيط';
 
     document.getElementById('custName').textContent = clientName;
@@ -294,46 +289,55 @@
     document.getElementById('custCity').textContent = clientCity;
     document.getElementById('payMethodText').textContent = payMethod;
 
+    // 2. حساب المنتجات والأسعار الحقيقية من السلة
     let rawPrice = 0;
     let tableHtml = '';
-    let productName = 'بطارية لثيوم GoodWe عالية الجهد بقدرة 56.3 كيلوواط/ساعة';
-    let qty = 1;
 
     if (cart.length > 0) {
       cart.forEach(item => {
         let p = Number(item.price || item.p || 0);
         let q = Number(item.qty || item.q || 1);
-        rawPrice += (p * q);
+        let itemTotal = p * q;
+        rawPrice += itemTotal;
+
+        let pName = item.name || item.n || 'منتج إلكتروني';
+        let optionStr = item.option || item.o ? ` (${item.option || item.o})` : '';
+
+        tableHtml += `
+          <tr>
+            <td>${pName}${optionStr}</td>
+            <td>${q}</td>
+            <td>${p.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+            <td>${itemTotal.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+          </tr>
+        `;
       });
-      const firstItem = cart[0];
-      productName = firstItem.name || firstItem.n || productName;
-      qty = cart.reduce((sum, i) => sum + Number(i.qty || i.q || 1), 0);
-      
-      let unitPrice = rawPrice / qty;
-      tableHtml = `
-        <tr>
-          <td>${productName}</td>
-          <td>${qty}</td>
-          <td>${unitPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
-          <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
-        </tr>
-      `;
     } else {
-      rawPrice = Number(orderInfo.total || orderInfo.price || 41700.00);
-      tableHtml = `
-        <tr>
-          <td>${productName}</td>
-          <td>1</td>
-          <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
-          <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
-        </tr>
-      `;
+      // إذا لم توجد سلة، نقرأ من orderInfo أو نتركها صفراً
+      rawPrice = Number(orderInfo.total || orderInfo.price || 0);
+      if (rawPrice > 0) {
+        tableHtml = `
+          <tr>
+            <td>طلب إلكتروني عام</td>
+            <td>1</td>
+            <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+            <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+          </tr>
+        `;
+      } else {
+        tableHtml = `<tr><td colspan="4" style="text-align: center; color: #888;">لا توجد منتجات مضافة</td></tr>`;
+      }
     }
 
     document.getElementById('itemsTableBody').innerHTML = tableHtml;
 
-    // حساب الدفعة الأولى والإجمالي
-    const firstPay = rawPrice > 5000 ? Math.round(rawPrice * 0.1) : 500.00;
+    // 3. حساب المبالغ والدفعة الأولى بناءً على سعر المشتريات الفعلي
+    let firstPay = 0;
+    if (payMethod.includes('Tabby') || payMethod.includes('tabby') || payMethod.includes('تمارا')) {
+      firstPay = Math.round(rawPrice / 4);
+    } else if (rawPrice > 0) {
+      firstPay = rawPrice > 2000 ? Math.round(rawPrice * 0.1) : 500.00;
+    }
 
     const formattedTotal = rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' د.إ';
     const formattedFirst = firstPay.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' د.إ';
@@ -342,9 +346,13 @@
     document.getElementById('grandTotalVal').textContent = formattedTotal;
     document.getElementById('firstPayVal').textContent = formattedFirst;
 
-    // رقم الفاتورة والتاريخ
+    // 4. رقم الفاتورة والتاريخ
     const randomInv = 'INV-' + (orderInfo.invId || Math.floor(100000 + Math.random() * 900000));
     document.getElementById('invNum').textContent = randomInv;
+
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('ar-AE') + ' | ' + today.toLocaleTimeString('ar-AE', {hour: '2-digit', minute:'2-digit'});
+    document.getElementById('invDate').textContent = 'تاريخ الطلب: ' + dateStr;
   });
 </script>
 
