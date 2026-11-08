@@ -290,6 +290,7 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // 1. إنشاء تاريخ اليوم ورقم فاتورة عشوائي
     const today = new Date().toISOString().split('T')[0].replace(/-/g, '/');
     const randomInv = 'INV-' + Math.floor(100000 + Math.random() * 900000);
 
@@ -297,11 +298,11 @@
     document.getElementById('invDate').textContent = today;
     document.getElementById('orderDate').textContent = today;
 
-    // جلب البيانات من التخزين المحلي مع دعم كافة التسميات المحتملة
+    // 2. جلب السلة وبيانات العميل
     const cart = JSON.parse(localStorage.getItem('a2cart') || '[]');
     const orderInfo = JSON.parse(localStorage.getItem('a2_order_info') || '{}');
 
-    // تعبئة بيانات العميل مع التحقق من وجودها
+    // 3. تعبئة بيانات العميل
     if (orderInfo.name) document.getElementById('custName').textContent = orderInfo.name;
     if (orderInfo.phone) document.getElementById('custPhone').textContent = orderInfo.phone;
     if (orderInfo.city || orderInfo.address) document.getElementById('custCity').textContent = orderInfo.city || orderInfo.address;
@@ -310,21 +311,32 @@
     const tbody = document.getElementById('itemsTable');
     let totalGross = 0;
 
-    if (cart.length === 0) {
+    if (!cart || cart.length === 0) {
       tbody.innerHTML = `<tr><td colspan="5" style="padding:20px; color:#5f7188;">لا توجد عناصر مضافة في السلة</td></tr>`;
       return;
     }
 
     let rowsHtml = '';
+    
     cart.forEach(item => {
-      // التعامل مع مختلف أسماء الخصائص في الكود (مثل n بدل name وسعر السلعة)
-      const productName = item.name || item.n || 'منتج رقمي';
-      const productOption = item.option || item.o || '';
+      const productName = item.name || item.n || 'منتج ذكي';
       const productQty = Number(item.qty || item.q || 1);
       
-      // جلب السعر الفردي بشكل صحيح وسليم
-      let unitPrice = Number(item.price || item.p || 0);
-      if (!unitPrice && item.pr) unitPrice = Number(item.pr);
+      let optionText = item.option || item.o || '';
+      if (!optionText && item.r) optionText = (item.r === 'us' ? 'نسخة أمريكية' : 'شرق أوسط');
+
+      // **استخراج السعر بدقة من مختلف احتمالات التخزين أو كائن المنتج**
+      let unitPrice = Number(item.price || item.p || item.pr || 0);
+      
+      // إذا كان السعر مخزناً داخل كائن المنتج الرئيسي أو الخيارات
+      if (!unitPrice && item.product && item.product.price) {
+        unitPrice = Number(item.product.price);
+      }
+      
+      // إذا ظل السعر 0، نحاول البحث عنه بالطريقة الافتراضية أو نفترض سعراً للمنتج
+      if (!unitPrice && item.total) {
+        unitPrice = Number(item.total) / productQty;
+      }
 
       const itemTotal = unitPrice * productQty;
       totalGross += itemTotal;
@@ -333,19 +345,19 @@
         <tr>
           <td>
             <span class="prod-name">${productName}</span>
-            <span class="prod-sub">${productOption}</span>
+            ${optionText ? `<span class="prod-sub">${optionText}</span>` : ''}
           </td>
           <td>${productQty}</td>
-          <td>${unitPrice.toLocaleString()} د.إ</td>
+          <td style="font-weight: 700;">${unitPrice ? unitPrice.toLocaleString() + ' د.إ' : '0 د.إ'}</td>
           <td>0.00 د.إ</td>
-          <td style="font-weight: 700;">${itemTotal.toLocaleString()} د.إ</td>
+          <td style="font-weight: 700; color: #0b3b68;">${itemTotal ? itemTotal.toLocaleString() + ' د.إ' : '0 د.إ'}</td>
         </tr>
       `;
     });
 
     tbody.innerHTML = rowsHtml;
 
-    // تعبئة الحسابات الإجمالية مع جعل الضريبة 0 والإجمالي مطابقاً بدقة
+    // تعبئة جدول المبالغ والإجمالي النهائي
     document.getElementById('subTotal').textContent = totalGross.toLocaleString() + ' د.إ';
     document.getElementById('taxAmount').textContent = '0.00 د.إ';
     document.getElementById('grandTotal').textContent = totalGross.toLocaleString() + ' د.إ';
