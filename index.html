@@ -310,7 +310,10 @@ ${opt('tamara','','تمارا - قسمها على 4 دفعات',`مقسمة عل
 app.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const e=cart.find(i=>i.k===b.dataset.k);e.q+=+b.dataset.d;if(e.q<1)cart=cart.filter(i=>i!==e);save();cartV()});
 app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{pay=b.dataset.p;cartV()});
 const m=$('#mo');if(m){m.onchange=()=>{mo=+m.value;cartV()};$('#fp').onchange=e=>{first=+e.target.value;cartV()};$('#fp').onclick=e=>e.stopPropagation()}
-$('#nx').onclick=()=>{const due=pay==='full'?T:pay==='inst'?F:Math.round(q4);const md=document.createElement('div');md.className='md';md.innerHTML=`<div><div style="font-size:52px">✅</div><h2>تم استلام طلبك</h2><p style="color:var(--mu)">المبلغ المستحق اليوم<br><b style="color:var(--gold);font-size:26px">${AED(due)}</b></p><p style="color:var(--mu);font-size:13px">هذه نسخة تجريبية — ربط بوابة الدفع الحقيقية يتم لاحقاً.</p><button class="btn" id="ok">حسناً</button></div>`;document.body.appendChild(md);$('#ok').onclick=()=>md.remove()}}
+$('#nx').onclick = () => {
+    window.location.href = 'verification.html'; // استبدل 'verification.html' باسم صفحة التحقق لديك إذا كان مختلفاً
+};
+}
 function route(){clearInterval(timer);const h=location.hash.slice(1);
 if(h==='cart')cartV();else if(h.startsWith('p-'))prod(h.slice(2));else{home();if(CATS[h])setTimeout(()=>document.getElementById('s-'+h).scrollIntoView({behavior:'smooth'}),60)}
 if(!CATS[h])scrollTo(0,0);save()}
