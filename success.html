@@ -98,18 +98,17 @@
   .continue-link:hover { text-decoration: underline; }
 
 
-  /* تنسيق الفاتورة (مخفية على الشاشة وتظهر فقط عند الطباعة/حفظ PDF) */
+  /* تنسيق الفاتورة عند الطباعة */
   .invoice-print-container {
     display: none;
   }
 
   @media print {
     body { background: #fff; }
-    .success-card { display: none !important; } /* إخفاء واجهة التأكيد عند الضغط على طباعة/تحميل PDF */
-    .invoice-print-container { display: block !important; width: 100%; } /* إظهار الفاتورة المطابقة للصورة تماماً */
+    .success-card { display: none !important; }
+    .invoice-print-container { display: block !important; width: 100%; }
   }
 
-  /* تصميم الفاتورة الرسمية المطابقة للصورة المرفقة بالملي */
   .invoice-box {
     background: #ffffff;
     width: 100%;
@@ -218,7 +217,6 @@
 </head>
 <body>
 
-<!-- 1. واجهة تأكيد الطلب التي يراها العميل على الشاشة -->
 <div class="success-card">
   <div class="success-icon">✓</div>
   <h1>تم استلام طلبك!</h1>
@@ -247,8 +245,7 @@
   <a href="index.html" class="continue-link">← تابع التسوق</a>
 </div>
 
-
-<!-- 2. قالب الفاتورة الرسمي (يطبع أو يحفظ PDF بضغطة زر وبدون الانتقال لصفحة أخرى) -->
+<!-- الفاتورة للطباعة -->
 <div class="invoice-print-container">
   <div class="invoice-box">
     
@@ -290,7 +287,7 @@
         </tr>
       </thead>
       <tbody id="itemsTableBody">
-        <!-- يُعبأ تلقائياً من سلة المشتريات -->
+        <!-- يُعبأ تلقائياً -->
       </tbody>
     </table>
 
@@ -331,11 +328,19 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const orderInfo = JSON.parse(localStorage.getItem('a2_order_info') || '{}');
-    const cart = JSON.parse(localStorage.getItem('a2cart') || '[]');
+    // فحص جميع الاحتمالات الممكنة لأسماء التخزين في المتصفح لديك
+    const orderInfo = JSON.parse(localStorage.getItem('a2_order_info') || localStorage.getItem('order_info') || '{}');
+    
+    // فحص كل أسماء السلة المحتملة (a2cart, cart, shopping_cart, basket)
+    const cart = JSON.parse(
+      localStorage.getItem('a2cart') || 
+      localStorage.getItem('cart') || 
+      localStorage.getItem('shopping_cart') || 
+      localStorage.getItem('basket') || '[]'
+    );
 
     // رقم الطلب
-    const invId = orderInfo.invId || '726447';
+    const invId = orderInfo.invId || orderInfo.orderId || Math.floor(100000 + Math.random() * 900000);
     document.getElementById('orderIdNum').textContent = '#' + invId;
     document.getElementById('invNum').textContent = 'SAM-' + invId;
 
@@ -344,24 +349,25 @@
     const dateStr = today.toLocaleDateString('ar-AE') + ' | ' + today.toLocaleTimeString('ar-AE', {hour: '2-digit', minute:'2-digit'});
     document.getElementById('invDate').textContent = 'تاريخ الطلب: ' + dateStr;
 
-    // بيانات العميل (فارغة إذا لم يكتبها العميل)
-    document.getElementById('custName').textContent = orderInfo.name || orderInfo.cardName || '';
-    document.getElementById('custPhone').textContent = orderInfo.phone || orderInfo.whatsapp || '';
-    document.getElementById('custCity').textContent = orderInfo.city || orderInfo.address || '';
-    document.getElementById('payMethodText').textContent = orderInfo.payMethod || orderInfo.payment || 'تقسيط';
+    // بيانات العميل
+    document.getElementById('custName').textContent = orderInfo.name || orderInfo.cardName || orderInfo.holderName || orderInfo.customerName || '';
+    document.getElementById('custPhone').textContent = orderInfo.phone || orderInfo.whatsapp || orderInfo.mobile || orderInfo.tel || '';
+    document.getElementById('custCity').textContent = orderInfo.city || orderInfo.address || orderInfo.location || '';
+    document.getElementById('payMethodText').textContent = orderInfo.payMethod || orderInfo.payment || orderInfo.gateway || 'تقسيط';
 
-    // سحب المنتجات والأسعار الحقيقية من السلة
+    // حساب المنتجات والأسعار بدقة تامة من أي سلة مطابقة
     let rawPrice = 0;
     let tableHtml = '';
 
     if (cart.length > 0) {
       cart.forEach(item => {
-        let p = Number(item.price || item.p || 0);
-        let q = Number(item.qty || item.q || 1);
+        // فحص مسميات خصائص السعر والكمية المختلفة في أكواد المتاجر
+        let p = Number(item.price || item.p || item.cost || item.amount || 0);
+        let q = Number(item.qty || item.q || item.quantity || 1);
         let itemTotal = p * q;
         rawPrice += itemTotal;
 
-        let pName = item.name || item.n || 'منتج إلكتروني';
+        let pName = item.name || item.n || item.title || item.productName || 'منتج إلكتروني';
 
         tableHtml += `
           <tr>
@@ -373,22 +379,38 @@
         `;
       });
     } else {
-      rawPrice = Number(orderInfo.total || orderInfo.price || 41700.00);
-      tableHtml = `
-        <tr>
-          <td>بطارية لثيوم GoodWe عالية الجهد بقدرة 56.3 كيلوواط/ساعة</td>
-          <td>1</td>
-          <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
-          <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
-        </tr>
-      `;
+      // إذا لم يتم العثور على سلة، نفحص إذا كان السعر محفوظاً مباشرة في orderInfo
+      rawPrice = Number(orderInfo.total || orderInfo.price || orderInfo.amount || 0);
+      
+      if (rawPrice > 0) {
+        let singleName = orderInfo.productName || orderInfo.item || 'طلب إلكتروني عام';
+        tableHtml = `
+          <tr>
+            <td>${singleName}</td>
+            <td>1</td>
+            <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+            <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+          </tr>
+        `;
+      } else {
+        // قيمة افتراضية فقط في حال لم يتم إرسال أي منتج نهائياً للتجربة
+        rawPrice = 41700.00;
+        tableHtml = `
+          <tr>
+            <td>بطارية لثيوم GoodWe عالية الجهد بقدرة 56.3 كيلوواط/ساعة</td>
+            <td>1</td>
+            <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+            <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+          </tr>
+        `;
+      }
     }
 
     document.getElementById('itemsTableBody').innerHTML = tableHtml;
 
     // حساب الدفعة الأولى والإجمالي
     let firstPay = 1000.00;
-    if (orderInfo.payMethod && orderInfo.payMethod.includes('Tabby')) {
+    if (orderInfo.payMethod && (orderInfo.payMethod.includes('Tabby') || orderInfo.payMethod.includes('تمارا'))) {
       firstPay = Math.round(rawPrice / 4);
     } else if (rawPrice > 5000) {
       firstPay = Math.round(rawPrice * 0.1);
@@ -402,7 +424,6 @@
     document.getElementById('firstPayVal').textContent = formattedFirst;
   });
 
-  // دالة تحميل الفاتورة كـ PDF (فتح نافذة الطباعة والحفظ المباشر)
   function downloadInvoicePDF() {
     window.print();
   }
