@@ -1,53 +1,85 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Successful - Invoice</title>
+    <title>Payment Successful - A2 Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* إخفاء الأزرار تلقائياً عند طباعة الصفحة ورقياً أو حفظها كـ PDF */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+            .shadow-xl { box-shadow: none !important; border: none !important; }
+        }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center px-4 py-8">
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
 
-    <div class="w-full max-w-md bg-white border border-gray-200 shadow-lg rounded-xl p-6 sm:p-8 text-center text-black">
+    <div class="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 text-center border border-slate-100">
         
-        <!-- Success Icon -->
-        <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-inner">
-            ✓
-        </div>
-
-        <h1 class="text-2xl font-bold text-gray-800">Payment Successful!</h1>
-        <p class="text-sm text-gray-500 mt-1">Thank you for your transaction. Your payment has been processed successfully.</p>
-
-        <!-- Invoice Details Box -->
-        <div class="mt-6 border-t border-b border-gray-200 py-4 text-left text-sm space-y-3">
-            <div class="flex justify-between">
-                <span class="text-gray-500">Order Reference:</span>
-                <span id="orderId" class="font-mono font-semibold text-gray-800">#A2-98421</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-gray-500">Transaction Date:</span>
-                <span id="date" class="font-medium text-gray-800">-</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-gray-500">Card Holder:</span>
-                <span id="cardHolder" class="font-medium text-gray-800">-</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-gray-500">Card Number:</span>
-                <span id="cardNumber" class="font-mono font-medium text-gray-800">-</span>
-            </div>
-            <div class="flex justify-between border-t pt-3">
-                <span class="text-gray-600 font-bold">Status:</span>
-                <span class="bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full text-xs font-bold">Approved</span>
+        <!-- Success Check Icon -->
+        <div class="relative w-20 h-20 mx-auto mb-6">
+            <div class="absolute inset-0 bg-emerald-100 rounded-full animate-ping opacity-25"></div>
+            <div class="relative w-20 h-20 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto shadow-lg shadow-emerald-200">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                </svg>
             </div>
         </div>
 
-        <!-- Action Button -->
-        <button id="homeBtn" class="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg w-full transition-all shadow-md">
-            Return to Store
-        </button>
+        <h1 class="text-2xl font-bold text-slate-800">Payment Successful</h1>
+        <p class="text-sm text-slate-500 mt-1">Your transaction has been processed and approved securely.</p>
 
-        <p class="text-xs text-gray-400 mt-6">
+        <!-- Receipt Box -->
+        <div class="mt-8 bg-slate-50 rounded-xl p-5 border border-slate-200 text-left space-y-3.5 text-sm">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+                <span class="text-slate-500 font-medium">Reference ID</span>
+                <span id="orderId" class="font-mono font-semibold text-slate-800">#A2-98421</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-slate-500 font-medium">Product Name</span>
+                <span id="productName" class="font-semibold text-slate-800">-</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-slate-500 font-medium">Total Amount</span>
+                <span id="amount" class="font-bold text-emerald-600">-</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-slate-500 font-medium">Date & Time</span>
+                <span id="date" class="font-medium text-slate-800">-</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-slate-500 font-medium">Cardholder Name</span>
+                <span id="cardHolder" class="font-semibold text-slate-800 uppercase">-</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-slate-500 font-medium">Card Number</span>
+                <span id="cardNumber" class="font-mono font-semibold text-slate-800">•••• •••• •••• ••••</span>
+            </div>
+            <div class="flex justify-between items-center pt-3 border-t border-slate-200">
+                <span class="text-slate-600 font-bold">Status</span>
+                <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    Verified & Completed
+                </span>
+            </div>
+        </div>
+
+        <!-- Action Buttons (no-print classes hide them during physical printing) -->
+        <div class="mt-8 space-y-3 no-print">
+            <button id="printBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-md shadow-emerald-100 flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                Print Receipt / Save PDF
+            </button>
+            <button id="homeBtn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-md shadow-slate-200">
+                Return to Store
+            </button>
+        </div>
+
+        <p class="text-xs text-slate-400 mt-6">
             A2 Store Secure Checkout &copy; 2026. All rights reserved.
         </p>
     </div>
@@ -62,19 +94,24 @@
                 + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
         }
 
-        // تعبئة البيانات تلقائياً من الجلسة
         const payment = readJSON('pk_payment') || {};
         
         document.getElementById('date').textContent = formatDate(new Date());
-        document.getElementById('cardHolder').textContent = payment.holder || 'Client User';
+        document.getElementById('productName').textContent = payment.productName || 'منتج رقمي / تسوق عام';
+        document.getElementById('amount').textContent = payment.amount || '0.00 ج.م';
+        document.getElementById('cardHolder').textContent = payment.holder || 'Valued Customer';
         document.getElementById('cardNumber').textContent = payment.masked || '•••• •••• •••• ••••';
         document.getElementById('orderId').textContent = '#A2-' + Math.floor(100000 + Math.random() * 900000);
 
-        // زر العودة للمتجر أو الصفحة الرئيسية
+        // تفعيل زر الطباعة
+        document.getElementById('printBtn').addEventListener('click', () => {
+            window.print();
+        });
+
         document.getElementById('homeBtn').addEventListener('click', () => {
             sessionStorage.clear();
             localStorage.removeItem('a2_user_id');
-            window.location.href = 'index.html'; // أو صفحة المتجر الرئيسية
+            window.location.href = 'index.html';
         });
     </script>
 
