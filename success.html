@@ -36,7 +36,6 @@
     position: relative;
   }
 
-  /* Header Design */
   .doc-header {
     display: flex;
     justify-content: space-between;
@@ -67,7 +66,6 @@
   }
   .inv-no { color: #d93838; }
 
-  /* Greeting Box */
   .greeting-box {
     border: 1px solid var(--border-color);
     padding: 15px 20px;
@@ -79,7 +77,6 @@
     line-height: 1.6;
   }
 
-  /* Blue Header Table & Bars */
   .blue-bar {
     background: var(--navy-header);
     color: #ffffff;
@@ -108,7 +105,6 @@
     font-size: 14px;
   }
 
-  /* Installment Table Grid */
   .schedule-table {
     width: 100%;
     border-collapse: collapse;
@@ -147,7 +143,6 @@
     margin-top: 10px;
   }
 
-  /* Buttons Bar */
   .actions-flex {
     display: flex;
     justify-content: center;
@@ -167,7 +162,6 @@
   .btn-blue { background-color: #2b77e5; }
   .btn-green { background-color: #22c55e; }
 
-  /* Form 2 Styles - Contract */
   .contract-title {
     text-align: center;
     font-size: 18px;
@@ -198,7 +192,6 @@
     font-size: 14px;
   }
 
-  /* Form 3 Styles - Order & Source Details */
   .grid-2-cols {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -267,7 +260,7 @@
 <div class="doc-container">
   <div class="doc-header">
     <div class="brand-left">
-      <h2>A2STORE</h2>
+      <h2>A2 STORE</h2>
       <p>The first store in Emirates</p>
     </div>
     <div>
@@ -287,22 +280,21 @@
   <div class="greeting-box">
     <div>
       Dear Customer,<br>
-      Thank you for shopping with A2STORE<br>
+      Thank you for shopping with A2 STORE<br>
       Your order has been placed.<br>
       Below is the summary of the order.
     </div>
     <div style="text-align: left;">
       عميلنا العزيز،<br>
-      شكراً لتسوقكم من أي 2 فونز.<br>
+      شكراً لتسوقكم من A2 STORE.<br>
       لقد تم إنشاء طلبكم بنجاح.<br>
       فيما يلي ملخص الطلب.
     </div>
   </div>
 
   <div class="blue-bar">
-    <span>اسم العميل: <span id="cName1">Yhbnb</span></span>
-    <span>رقم الجوال: <span id="cPhone1">05868669869</span></span>
-    <span>العنوان: <span id="cCity1">Alain</span></span>
+    <span>اسم العميل: <span id="cName1">عميل المتجر</span></span>
+    <span>العنوان: الإمارات</span>
   </div>
 
   <div class="info-table-box">
@@ -338,7 +330,7 @@
     المجموع: <span id="grandTotal1">5,649.92 د.إ</span>
   </div>
 
-  <div class="doc-footer-brand">أي 2 فونز</div>
+  <div class="doc-footer-brand">A2 STORE</div>
 
   <div class="actions-flex">
     <a href="#" onclick="window.print()" class="btn-action btn-blue">تحميل PDF</a>
@@ -350,7 +342,7 @@
 <div class="doc-container">
   <div class="doc-header">
     <div class="brand-left">
-      <h2>A2STORE</h2>
+      <h2>A2 STORE</h2>
       <p>The first store in Emirates</p>
     </div>
     <div>
@@ -367,8 +359,8 @@
   <div class="contract-title">عقد بيع بالتقسيط</div>
 
   <div class="contract-body">
-    نحن أي 2 فونز / <span id="cName2" style="font-weight: 700;">Yhbnb</span>، رقم جوال <span id="cPhone2" style="font-weight: 700;">05868669869</span>، عنوانه / <span id="cCity2" style="font-weight: 700;">Alain</span>.<br>
-    أقر وأنا في كامل قواي العقلية أنني قمت بشراء المنتجات التالية بالأقساط من مؤسسة أي 2 فونز:<br>
+    نحن A2 STORE / <span id="cName2" style="font-weight: 700;">عميل المتجر</span>، عنوانه / الإمارات.<br>
+    أقر وأنا في كامل قواي العقلية أنني قمت بشراء المنتجات التالية بالأقساط من مؤسسة A2 STORE:<br>
     • <span id="pName2">Iphone 18 pro max _ سيماوي</span> (الكمية: <span id="pQty2">1</span>)<br>
     بمبلغ وقدره <span id="grandTotal2" style="font-weight: 700;">5,649.92</span> د.إ فقط.<br>
     على أن أقوم بسداد المبلغ على أقساط شهرية بمبلغ وقدره <span id="monthlyVal" style="font-weight: 700;">214.58</span> د.إ فقط؛ اعتباراً من تاريخ <span id="startDateContract" style="font-weight: 700;">08/12/2026</span> وحق سداد كامل المبلغ المذكور أعلاه.<br>
@@ -377,7 +369,7 @@
   </div>
 
   <div class="signature-area">
-    <div>الاسم / <span id="cName3">Yhbnb</span> .</div>
+    <div>الاسم / <span id="cName3">عميل المتجر</span> .</div>
     <div class="signature-line">التوقيع / ....................................</div>
   </div>
 
@@ -407,10 +399,9 @@
     <div class="detail-card">
       <h3>مصدر الطلب</h3>
       <div class="detail-row"><span class="lbl">المتجر الإلكتروني:</span><span class="val">A2 STORE</span></div>
-      <div class="detail-row"><span class="lbl">اسم العميل:</span><span class="val" id="cName4">Yhbnb</span></div>
+      <div class="detail-row"><span class="lbl">اسم العميل:</span><span class="val" id="cName4">عميل المتجر</span></div>
       <div class="detail-row"><span class="lbl">البائع:</span><span class="val">A2 STORE</span></div>
-      <div class="detail-row"><span class="lbl">رقم الهاتف:</span><span class="val">+971 55 578 4831</span></div>
-      <div class="detail-row"><span class="lbl">البريد الإلكتروني:</span><span class="val">a2store.uae@gmail.com</span></div>
+      <div class="detail-row"><span class="lbl">البريد الإلكتروني:</span><span class="val">a2store@gmail.com</span></div>
     </div>
   </div>
 
@@ -425,7 +416,7 @@
     </div>
     <div class="detail-card">
       <h3>تفاصيل الشحن</h3>
-      <div class="detail-row"><span class="lbl">المدينة:</span><span class="val" id="cCity3">Alain</span></div>
+      <div class="detail-row"><span class="lbl">المدينة:</span><span class="val">الإمارات</span></div>
       <div class="detail-row"><span class="lbl">الوسيلة:</span><span class="val">غير محدد</span></div>
       <div class="detail-row"><span class="lbl">موعد التوصيل المتوقع:</span><span class="val">من 24 إلى 48 ساعة</span></div>
     </div>
@@ -464,13 +455,11 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // 1. Fetch Order data or set accurate defaults matching design
     const orderInfo = JSON.parse(localStorage.getItem('a2_order_info') || '{}');
     const cart = JSON.parse(localStorage.getItem('a2cart') || '[]');
 
-    const clientName = orderInfo.name || 'Yhbnb';
-    const clientPhone = orderInfo.phone || '05868669869';
-    const clientCity = orderInfo.city || orderInfo.address || 'Alain';
+    // جلب اسم العميل من بيانات الفيزا / الطلب
+    const clientName = orderInfo.name || orderInfo.cardName || orderInfo.holderName || 'عميل المتجر';
 
     let productName = 'Iphone 18 pro max _ سيماوي';
     let rawPrice = 5649.92;
@@ -483,36 +472,29 @@
       rawPrice = Number(item.price || item.p || rawPrice);
     }
 
-    const firstPay = 500.00;
+    // حساب الدفعة الأولى ديناميكياً (مثلاً 10% أو 500 كحد أدنى)
+    const firstPay = rawPrice > 1000 ? 500.00 : Math.round(rawPrice * 0.1);
     const remaining = rawPrice - firstPay;
-    const monthlyInstallment = 215.00;
+    const monthlyInstallment = remaining / 24;
 
-    // Generate random invoice ID matching format
-    const randomInv = 'INV-' + (orderInfo.invId || '6AF0DF2306B50');
+    const randomInv = 'INV-' + (orderInfo.invId || Math.floor(100000 + Math.random() * 900000));
     const todayStr = '08/11/2026';
     const fullDateStr = 'Sunday 08 November 2026 | 08:44 PM';
 
-    // Populate Fields Across All Forms
+    // تعبئة البيانات في كافة العناصر
     document.getElementById('invNo1').textContent = 'No. #' + randomInv;
     document.getElementById('invNo3').textContent = randomInv;
     document.getElementById('invNo4').textContent = randomInv;
     document.getElementById('invDate1').textContent = todayStr;
     document.getElementById('fullDate3').textContent = fullDateStr;
 
-    // Customer
+    // تعبئة اسم العميل في كل الأماكن المطلوبة
     document.getElementById('cName1').textContent = clientName;
     document.getElementById('cName2').textContent = clientName;
     document.getElementById('cName3').textContent = clientName;
     document.getElementById('cName4').textContent = clientName;
 
-    document.getElementById('cPhone1').textContent = clientPhone;
-    document.getElementById('cPhone2').textContent = clientPhone;
-
-    document.getElementById('cCity1').textContent = clientCity;
-    document.getElementById('cCity2').textContent = clientCity;
-    document.getElementById('cCity3').textContent = clientCity;
-
-    // Product & Financials
+    // اسم المنتج والكمية
     document.getElementById('pName1').textContent = productName;
     document.getElementById('pName2').textContent = productName;
     document.getElementById('pName3').textContent = productName + ' (' + qty + ' x)';
@@ -520,6 +502,7 @@
     document.getElementById('pQty1').textContent = qty;
     document.getElementById('pQty2').textContent = qty;
 
+    // المبالغ المالية
     const formattedTotal = rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' د.إ';
     document.getElementById('pPrice1').textContent = formattedTotal;
     document.getElementById('pPrice3').textContent = formattedTotal;
@@ -533,12 +516,11 @@
     document.getElementById('firstPay4').textContent = firstPay.toFixed(2);
 
     document.getElementById('remainPay3').textContent = remaining.toLocaleString('en-US', {minimumFractionDigits: 2});
-    document.getElementById('monthlyVal').textContent = (remaining / 24).toFixed(2);
+    document.getElementById('monthlyVal').textContent = monthlyInstallment.toFixed(2);
 
-    // 2. Generate Installment Table Grid (24 Months dynamically starting 08/12/2026)
+    // جدول الأقساط الشهرية الـ 24
     const scheduleBody = document.getElementById('scheduleBody');
     let rowsHtml = '';
-    
     let year = 2026;
     let month = 12;
 
@@ -548,7 +530,6 @@
         let mStr = month < 10 ? '0' + month : month;
         let dateStr = `08/${mStr}/${year}`;
         rowsHtml += `<td>${monthlyInstallment.toFixed(2)} د.إ</td><td>${dateStr}</td>`;
-        
         month++;
         if (month > 12) {
           month = 1;
