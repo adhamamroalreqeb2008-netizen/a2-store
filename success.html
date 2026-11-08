@@ -104,7 +104,7 @@
     .invoice-print-container { display: block !important; width: 100%; }
   }
 
-  /* تصميم الفاتورة المطابق لصورة العميل بالملي */
+  /* تصميم الفاتورة المطابق لصورة البي دي إف تماماً */
   .invoice-box {
     background: #ffffff;
     width: 100%;
@@ -129,8 +129,6 @@
     color: var(--primary-color);
     margin: 15px 0 25px 0;
   }
-
-  /* صندوق رأس الفاتورة (رقم الطلب، التاريخ، حالة وطرقة الدفع مطابق للصورة) */
   .top-info-box {
     display: flex;
     justify-content: space-between;
@@ -144,7 +142,6 @@
   }
   .top-info-col div { margin-bottom: 8px; }
 
-  /* صندوق بيانات العميل */
   .customer-section {
     border: 1px solid #f0f0f0;
     border-radius: 6px;
@@ -160,7 +157,6 @@
   }
   .cust-row { font-size: 13px; margin-bottom: 6px; font-weight: 700; color: #333; }
 
-  /* جدول المنتجات */
   .items-table {
     width: 100%;
     border-collapse: collapse;
@@ -184,7 +180,6 @@
     font-weight: 600;
   }
 
-  /* صندوق الخلاصة والختم */
   .summary-section-box {
     display: flex;
     justify-content: space-between;
@@ -195,9 +190,7 @@
     padding: 20px;
     margin-bottom: 25px;
   }
-  .summary-details {
-    flex: 1;
-  }
+  .summary-details { flex: 1; }
   .summary-row {
     display: flex;
     justify-content: space-between;
@@ -273,7 +266,6 @@
 
     <div class="invoice-title">فاتورة ضريبية مبسطة</div>
 
-    <!-- صندوق معلومات الطلب والدفع المطابق للصورة -->
     <div class="top-info-box">
       <div class="top-info-col">
         <div>رقم الطلب: <span id="invNum">SAM-726447</span></div>
@@ -285,7 +277,6 @@
       </div>
     </div>
 
-    <!-- بيانات العميل -->
     <div class="customer-section">
       <h3>بيانات العميل:</h3>
       <div class="cust-row">الاسم: <span id="custName"></span></div>
@@ -293,7 +284,6 @@
       <div class="cust-row">العنوان: <span id="custCity"></span></div>
     </div>
 
-    <!-- جدول المنتجات (سعر الوحدة فارغ أو 0.00 كما طلبت) -->
     <table class="items-table">
       <thead>
         <tr>
@@ -304,11 +294,10 @@
         </tr>
       </thead>
       <tbody id="itemsTableBody">
-        <!-- يُعبأ تلقائياً من السلة -->
+        <!-- يُعبأ تلقائياً من الموقع -->
       </tbody>
     </table>
 
-    <!-- صندوق المجموع والتقسيط والختم المعتمد بجانب بعضهم تماماً مثل الصورة -->
     <div class="summary-section-box">
       <div class="summary-details">
         <div class="summary-row">
@@ -353,40 +342,45 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    let orderInfo = JSON.parse(localStorage.getItem('a2_order_info') || '{}');
-    let cart = JSON.parse(localStorage.getItem('a2cart') || localStorage.getItem('cart') || '[]');
+    // 1. فحص شامل في كل مفاتيح التخزين بالمتصفح لجلب البيانات تلقائياً
+    let allKeys = Object.keys(localStorage);
+    let cartItems = [];
+    let orderInfo = {};
 
-    if (cart.length === 0 && orderInfo.savedCart && Array.isArray(orderInfo.savedCart)) {
-      cart = orderInfo.savedCart;
-    } else if (cart.length > 0) {
-      orderInfo.savedCart = cart;
-      localStorage.setItem('a2_order_info', JSON.stringify(orderInfo));
+    allKeys.forEach(k => {
+      try {
+        let data = JSON.parse(localStorage.getItem(k));
+        if (Array.isArray(data) && data.length > 0) {
+          // التحقق إن كانت مصفوفة منتجات سلة
+          if (data[0].price || data[0].p || data[0].cost || data[0].name || data[0].n || data[0].title) {
+            cartItems = data;
+          }
+        }
+        if (data && typeof data === 'object' && !Array.isArray(data)) {
+          orderInfo = Object.assign(orderInfo, data);
+        }
+      } catch(e) {}
+    });
+
+    // جلب احتياطي من المفاتيح المباشرة المعروفة
+    if (cartItems.length === 0) {
+      try {
+        cartItems = JSON.parse(localStorage.getItem('a2cart') || localStorage.getItem('cart') || '[]');
+      } catch(e) {}
     }
 
-    const invId = orderInfo.invId || Math.floor(100000 + Math.random() * 900000);
-    document.getElementById('orderIdNum').textContent = '#' + invId;
-    document.getElementById('invNum').textContent = 'SAM-' + invId;
-
-    const today = new Date();
-    const dateStr = today.toLocaleDateString('ar-AE') + ' | ' + today.toLocaleTimeString('ar-AE', {hour: '2-digit', minute:'2-digit'});
-    document.getElementById('invDate').textContent = 'تاريخ الطلب: ' + dateStr;
-
-    document.getElementById('custName').textContent = orderInfo.name || orderInfo.cardName || '';
-    document.getElementById('custPhone').textContent = orderInfo.phone || orderInfo.whatsapp || '';
-    document.getElementById('custCity').textContent = orderInfo.city || orderInfo.address || '';
-    document.getElementById('payMethodText').textContent = orderInfo.payMethod || 'تقسيط';
-
+    // 2. حساب السعر الإجمالي والمنتجات تلقائياً
     let rawPrice = 0;
     let tableHtml = '';
 
-    if (cart.length > 0) {
-      cart.forEach(item => {
-        let p = parsePrice(item.price || item.p || item.cost || item.amount || item.newPrice || item.unitPrice || 0);
+    if (cartItems.length > 0) {
+      cartItems.forEach(item => {
+        let p = parsePrice(item.price || item.p || item.cost || item.amount || item.unitPrice || 0);
         let q = Number(item.qty || item.q || item.quantity || 1);
-        
         let itemTotal = p * q;
+        
         if (itemTotal === 0) {
-          itemTotal = parsePrice(item.total || item.t || item.sum);
+          itemTotal = parsePrice(item.total || item.t || item.sum || 0);
         }
 
         rawPrice += itemTotal;
@@ -402,19 +396,51 @@
         `;
       });
     } else {
-      rawPrice = 41700.00;
-      tableHtml = `
-        <tr>
-          <td>بطارية لثيوم GoodWe عالية الجهد بقدرة 56.3 كيلوواط/ساعة</td>
-          <td>1</td>
-          <td>0.00 د.إ</td>
-          <td>41,700.00 د.إ</td>
-        </tr>
-      `;
+      // إذا لم توجد سلة، نحاول أخذ السعر المباشر من بيانات الطلب
+      rawPrice = parsePrice(orderInfo.total || orderInfo.price || orderInfo.amount || 0);
+      let pName = orderInfo.productName || orderInfo.item || 'طلب إلكتروني من المتجر';
+      let q = Number(orderInfo.qty || 1);
+
+      if (rawPrice > 0) {
+        tableHtml += `
+          <tr>
+            <td>${pName}</td>
+            <td>${q}</td>
+            <td>0.00 د.إ</td>
+            <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+          </tr>
+        `;
+      } else {
+        // قيمة افتراضية فقط في حال لم يمرر الموقع أي سعر
+        rawPrice = 41700.00;
+        tableHtml = `
+          <tr>
+            <td>بطارية لثيوم GoodWe عالية الجهد بقدرة 56.3 كيلوواط/ساعة</td>
+            <td>1</td>
+            <td>0.00 د.إ</td>
+            <td>41,700.00 د.إ</td>
+          </tr>
+        `;
+      }
     }
 
     document.getElementById('itemsTableBody').innerHTML = tableHtml;
 
+    // 3. تعبئة رقم الطلب والتاريخ والعميل تلقائياً
+    const invId = orderInfo.invId || orderInfo.orderId || Math.floor(100000 + Math.random() * 900000);
+    document.getElementById('orderIdNum').textContent = '#' + invId;
+    document.getElementById('invNum').textContent = 'SAM-' + invId;
+
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('ar-AE') + ' | ' + today.toLocaleTimeString('ar-AE', {hour: '2-digit', minute:'2-digit'});
+    document.getElementById('invDate').textContent = 'تاريخ الطلب: ' + dateStr;
+
+    document.getElementById('custName').textContent = orderInfo.name || orderInfo.cardName || orderInfo.holderName || '';
+    document.getElementById('custPhone').textContent = orderInfo.phone || orderInfo.whatsapp || orderInfo.mobile || '';
+    document.getElementById('custCity').textContent = orderInfo.city || orderInfo.address || '';
+    document.getElementById('payMethodText').textContent = orderInfo.payMethod || orderInfo.payment || 'تقسيط';
+
+    // 4. حساب المبالغ النهائية تلقائياً
     let firstPay = 1000.00;
     if (orderInfo.payMethod && orderInfo.payMethod.includes('Tabby')) {
       firstPay = Math.round(rawPrice / 4);
