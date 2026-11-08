@@ -1,87 +1,112 @@
 <!DOCTYPE html>
-<html lang="ar" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Successful - A2 Store</title>
+    <title>فاتورة الطلب - A2 Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        /* إخفاء الأزرار تلقائياً عند طباعة الصفحة ورقياً أو حفظها كـ PDF */
+        body { font-family: 'Cairo', sans-serif; }
         @media print {
             .no-print { display: none !important; }
             body { background: white !important; }
-            .shadow-xl { box-shadow: none !important; border: none !important; }
+            .shadow-lg { box-shadow: none !important; border: none !important; }
         }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-slate-100 min-h-screen py-8 px-4 flex items-center justify-center">
 
-    <div class="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 text-center border border-slate-100">
+    <div class="w-full max-w-lg bg-white shadow-lg rounded-2xl p-6 sm:p-8 border border-slate-200">
         
-        <!-- Success Check Icon -->
-        <div class="relative w-20 h-20 mx-auto mb-6">
-            <div class="absolute inset-0 bg-emerald-100 rounded-full animate-ping opacity-25"></div>
-            <div class="relative w-20 h-20 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto shadow-lg shadow-emerald-200">
-                <svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
-                </svg>
+        <!-- Header Logo & Title -->
+        <div class="text-center pb-6 border-b border-slate-200">
+            <h2 class="text-2xl font-bold text-slate-900 tracking-wide">A2 STORE</h2>
+            <p class="text-sm font-semibold text-emerald-600 mt-1">فاتورة ضريبية مبسطة</p>
+        </div>
+
+        <!-- Order Meta Info -->
+        <div class="py-4 grid grid-cols-2 gap-4 text-sm border-b border-slate-200">
+            <div>
+                <p class="text-slate-400 text-xs">رقم الطلب:</p>
+                <p id="orderId" class="font-bold text-slate-800">#A2-958692</p>
+            </div>
+            <div>
+                <p class="text-slate-400 text-xs">تاريخ الطلب:</p>
+                <p id="date" class="font-bold text-slate-800">-</p>
+            </div>
+            <div>
+                <p class="text-slate-400 text-xs">حالة الدفع:</p>
+                <p class="font-bold text-emerald-600 inline-flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> مقبول بنجاح (كاش/إلكتروني)
+                </p>
+            </div>
+            <div>
+                <p class="text-slate-400 text-xs">وقت التوصيل المتوقع:</p>
+                <p class="font-bold text-slate-800">24-48 ساعة</p>
             </div>
         </div>
 
-        <h1 class="text-2xl font-bold text-slate-800">Payment Successful</h1>
-        <p class="text-sm text-slate-500 mt-1">Your transaction has been processed and approved securely.</p>
+        <!-- Client Details -->
+        <div class="py-4 border-b border-slate-200 text-sm space-y-1">
+            <p class="text-rose-600 font-bold text-xs mb-1">بيانات العميل:</p>
+            <p class="text-slate-700"><strong>الاسم:</strong> <span id="clientName">-</span></p>
+            <p class="text-slate-700"><strong>رقم البطاقة:</strong> <span id="cardNumber">-</span></p>
+        </div>
 
-        <!-- Receipt Box -->
-        <div class="mt-8 bg-slate-50 rounded-xl p-5 border border-slate-200 text-left space-y-3.5 text-sm">
-            <div class="flex justify-between items-center pb-3 border-b border-slate-200">
-                <span class="text-slate-500 font-medium">Reference ID</span>
-                <span id="orderId" class="font-mono font-semibold text-slate-800">#A2-98421</span>
+        <!-- Items Table -->
+        <div class="py-4 border-b border-slate-200">
+            <table class="w-full text-right text-sm">
+                <thead>
+                    <tr class="text-slate-400 text-xs border-b pb-2">
+                        <th class="pb-2 font-medium">المنتج</th>
+                        <th class="pb-2 font-medium text-center">الكمية</th>
+                        <th class="pb-2 font-medium text-center">سعر الوحدة</th>
+                        <th class="pb-2 font-medium text-left">الإجمالي</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="productName" class="py-3 text-slate-800 font-semibold text-xs sm:text-sm">ابل أيفون 18 برو ماكس 5 جي 6.9 بوصة، 256 جيجا، فضي</td>
+                        <td class="py-3 text-center text-slate-600">1</td>
+                        <td id="unitPrice" class="py-3 text-center text-slate-600">5499.00 د.إ</td>
+                        <td id="totalPrice" class="py-3 text-left font-bold text-slate-900">5499.00 د.إ</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Subtotal & Grand Total -->
+        <div class="py-4 space-y-2 border-b border-slate-200 text-sm">
+            <div class="flex justify-between text-slate-500">
+                <span>المجموع الفرعي:</span>
+                <span id="subTotal" class="font-semibold text-slate-800">5499.00 د.إ</span>
             </div>
-            <div class="flex justify-between items-center">
-                <span class="text-slate-500 font-medium">Product Name</span>
-                <span id="productName" class="font-semibold text-slate-800">-</span>
-            </div>
-            <div class="flex justify-between items-center">
-                <span class="text-slate-500 font-medium">Total Amount</span>
-                <span id="amount" class="font-bold text-emerald-600">-</span>
-            </div>
-            <div class="flex justify-between items-center">
-                <span class="text-slate-500 font-medium">Date & Time</span>
-                <span id="date" class="font-medium text-slate-800">-</span>
-            </div>
-            <div class="flex justify-between items-center">
-                <span class="text-slate-500 font-medium">Cardholder Name</span>
-                <span id="cardHolder" class="font-semibold text-slate-800 uppercase">-</span>
-            </div>
-            <div class="flex justify-between items-center">
-                <span class="text-slate-500 font-medium">Card Number</span>
-                <span id="cardNumber" class="font-mono font-semibold text-slate-800">•••• •••• •••• ••••</span>
-            </div>
-            <div class="flex justify-between items-center pt-3 border-t border-slate-200">
-                <span class="text-slate-600 font-bold">Status</span>
-                <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                    Verified & Completed
-                </span>
+            <div class="flex justify-between text-base font-bold text-slate-900">
+                <span>الإجمالي النهائي:</span>
+                <span id="grandTotal" class="text-emerald-600">5499.00 د.إ</span>
             </div>
         </div>
 
-        <!-- Action Buttons (no-print classes hide them during physical printing) -->
-        <div class="mt-8 space-y-3 no-print">
-            <button id="printBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-md shadow-emerald-100 flex items-center justify-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                Print Receipt / Save PDF
+        <!-- Footer Note & Stamp Mock -->
+        <div class="py-4 text-center text-xs text-slate-400 space-y-2">
+            <div class="inline-block border border-dashed border-emerald-500 text-emerald-600 px-3 py-1 rounded font-bold uppercase tracking-widest text-[10px]">
+                A2 STORE - الختم المعتمد
+            </div>
+            <p>شكراً لتسوقكم معنا في A2 Store!</p>
+            <p class="text-[10px]">هذه فاتورة إلكترونية معتمدة ولا تحتاج لحتّم أو توقيع ورقي.</p>
+        </div>
+
+        <!-- Action Buttons (Hidden on Print) -->
+        <div class="mt-6 space-y-3 no-print">
+            <button id="downloadBtn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                تحميل / طباعة الفاتورة (PDF)
             </button>
-            <button id="homeBtn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-md shadow-slate-200">
-                Return to Store
+            <button id="homeBtn" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-6 rounded-xl transition-all">
+                الرئيسية (تابع التسوق)
             </button>
         </div>
-
-        <p class="text-xs text-slate-400 mt-6">
-            A2 Store Secure Checkout &copy; 2026. All rights reserved.
-        </p>
     </div>
 
     <script>
@@ -91,23 +116,33 @@
         function pad(n) { return String(n).padStart(2, '0'); }
         function formatDate(d) {
             return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear()
-                + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+                + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ' م';
         }
 
+        // جلب البيانات المخزنة من الجلسة
         const payment = readJSON('pk_payment') || {};
         
         document.getElementById('date').textContent = formatDate(new Date());
-        document.getElementById('productName').textContent = payment.productName || 'منتج رقمي / تسوق عام';
-        document.getElementById('amount').textContent = payment.amount || '0.00 ج.م';
-        document.getElementById('cardHolder').textContent = payment.holder || 'Valued Customer';
+        document.getElementById('clientName').textContent = payment.holder || 'عميل مميز';
         document.getElementById('cardNumber').textContent = payment.masked || '•••• •••• •••• ••••';
         document.getElementById('orderId').textContent = '#A2-' + Math.floor(100000 + Math.random() * 900000);
 
-        // تفعيل زر الطباعة
-        document.getElementById('printBtn').addEventListener('click', () => {
+        if (payment.productName) {
+            document.getElementById('productName').textContent = payment.productName;
+        }
+        if (payment.amount) {
+            document.getElementById('unitPrice').textContent = payment.amount;
+            document.getElementById('totalPrice').textContent = payment.amount;
+            document.getElementById('subTotal').textContent = payment.amount;
+            document.getElementById('grandTotal').textContent = payment.amount;
+        }
+
+        // زر التحميل/الطباعة
+        document.getElementById('downloadBtn').addEventListener('click', () => {
             window.print();
         });
 
+        // زر العودة للرئيسية
         document.getElementById('homeBtn').addEventListener('click', () => {
             sessionStorage.clear();
             localStorage.removeItem('a2_user_id');
