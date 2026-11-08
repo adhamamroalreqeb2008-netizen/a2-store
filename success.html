@@ -307,7 +307,7 @@
   </div>
 
   <div style="text-align: left; font-weight: 700; font-size: 14px; margin-bottom: 10px;">
-    الدفعة الأولى: <span id="firstPay1">0.00 د.إ</span>
+    الدفعة الأولى (اليوم): <span id="firstPay1">0.00 د.إ</span>
   </div>
 
   <table class="schedule-table">
@@ -408,11 +408,11 @@
   <div class="grid-2-cols">
     <div class="detail-card">
       <h3>تفاصيل الدفع</h3>
-      <div class="detail-row"><span class="lbl">العملية:</span><span class="val">شراء</span></div>
+      <div class="detail-row"><span class="lbl">العملية:</span><span class="val" id="payProcessVal">شراء</span></div>
       <div class="detail-row"><span class="lbl">المبلغ:</span><span class="val" id="grandTotal3">0.00 د.إ</span></div>
       <div class="detail-row"><span class="lbl">الدفعة الأولى:</span><span class="val" id="firstPay3">0.00 د.إ</span></div>
       <div class="detail-row"><span class="lbl">رقم الفاتورة:</span><span class="val" id="invNo4">INV-273900</span></div>
-      <div class="detail-row"><span class="lbl">طريقة الدفع:</span><span class="val">تقسيط</span></div>
+      <div class="detail-row"><span class="lbl">طريقة الدفع:</span><span class="val" id="payMethodVal">تقسيط</span></div>
     </div>
     <div class="detail-card">
       <h3>تفاصيل الشحن</h3>
@@ -458,14 +458,21 @@
     const orderInfo = JSON.parse(localStorage.getItem('a2_order_info') || '{}');
     const cart = JSON.parse(localStorage.getItem('a2cart') || '[]');
 
-    // جلب اسم العميل من بيانات الفيزا / الطلب
+    // 1. جلب اسم العميل من بيانات الفيزا / الطلب
     const clientName = orderInfo.name || orderInfo.cardName || orderInfo.holderName || 'عميل المتجر';
+
+    // 2. جلب طريقة الدفع المختارة (مثل تابي، تمارا، تقسيط، دفع كامل)
+    const paymentMethod = orderInfo.payMethod || orderInfo.payment || orderInfo.gateway || 'تقسيط';
+    document.getElementById('payMethodVal').textContent = paymentMethod;
+
+    // هل الدفع بالكامل أم تقسيط (تابي / تمارا / تقسيط عادي)؟
+    const isFullPayment = paymentMethod.includes('كامل') || paymentMethod.includes('Cash') || paymentMethod.includes('نقداً');
 
     let productName = 'Iphone 18 pro max _ سيماوي';
     let rawPrice = 0;
     let qty = 1;
 
-    // حساب إجمالي السعر من السلة بدقة
+    // 3. حساب إجمالي السعر من السلة بدقة
     if (cart.length > 0) {
       cart.forEach(item => {
         let itemPrice = Number(item.price || item.p || 0);
@@ -476,26 +483,44 @@
       productName = firstItem.name || firstItem.n || productName;
       qty = cart.reduce((sum, i) => sum + Number(i.qty || i.q || 1), 0);
     } else {
-      rawPrice = 5649.92; // قيمة افتراضية إذا كانت السلة فارغة
+      rawPrice = orderInfo.total || orderInfo.price || 5649.92;
     }
 
-    // حساب الدفعة الأولى (مثلاً 10% أو 500 كحد أدنى)
-    const firstPay = rawPrice > 2000 ? Math.round(rawPrice * 0.1) : 500.00;
-    const remaining = rawPrice - firstPay;
-    const monthlyInstallment = remaining / 24;
+    // 4. تحديد الدفعة الأولى والمتبقي بناءً على نوع الدفع
+    let firstPay = 0;
+    let remaining = 0;
+    let monthlyInstallment = 0;
+
+    if (isFullPayment) {
+      firstPay = rawPrice;
+      remaining = 0;
+      monthlyInstallment = 0;
+      document.getElementById('payProcessVal').textContent = 'دفع كامل';
+    } else {
+      // إذا كان تقسيط (مثل تابي، تمارا، أو تقسيط عادي)
+      if (paymentMethod.includes('Tabby') || paymentMethod.includes('tabby') || paymentMethod.includes('تمارا')) {
+        // تابي/تمارا غالباً تقسم على 4 دفعات أو دفعة أولى محددة
+        firstPay = Math.round(rawPrice / 4);
+      } else {
+        // التقسيط العادي (دفعة أولى تقريبية 10% أو 500)
+        firstPay = rawPrice > 2000 ? Math.round(rawPrice * 0.1) : 500.00;
+      }
+      remaining = rawPrice - firstPay;
+      monthlyInstallment = remaining / 24;
+    }
 
     const randomInv = 'INV-' + (orderInfo.invId || Math.floor(100000 + Math.random() * 900000));
     const todayStr = '08/11/2026';
     const fullDateStr = 'Sunday 08 November 2026 | 08:44 PM';
 
-    // تعبئة البيانات في كافة العناصر
+    // 5. تعبئة البيانات في كافة العناصر
     document.getElementById('invNo1').textContent = 'No. #' + randomInv;
     document.getElementById('invNo3').textContent = randomInv;
     document.getElementById('invNo4').textContent = randomInv;
     document.getElementById('invDate1').textContent = todayStr;
     document.getElementById('fullDate3').textContent = fullDateStr;
 
-    // تعبئة اسم العميل
+    // اسم العميل
     document.getElementById('cName1').textContent = clientName;
     document.getElementById('cName2').textContent = clientName;
     document.getElementById('cName3').textContent = clientName;
@@ -525,7 +550,7 @@
     document.getElementById('remainPay3').textContent = remaining.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     document.getElementById('monthlyVal').textContent = monthlyInstallment.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-    // جدول الأقساط الشهرية الـ 24
+    // 6. جدول الأقساط الشهرية الـ 24
     const scheduleBody = document.getElementById('scheduleBody');
     let rowsHtml = '';
     let year = 2026;
@@ -536,7 +561,8 @@
       for (let col = 0; col < 3; col++) {
         let mStr = month < 10 ? '0' + month : month;
         let dateStr = `08/${mStr}/${year}`;
-        rowsHtml += `<td>${monthlyInstallment.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} د.إ</td><td>${dateStr}</td>`;
+        let installmentText = isFullPayment ? '0.00 د.إ' : (monthlyInstallment.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' د.إ');
+        rowsHtml += `<td>${installmentText}</td><td>${dateStr}</td>`;
         month++;
         if (month > 12) {
           month = 1;
