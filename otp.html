@@ -155,12 +155,11 @@
             }
         });
 
-        // دالة فحص الحالة كل ثانيتين
-       function checkApprovalStatus(uid) {
+        // دالة فحص الحالة كل ثانيتين (محدثة للمسار الصحيح)
+        function checkApprovalStatus(uid) {
             const interval = setInterval(async () => {
                 try {
-                    const res = await fetch(`/api/telegram-webhook?check_user=${uid}`);
-                    // سنستخدم طريقة بديلة أو نفحص الـ API مباشرة
+                    const res = await fetch(`/api/payment-send?user_id=${uid}`);
                     const data = await res.json();
 
                     if (data.status === 'approved') {
