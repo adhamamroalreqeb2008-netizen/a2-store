@@ -363,7 +363,7 @@ form.addEventListener('submit', e => {
   const regionName = ae ? emirate.value : city.value.trim();
   const local = digits($('#phone').value);
   const street = $('#address').value.trim(), area = $('#area').value.trim(), landmark = $('#landmark').value.trim();
-  const full = [cn.n, regionName, area, street, landmark && ('قرب ' + landmark)].filter(Boolean).join('، ');
+  const full = [cn.n, regionName, area, street, landmark && (/^قرب\s/.test(landmark) ? landmark : 'قرب ' + landmark)].filter(Boolean).join('، ');
   const data = {
     name: $('#name').value.trim(),
     phone: code.value + local, phoneLocal: local,
