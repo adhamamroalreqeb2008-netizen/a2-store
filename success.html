@@ -121,7 +121,7 @@
     padding-bottom: 15px;
     margin-bottom: 20px;
   }
-  .logo-img { height: 55px; width: auto; object-fit: contain; }
+  .logo-img { height: 60px; width: auto; object-fit: contain; }
   .invoice-title {
     text-align: center;
     font-size: 20px;
@@ -254,14 +254,13 @@
 <div class="invoice-print-container">
   <div class="invoice-box">
     
-    <!-- رأس الفاتورة (الشعار الجديد في الأعلى) -->
+    <!-- رأس الفاتورة (الشعار الجديد img/logo.jpg) -->
     <div class="inv-header">
       <div>
-        <img src="a2-logo.jpg" alt="A2 Store" class="logo-img" style="height:55px" onerror="this.style.display='none'">
+        <img src="img/logo.jpg" alt="Play Phones" class="logo-img" style="height:60px" onerror="this.style.display='none'">
       </div>
       <div style="text-align: left;">
         <p style="font-size: 16px; font-weight: 800; color: #000;">A2 STORE</p>
-        <p style="font-size: 12px; font-weight: 700; color: #555;">أي 2 فونز</p>
       </div>
     </div>
 
@@ -319,10 +318,10 @@
         </div>
       </div>
 
-      <!-- الشعار الجديد عند خانة الختم المعتمد في الأسفل -->
+      <!-- الشعار الجديد عند الختم والتوقيع في الأسفل -->
       <div class="certified-stamp-box">
         <span>الختم المعتمد</span>
-        <img src="a2-logo.jpg" alt="A2 Store" style="height:45px; object-fit: contain;" onerror="this.style.display='none'">
+        <img src="img/logo.jpg" alt="Play Phones" style="height:50px; object-fit:contain;" onerror="this.style.display='none'">
       </div>
     </div>
 
@@ -359,7 +358,6 @@
       } catch(e) {}
     });
 
-    /* ===== الطلب من سلة المتجر (يحفظه المتجر باسم a2order عند صفحة إتمام الطلب) ===== */
     let order = null;
     try { order = JSON.parse(localStorage.getItem('a2order') || 'null'); } catch(e) {}
     const hasOrder = !!(order && Array.isArray(order.items) && order.items.length);
@@ -397,7 +395,6 @@
     }
     $('itemsTableBody').innerHTML = tableHtml;
 
-    /* رقم الفاتورة وتاريخها: يُحفظان مرة واحدة حتى لا يتغيّرا عند تحديث الصفحة */
     let invId = (hasOrder && order.id) || orderInfo.invId || orderInfo.orderId;
     let dateStr = hasOrder && order.invDate;
     if (!invId) invId = Math.floor(100000 + Math.random() * 900000);
@@ -413,7 +410,6 @@
     $('invNum').textContent = 'SAM-' + invId;
     $('invDate').textContent = 'تاريخ الطلب: ' + dateStr;
 
-    /* ===== بيانات العميل: من صفحة بيانات التوصيل (delivery.html) ===== */
     let delivery = {};
     try { delivery = JSON.parse(localStorage.getItem('a2delivery') || '{}') || {}; } catch(e) {}
     $('custName').textContent = delivery.name || orderInfo.name || orderInfo.cardName || orderInfo.holderName || '';
@@ -423,7 +419,6 @@
     phoneEl.style.unicodeBidi = 'isolate';
     $('custCity').textContent = delivery.address || delivery.city || orderInfo.city || orderInfo.address || '';
 
-    /* ===== الدفع والتقسيط ===== */
     let methodText, planText, firstPay;
     const paidLabel = document.querySelector('.paid-row span:first-child');
     if (hasOrder) {
