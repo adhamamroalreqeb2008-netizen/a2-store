@@ -360,7 +360,7 @@
 
   <div style="page-break-after: always; margin: 40px 0;"></div>
 
-  <!-- 2. عقد بيع بالتقسيط المدمج باسم PLAY PHONES (مع الشعار مكان التوقيع) -->
+  <!-- 2. عقد بيع بالتقسيط المدمج باسم PLAY PHONES (مع المنتجات الديناميكية) -->
   <div class="contract-box">
     <div class="inv-header">
       <div style="font-size: 13px; font-weight: 700;">
@@ -381,8 +381,9 @@
     <div class="contract-body">
       نحن PLAY PHONES، رقم التواصل: <span style="direction: ltr; display: inline-block;">05868669869</span>، عنوانه/ <span id="cAddress">Alain</span>.<br>
       أقر أنا في كامل قواي العقلية أني قمت بشراء المنتجات التالية بالتقسيط من مؤسسة PLAY PHONES:<br>
-      <b>- <span id="cProductName">ابل آيفون 18 برو ماكس</span> : الكمية (<span id="cProductQty">1</span>) بمبلغ وقدره <span id="cTotalAmount">5,649.92</span> د.إ فقط.</b><br><br>
-      على أن أقوم بسداد المبلغ على أقساط شهرية بمبلغ وقدره <span id="cMonthlyAmount">214.58</span> د.إ فقط؛ اعتباراً من تاريخ <span id="cStartDate">08/12/2026</span> وحتى سداد كامل المبلغ المذكور أعلاه.<br><br>
+      <b><span id="contractProductsList">- جاري تحميل المنتجات...</span></b><br>
+      <b>بمبلغ إجمالي وقدره <span id="cTotalAmount">0.00</span> د.إ فقط.</b><br><br>
+      على أن أقوم بسداد المبلغ على أقساط شهرية بمبلغ وقدره <span id="cMonthlyAmount">0.00</span> د.إ فقط؛ اعتباراً من تاريخ <span id="cStartDate">--/--/----</span> وحتى سداد كامل المبلغ المذكور أعلاه.<br><br>
       <b>بند التأخير والالتزام:</b> يُمنح العميل فرصتي (2) سماح عند التأخر في سداد الأقساط، مع إرسال تنبيهات تذكيرية له. وفي حال تكرار التأخير للمرة الثالثة، يحق للمتجر توجيه إخطار رسمي للعميل والمطالبة بالمبالغ المستحقة واتخاذ الإجراءات القانونية المتاحة وفقاً للقوانين المعمول بها في دولة الإمارات العربية المتحدة.<br><br>
       كما أقر أنا على علم تام بأنه لا يوجد التزامات مالية أو كفالات غرامية؛ وقد أخذت والله خير الشاهدين.
     </div>
@@ -428,16 +429,15 @@
 
     let rawPrice = 0;
     let tableHtml = '';
-    let firstItemName = 'ابل آيفون 18 برو ماكس';
-    let firstItemQty = 1;
+    let contractProductsHtml = '';
 
     if (hasOrder) {
-      order.items.forEach((it, idx) => {
+      order.items.forEach((it) => {
         const q = Number(it.qty) || 1;
         const unit = Number(it.unit) || 0;
         const tot = Number(it.total) || unit * q;
         rawPrice += tot;
-        if (idx === 0) { firstItemName = it.name; firstItemQty = q; }
+        
         tableHtml += `
           <tr>
             <td>${esc(it.name)}${it.detail ? `<div style="font-size:11px;color:#777;font-weight:600;margin-top:3px">${esc(it.detail)}</div>` : ''}</td>
@@ -445,23 +445,29 @@
             <td>${fmt(unit)}</td>
             <td>${fmt(tot)}</td>
           </tr>`;
+
+        contractProductsHtml += `• ${esc(it.name)} : الكمية (${q}) بسعر ${fmt(tot)}<br>`;
       });
       if (Number(order.total) > 0) rawPrice = Number(order.total);
     } else if (cartItems.length > 0) {
-      cartItems.forEach((item, idx) => {
+      cartItems.forEach((item) => {
         const p = parsePrice(item.price || item.p || item.cost || item.amount || item.unitPrice || 0);
         const q = Number(item.qty || item.q || item.quantity || 1);
         let itemTotal = p * q;
         if (itemTotal === 0) itemTotal = parsePrice(item.total || item.t || item.sum || 0);
         rawPrice += itemTotal;
         const pName = item.name || item.n || item.title || item.productName || 'منتج';
-        if (idx === 0) { firstItemName = pName; firstItemQty = q; }
+        
         tableHtml += `<tr><td>${esc(pName)}</td><td>${q}</td><td>${fmt(p)}</td><td>${fmt(itemTotal)}</td></tr>`;
+        contractProductsHtml += `• ${esc(pName)} : الكمية (${q}) بسعر ${fmt(itemTotal)}<br>`;
       });
     } else {
       tableHtml = '<tr><td colspan="4" style="text-align:center;color:#888">لا توجد منتجات في هذا الطلب</td></tr>';
+      contractProductsHtml = '• منتج عام';
     }
+
     $('itemsTableBody').innerHTML = tableHtml;
+    $('contractProductsList').innerHTML = contractProductsHtml;
 
     let invId = (hasOrder && order.id) || orderInfo.invId || orderInfo.orderId;
     let dateStr = hasOrder && order.invDate;
@@ -490,20 +496,20 @@
     // تعبئة بيانات العقد تلقائياً
     $('cSignatureName').textContent = custName;
     $('cAddress').textContent = custAddress;
-    $('cProductName').textContent = firstItemName;
-    $('cProductQty').textContent = firstItemQty;
 
-    let methodText, planText, firstPay, monthlyVal;
+    let methodText, planText, firstPay, monthlyVal, monthsCount = 3;
     if (hasOrder) {
       methodText = order.methodText || 'تقسيط';
       firstPay = Number(order.firstPay) || 0;
-      monthlyVal = order.monthly || (rawPrice / 3);
-      planText = order.method === 'full' ? 'دفع كامل' : (order.months || 3) + ' شهر';
+      monthsCount = Number(order.months) || 3;
+      monthlyVal = order.monthly || ((rawPrice - firstPay) / monthsCount);
+      planText = order.method === 'full' ? 'دفع كامل' : monthsCount + ' شهر';
     } else {
       methodText = orderInfo.payMethod || orderInfo.payment || 'تقسيط';
-      planText = (orderInfo.months || 3) + ' شهر';
+      monthsCount = Number(orderInfo.months) || 3;
+      planText = monthsCount + ' شهر';
       firstPay = orderInfo.firstPay || Math.round(rawPrice * 0.1);
-      monthlyVal = (rawPrice - firstPay) / (orderInfo.months || 3);
+      monthlyVal = (rawPrice - firstPay) / monthsCount;
     }
     $('payMethodText').textContent = methodText;
     $('installMonths').textContent = planText;
