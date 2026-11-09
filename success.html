@@ -247,6 +247,12 @@
     border-top: 1px solid #eee;
     padding-top: 20px;
   }
+  .sig-img-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    vertical-align: middle;
+  }
 </style>
 </head>
 <body>
@@ -354,7 +360,7 @@
 
   <div style="page-break-after: always; margin: 40px 0;"></div>
 
-  <!-- 2. عقد بيع بالتقسيط المدمج باسم PLAY PHONES -->
+  <!-- 2. عقد بيع بالتقسيط المدمج باسم PLAY PHONES (مع الشعار مكان التوقيع) -->
   <div class="contract-box">
     <div class="inv-header">
       <div style="font-size: 13px; font-weight: 700;">
@@ -383,7 +389,10 @@
 
     <div class="signature-section">
       <div>الاسم/ <span id="cSignatureName">اسم العميل</span>.</div>
-      <div>التوقيع/ ............................................</div>
+      <div class="sig-img-box">
+        <span>التوقيع/</span>
+        <img src="img/logo.jpg" alt="Signature Stamp" style="height: 40px; object-fit: contain; border: 1px solid #ddd; padding: 2px; border-radius: 4px;" onerror="this.style.display='none'">
+      </div>
     </div>
   </div>
 
