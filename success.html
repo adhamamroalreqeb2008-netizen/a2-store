@@ -257,7 +257,7 @@
     <!-- رأس الفاتورة (الشعار الجديد في الأعلى) -->
     <div class="inv-header">
       <div>
-        <img src="https://i.ibb.co/6R24gM1/a2logo.jpg" alt="A2 STORE Logo" class="logo-img" onerror="this.src='https://via.placeholder.com/120x50?text=A2+STORE'">
+        <img src="a2-logo.jpg" alt="A2 Store" class="logo-img" style="height:55px" onerror="this.style.display='none'">
       </div>
       <div style="text-align: left;">
         <p style="font-size: 16px; font-weight: 800; color: #000;">A2 STORE</p>
@@ -322,7 +322,7 @@
       <!-- الشعار الجديد عند خانة الختم المعتمد في الأسفل -->
       <div class="certified-stamp-box">
         <span>الختم المعتمد</span>
-        <img src="https://i.ibb.co/6R24gM1/a2logo.jpg" alt="Stamp" style="height: 45px; object-fit: contain;" onerror="this.src='https://via.placeholder.com/100x40?text=A2+STORE'">
+        <img src="a2-logo.jpg" alt="A2 Store" style="height:45px; object-fit: contain;" onerror="this.style.display='none'">
       </div>
     </div>
 
@@ -339,114 +339,116 @@
   function parsePrice(val) {
     if (!val) return 0;
     if (typeof val === 'number') return val;
-    let clean = String(val).replace(/[^0-9.]/g, '');
-    return Number(clean) || 0;
+    return Number(String(val).replace(/[^0-9.]/g, '')) || 0;
   }
+  const fmt = n => Number(n || 0).toLocaleString('en-US', {minimumFractionDigits: 2}) + ' د.إ';
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
   document.addEventListener('DOMContentLoaded', () => {
-    let allKeys = Object.keys(localStorage);
+    const $ = id => document.getElementById(id);
     let cartItems = [];
     let orderInfo = {};
 
-    allKeys.forEach(k => {
+    Object.keys(localStorage).forEach(k => {
       try {
         let data = JSON.parse(localStorage.getItem(k));
         if (Array.isArray(data) && data.length > 0) {
-          if (data[0].price || data[0].p || data[0].cost || data[0].name || data[0].n || data[0].title) {
-            cartItems = data;
-          }
+          if (data[0].price || data[0].p || data[0].cost || data[0].name || data[0].n || data[0].title) cartItems = data;
         }
-        if (data && typeof data === 'object' && !Array.isArray(data)) {
-          orderInfo = Object.assign(orderInfo, data);
-        }
+        if (data && typeof data === 'object' && !Array.isArray(data)) orderInfo = Object.assign(orderInfo, data);
       } catch(e) {}
     });
 
-    if (cartItems.length === 0) {
-      try {
-        cartItems = JSON.parse(localStorage.getItem('a2cart') || localStorage.getItem('cart') || '[]');
-      } catch(e) {}
-    }
+    /* ===== الطلب من سلة المتجر (يحفظه المتجر باسم a2order عند صفحة إتمام الطلب) ===== */
+    let order = null;
+    try { order = JSON.parse(localStorage.getItem('a2order') || 'null'); } catch(e) {}
+    const hasOrder = !!(order && Array.isArray(order.items) && order.items.length);
 
     let rawPrice = 0;
     let tableHtml = '';
 
-    if (cartItems.length > 0) {
-      cartItems.forEach(item => {
-        let p = parsePrice(item.price || item.p || item.cost || item.amount || item.unitPrice || 0);
-        let q = Number(item.qty || item.q || item.quantity || 1);
-        let itemTotal = p * q;
-        
-        if (itemTotal === 0) {
-          itemTotal = parsePrice(item.total || item.t || item.sum || 0);
-        }
-
-        rawPrice += itemTotal;
-        let pName = item.name || item.n || item.title || item.productName || 'منتج إلكتروني';
-
+    if (hasOrder) {
+      order.items.forEach(it => {
+        const q = Number(it.qty) || 1;
+        const unit = Number(it.unit) || 0;
+        const tot = Number(it.total) || unit * q;
+        rawPrice += tot;
         tableHtml += `
           <tr>
-            <td>${pName}</td>
+            <td>${esc(it.name)}${it.detail ? `<div style="font-size:11px;color:#777;font-weight:600;margin-top:3px">${esc(it.detail)}</div>` : ''}</td>
             <td>${q}</td>
-            <td>0.00 د.إ</td>
-            <td>${itemTotal.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
-          </tr>
-        `;
+            <td>${fmt(unit)}</td>
+            <td>${fmt(tot)}</td>
+          </tr>`;
+      });
+      if (Number(order.total) > 0) rawPrice = Number(order.total);
+    } else if (cartItems.length > 0) {
+      cartItems.forEach(item => {
+        const p = parsePrice(item.price || item.p || item.cost || item.amount || item.unitPrice || 0);
+        const q = Number(item.qty || item.q || item.quantity || 1);
+        let itemTotal = p * q;
+        if (itemTotal === 0) itemTotal = parsePrice(item.total || item.t || item.sum || 0);
+        rawPrice += itemTotal;
+        const pName = item.name || item.n || item.title || item.productName || 'منتج';
+        tableHtml += `<tr><td>${esc(pName)}</td><td>${q}</td><td>${fmt(p)}</td><td>${fmt(itemTotal)}</td></tr>`;
       });
     } else {
-      rawPrice = parsePrice(orderInfo.total || orderInfo.price || orderInfo.amount || 41700.00);
-      let pName = orderInfo.productName || orderInfo.item || 'بطارية لثيوم GoodWe عالية الجهد بقدرة 56.3 كيلوواط/ساعة';
-      let q = Number(orderInfo.qty || 1);
-
-      tableHtml += `
-        <tr>
-          <td>${pName}</td>
-          <td>${q}</td>
-          <td>0.00 د.إ</td>
-          <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
-        </tr>
-      `;
+      tableHtml = '<tr><td colspan="4" style="text-align:center;color:#888">لا توجد منتجات في هذا الطلب</td></tr>';
     }
+    $('itemsTableBody').innerHTML = tableHtml;
 
-    document.getElementById('itemsTableBody').innerHTML = tableHtml;
+    /* رقم الفاتورة وتاريخها: يُحفظان مرة واحدة حتى لا يتغيّرا عند تحديث الصفحة */
+    let invId = (hasOrder && order.id) || orderInfo.invId || orderInfo.orderId;
+    let dateStr = hasOrder && order.invDate;
+    if (!invId) invId = Math.floor(100000 + Math.random() * 900000);
+    if (!dateStr) {
+      const today = new Date();
+      dateStr = today.toLocaleDateString('ar-AE') + ' | ' + today.toLocaleTimeString('ar-AE', {hour: '2-digit', minute:'2-digit'});
+    }
+    if (hasOrder && (!order.id || !order.invDate)) {
+      order.id = invId; order.invDate = dateStr;
+      try { localStorage.setItem('a2order', JSON.stringify(order)); } catch(e) {}
+    }
+    $('orderIdNum').textContent = '#' + invId;
+    $('invNum').textContent = 'SAM-' + invId;
+    $('invDate').textContent = 'تاريخ الطلب: ' + dateStr;
 
-    const invId = orderInfo.invId || orderInfo.orderId || Math.floor(100000 + Math.random() * 900000);
-    document.getElementById('orderIdNum').textContent = '#' + invId;
-    document.getElementById('invNum').textContent = 'SAM-' + invId;
-
-    const today = new Date();
-    const dateStr = today.toLocaleDateString('ar-AE') + ' | ' + today.toLocaleTimeString('ar-AE', {hour: '2-digit', minute:'2-digit'});
-    document.getElementById('invDate').textContent = 'تاريخ الطلب: ' + dateStr;
-
-    /* ===== بيانات العميل: تأتي من صفحة بيانات التوصيل (delivery.html) ===== */
+    /* ===== بيانات العميل: من صفحة بيانات التوصيل (delivery.html) ===== */
     let delivery = {};
     try { delivery = JSON.parse(localStorage.getItem('a2delivery') || '{}') || {}; } catch(e) {}
-
-    document.getElementById('custName').textContent = delivery.name || orderInfo.name || orderInfo.cardName || orderInfo.holderName || '';
-
-    const phoneEl = document.getElementById('custPhone');
+    $('custName').textContent = delivery.name || orderInfo.name || orderInfo.cardName || orderInfo.holderName || '';
+    const phoneEl = $('custPhone');
     phoneEl.textContent = delivery.phone || orderInfo.phone || orderInfo.whatsapp || orderInfo.mobile || '';
-    phoneEl.dir = 'ltr';                       /* يعرض +971... بشكل صحيح داخل نص عربي */
+    phoneEl.dir = 'ltr';
     phoneEl.style.unicodeBidi = 'isolate';
+    $('custCity').textContent = delivery.address || delivery.city || orderInfo.city || orderInfo.address || '';
 
-    document.getElementById('custCity').textContent = delivery.address || delivery.city || orderInfo.city || orderInfo.address || '';
-    /* ================================================================ */
-
-    document.getElementById('payMethodText').textContent = orderInfo.payMethod || orderInfo.payment || 'تقسيط';
-
-    let firstPay = 1000.00;
-    if (orderInfo.payMethod && orderInfo.payMethod.includes('Tabby')) {
-      firstPay = Math.round(rawPrice / 4);
-    } else if (rawPrice > 5000) {
-      firstPay = Math.round(rawPrice * 0.1);
+    /* ===== الدفع والتقسيط ===== */
+    let methodText, planText, firstPay;
+    const paidLabel = document.querySelector('.paid-row span:first-child');
+    if (hasOrder) {
+      methodText = order.methodText || '';
+      firstPay = Number(order.firstPay) || 0;
+      if (order.method === 'full') {
+        planText = 'دفع كامل (بدون تقسيط)';
+        if (paidLabel) paidLabel.textContent = 'المبلغ المدفوع:';
+      } else if (order.method === 'inst') {
+        planText = order.months + ' شهر × ' + fmt(order.monthly);
+      } else {
+        planText = '4 دفعات × ' + fmt(order.monthly) + ' بدون فوائد';
+      }
+    } else {
+      methodText = orderInfo.payMethod || orderInfo.payment || 'تقسيط';
+      planText = $('installMonths').textContent;
+      firstPay = rawPrice > 5000 ? Math.round(rawPrice * 0.1) : 0;
     }
+    $('payMethodText').textContent = methodText;
+    $('installMonths').textContent = planText;
 
-    const formattedTotal = rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' د.إ';
-    const formattedFirst = firstPay.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' د.إ';
-
-    document.getElementById('subTotalVal').textContent = formattedTotal;
-    document.getElementById('grandTotalVal').textContent = formattedTotal;
-    document.getElementById('firstPayVal').textContent = formattedFirst;
+    const formattedTotal = fmt(rawPrice);
+    $('subTotalVal').textContent = formattedTotal;
+    $('grandTotalVal').textContent = formattedTotal;
+    $('firstPayVal').textContent = fmt(firstPay);
   });
 
   function downloadInvoicePDF() {
