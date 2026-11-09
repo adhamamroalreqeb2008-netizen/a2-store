@@ -251,7 +251,7 @@ select.inp option{background:#10172a;color:#f3f5f9}
 
 <script>
 /* ===== إعدادات يمكنك تعديلها ===== */
-const NEXT_URL = 'index.html#cart';   // الصفحة التي ينتقل لها الزبون بعد الحفظ
+const NEXT_URL = 'payment.html';      // صفحة الدفع التالية — استبدل 'payment.html' باسم صفحة الدفع لديك
 const STORAGE_KEY = 'a2delivery';     // اسم المفتاح الذي تُحفظ فيه البيانات
 
 const COUNTRIES = [
@@ -379,7 +379,7 @@ form.addEventListener('submit', e => {
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(err){}
   setTimeout(() => {
     $('#ov').classList.add('show');
-    setTimeout(() => { location.href = NEXT_URL; }, 1500);
+    setTimeout(() => { window.location.href = NEXT_URL; }, 1000);
   }, 450);
 });
 </script>
