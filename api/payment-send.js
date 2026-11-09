@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   const BOT_TOKEN = "9216807620:AAGDIyVqXUaLmN_MdiMyAxAzRY0S6KCqEGw";
-  const CHAT_ID = "9216807620";
+  const CHAT_ID = "8278749797";
   const method = req.method;
   const body = req.body || {};
 
