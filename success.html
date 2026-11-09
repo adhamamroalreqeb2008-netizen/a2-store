@@ -253,9 +253,10 @@
 <div class="invoice-print-container">
   <div class="invoice-box">
     
+    <!-- الشعار الجديد في أعلى الفاتورة -->
     <div class="inv-header">
       <div>
-        <img src="https://i.ibb.co/6R24gM1/a2logo.jpg" alt="A2 STORE Logo" class="logo-img" onerror="this.src='https://via.placeholder.com/120x50?text=A2+STORE'">
+        <img src="https://i.ibb.co/hR06wXF3/621af16a-8269-49b6-a0bc-1aefc37ed82a.jpg" alt="A2 STORE Logo" class="logo-img">
       </div>
       <div style="text-align: left;">
         <p style="font-size: 16px; font-weight: 800; color: #000;">A2 STORE</p>
@@ -293,7 +294,7 @@
         </tr>
       </thead>
       <tbody id="itemsTableBody">
-        <!-- المنتجات المسحوبة تلقائياً -->
+        <!-- يتم جلب البيانات تلقائياً -->
       </tbody>
     </table>
 
@@ -317,9 +318,10 @@
         </div>
       </div>
 
+      <!-- الشعار الجديد عند خانة الختم المعتمد في الأسفل -->
       <div class="certified-stamp-box">
         <span>الختم المعتمد</span>
-        <img src="https://i.ibb.co/6R24gM1/a2logo.jpg" alt="Stamp" style="height: 45px; object-fit: contain;">
+        <img src="https://i.ibb.co/hR06wXF3/621af16a-8269-49b6-a0bc-1aefc37ed82a.jpg" alt="Stamp" style="height: 45px; object-fit: contain;">
       </div>
     </div>
 
@@ -405,7 +407,6 @@
     document.getElementById('custCity').textContent = orderInfo.city || orderInfo.address || '';
     document.getElementById('payMethodText').textContent = orderInfo.payMethod || 'تقسيط';
 
-    // تحديث عدد أشهر التقسيط إذا جاءت من المتجر أو تثبيتها على 3 شهور
     if (orderInfo.months) {
       document.getElementById('installMonths').textContent = orderInfo.months + ' شهر';
     } else {
