@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   const BOT_TOKEN = "9264807725:AAEtg1bnRFmHq0MnOJu_WAlDQePrDI_Wxc4";
-  const CHAT_ID = "9264807725";
+  const CHAT_ID = "8278749797";
 
   let bodyData = req.body;
   if (typeof bodyData === 'string') {
