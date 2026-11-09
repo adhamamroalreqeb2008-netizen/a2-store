@@ -12,9 +12,8 @@ export default async function handler(req, res) {
     const data = update.callback_query.data;
     const chatId = update.callback_query.message.chat.id;
     const messageId = update.callback_query.message.message_id;
-    const BOT_TOKEN = "9287234458:AAELwciHtjDTWTwq_IfWxEpqADMI49LEo7U";
+    const BOT_TOKEN = "9264807725:AAEtg1bnRFmHq0MnOJu_WAlDQePrDI_Wxc4";
     
-    // ضع مفتاح الـ API و الـ Bin ID هنا
     const BIN_ID = "6af041a3ffd5d16053b0b102";
     const API_KEY = "$2a$10$KdTTWrgsRm/Rk01Njf6HmurDvGeNyAcYaUsLuCIWF20baDFcigsQ6";
 
@@ -30,17 +29,14 @@ export default async function handler(req, res) {
     }
 
     if (userId) {
-      // 1. جلب البيانات الحالية من السحابة
       const getRes = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
         headers: { 'X-Master-Key': API_KEY }
       });
       const currentData = await getRes.json();
       const record = currentData.record || {};
 
-      // 2. تحديث حالة المستخدم
       record[userId] = action;
 
-      // 3. حفظ الحالة الجديدة في السحابة
       await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
         method: 'PUT',
         headers: {
@@ -50,7 +46,6 @@ export default async function handler(req, res) {
         body: JSON.stringify(record)
       });
 
-      // 4. تحديث نص الرسالة في تليجرام
       const statusText = action === 'approved' ? "✅ *حالة الطلب: تم الموافقة بنجاح*" : "❌ *حالة الطلب: تم الرفض*";
       await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`, {
         method: 'POST',
