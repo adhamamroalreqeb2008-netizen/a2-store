@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>الفاتورة وعقد التقسيط - A2 STORE</title>
+<title>الفاتورة وعقد التقسيط - PLAY PHONES</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -282,10 +282,10 @@
   <div class="invoice-box">
     <div class="inv-header">
       <div>
-        <img src="img/logo.jpg" alt="A2 Store" class="logo-img" onerror="this.style.display='none'">
+        <img src="img/logo.jpg" alt="PLAY PHONES" class="logo-img" onerror="this.style.display='none'">
       </div>
       <div style="text-align: left;">
-        <p style="font-size: 16px; font-weight: 800; color: #000;">A2 STORE</p>
+        <p style="font-size: 16px; font-weight: 800; color: #000;">PLAY PHONES</p>
       </div>
     </div>
 
@@ -348,24 +348,24 @@
     </div>
 
     <div class="footer-note">
-      شكراً لتسوقكم معنا!<br>A2 STORE - وجهتك الأولى للأجهزة الذكية والتقنية
+      شكراً لتسوقكم معنا!<br>PLAY PHONES - المتجر الأول في الإمارات
     </div>
   </div>
 
   <div style="page-break-after: always; margin: 40px 0;"></div>
 
-  <!-- 2. عقد بيع بالتقسيط المدمج -->
+  <!-- 2. عقد بيع بالتقسيط المدمج باسم PLAY PHONES -->
   <div class="contract-box">
     <div class="inv-header">
       <div style="font-size: 13px; font-weight: 700;">
-        <div>A2 STORE</div>
+        <div>PLAY PHONES</div>
         <div style="font-size: 11px; color: #555;">The first store in the Emirates</div>
       </div>
       <div>
-        <img src="img/logo.jpg" alt="A2 Store" class="logo-img" onerror="this.style.display='none'">
+        <img src="img/logo.jpg" alt="PLAY PHONES" class="logo-img" onerror="this.style.display='none'">
       </div>
       <div style="text-align: left; font-size: 13px; font-weight: 700;">
-        <div>أي 2 فونز</div>
+        <div>بلاي فونز</div>
         <div style="font-size: 11px; color: #555;">المتجر الأول في الامارات</div>
       </div>
     </div>
@@ -373,8 +373,8 @@
     <div class="contract-title">عقد بيع بالتقسيط</div>
 
     <div class="contract-body">
-      نحن A2 STORE، رقم التواصل: <span style="direction: ltr; display: inline-block;">05868669869</span>، عنوانه/ <span id="cAddress">Alain</span>.<br>
-      أقر أنا في كامل قواي العقلية أني قمت بشراء المنتجات التالية بالتقسيط من مؤسسة A2 STORE:<br>
+      نحن PLAY PHONES، رقم التواصل: <span style="direction: ltr; display: inline-block;">05868669869</span>، عنوانه/ <span id="cAddress">Alain</span>.<br>
+      أقر أنا في كامل قواي العقلية أني قمت بشراء المنتجات التالية بالتقسيط من مؤسسة PLAY PHONES:<br>
       <b>- <span id="cProductName">ابل آيفون 18 برو ماكس</span> : الكمية (<span id="cProductQty">1</span>) بمبلغ وقدره <span id="cTotalAmount">5,649.92</span> د.إ فقط.</b><br><br>
       على أن أقوم بسداد المبلغ على أقساط شهرية بمبلغ وقدره <span id="cMonthlyAmount">214.58</span> د.إ فقط؛ اعتباراً من تاريخ <span id="cStartDate">08/12/2026</span> وحتى سداد كامل المبلغ المذكور أعلاه.<br><br>
       <b>بند التأخير والالتزام:</b> يُمنح العميل فرصتي (2) سماح عند التأخر في سداد الأقساط، مع إرسال تنبيهات تذكيرية له. وفي حال تكرار التأخير للمرة الثالثة، يحق للمتجر توجيه إخطار رسمي للعميل والمطالبة بالمبالغ المستحقة واتخاذ الإجراءات القانونية المتاحة وفقاً للقوانين المعمول بها في دولة الإمارات العربية المتحدة.<br><br>
@@ -467,7 +467,7 @@
 
     let delivery = {};
     try { delivery = JSON.parse(localStorage.getItem('a2delivery') || '{}') || {}; } catch(e) {}
-    const custName = delivery.name || orderInfo.name || orderInfo.cardName || orderInfo.holderName || 'عميل A2';
+    const custName = delivery.name || orderInfo.name || orderInfo.cardName || orderInfo.holderName || 'عميل Play Phones';
     const custPhone = delivery.phone || orderInfo.phone || orderInfo.whatsapp || orderInfo.mobile || '';
     const custAddress = delivery.address || delivery.city || orderInfo.city || orderInfo.address || 'الإمارات';
 
