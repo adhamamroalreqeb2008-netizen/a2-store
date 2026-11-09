@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>فاتورة ضريبية مبسطة - A2 STORE</title>
+<title>تم استلام طلبك - A2 STORE</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -104,6 +104,7 @@
     .invoice-print-container { display: block !important; width: 100%; }
   }
 
+  /* تصميم الفاتورة */
   .invoice-box {
     background: #ffffff;
     width: 100%;
@@ -249,17 +250,18 @@
   <a href="index.html" class="continue-link">← تابع التسوق</a>
 </div>
 
-<!-- الفاتورة الرسمية للطباعة / PDF -->
+<!-- الفاتورة للطباعة / PDF -->
 <div class="invoice-print-container">
   <div class="invoice-box">
     
-    <!-- رأس الفاتورة يحتوي على الشعار فقط بدون أي نصوص إضافية -->
+    <!-- رأس الفاتورة (الشعار الجديد في الأعلى) -->
     <div class="inv-header">
       <div>
-        <img src="a2-logo.jpg" alt="A2 Store" style="height:55px" class="logo-img">
+        <img src="https://i.ibb.co/6R24gM1/a2logo.jpg" alt="A2 STORE Logo" class="logo-img" onerror="this.src='https://via.placeholder.com/120x50?text=A2+STORE'">
       </div>
       <div style="text-align: left;">
         <p style="font-size: 16px; font-weight: 800; color: #000;">A2 STORE</p>
+        <p style="font-size: 12px; font-weight: 700; color: #555;">أي 2 فونز</p>
       </div>
     </div>
 
@@ -293,7 +295,7 @@
         </tr>
       </thead>
       <tbody id="itemsTableBody">
-        <!-- جلب المنتجات والأسعار تلقائياً -->
+        <!-- يُعبأ تلقائياً من سلة الموقع -->
       </tbody>
     </table>
 
@@ -305,7 +307,7 @@
         </div>
         <div class="summary-row installment-row">
           <span>خطة التقسيط:</span>
-          <span id="installMonths">3 شهر</span>
+          <span id="installMonths">6 شهر</span>
         </div>
         <div class="summary-row total-bold">
           <span>الإجمالي:</span>
@@ -317,10 +319,10 @@
         </div>
       </div>
 
-      <!-- الختم المعتمد في الأسفل -->
+      <!-- الشعار الجديد عند خانة الختم المعتمد في الأسفل -->
       <div class="certified-stamp-box">
         <span>الختم المعتمد</span>
-        <img src="a2-logo.jpg" alt="A2 Store" style="height: 45px; object-fit: contain;">
+        <img src="https://i.ibb.co/6R24gM1/a2logo.jpg" alt="Stamp" style="height: 45px; object-fit: contain;" onerror="this.src='https://via.placeholder.com/100x40?text=A2+STORE'">
       </div>
     </div>
 
@@ -342,24 +344,41 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    let orderInfo = JSON.parse(localStorage.getItem('a2_order_info') || '{}');
-    let cart = JSON.parse(localStorage.getItem('a2cart') || localStorage.getItem('cart') || '[]');
+    let allKeys = Object.keys(localStorage);
+    let cartItems = [];
+    let orderInfo = {};
 
-    if (cart.length === 0 && orderInfo.savedCart && Array.isArray(orderInfo.savedCart)) {
-      cart = orderInfo.savedCart;
+    allKeys.forEach(k => {
+      try {
+        let data = JSON.parse(localStorage.getItem(k));
+        if (Array.isArray(data) && data.length > 0) {
+          if (data[0].price || data[0].p || data[0].cost || data[0].name || data[0].n || data[0].title) {
+            cartItems = data;
+          }
+        }
+        if (data && typeof data === 'object' && !Array.isArray(data)) {
+          orderInfo = Object.assign(orderInfo, data);
+        }
+      } catch(e) {}
+    });
+
+    if (cartItems.length === 0) {
+      try {
+        cartItems = JSON.parse(localStorage.getItem('a2cart') || localStorage.getItem('cart') || '[]');
+      } catch(e) {}
     }
 
     let rawPrice = 0;
     let tableHtml = '';
 
-    if (cart.length > 0) {
-      cart.forEach(item => {
+    if (cartItems.length > 0) {
+      cartItems.forEach(item => {
         let p = parsePrice(item.price || item.p || item.cost || item.amount || item.unitPrice || 0);
         let q = Number(item.qty || item.q || item.quantity || 1);
         let itemTotal = p * q;
         
-        if (itemTotal === 0 && item.total) {
-          itemTotal = parsePrice(item.total);
+        if (itemTotal === 0) {
+          itemTotal = parsePrice(item.total || item.t || item.sum || 0);
         }
 
         rawPrice += itemTotal;
@@ -370,18 +389,16 @@
             <td>${pName}</td>
             <td>${q}</td>
             <td>0.00 د.إ</td>
-            <td>${(itemTotal > 0 ? itemTotal : parsePrice(orderInfo.total || 5499)).toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+            <td>${itemTotal.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
           </tr>
         `;
       });
-    }
-
-    if (rawPrice === 0) {
-      rawPrice = parsePrice(orderInfo.total || orderInfo.price || orderInfo.amount || 5499.00);
-      let pName = orderInfo.productName || orderInfo.item || 'ابل آیفون 18 برو ماكس 5 جي 6.9 بوصة، 256 جيجا';
+    } else {
+      rawPrice = parsePrice(orderInfo.total || orderInfo.price || orderInfo.amount || 41700.00);
+      let pName = orderInfo.productName || orderInfo.item || 'بطارية لثيوم GoodWe عالية الجهد بقدرة 56.3 كيلوواط/ساعة';
       let q = Number(orderInfo.qty || 1);
 
-      tableHtml = `
+      tableHtml += `
         <tr>
           <td>${pName}</td>
           <td>${q}</td>
@@ -393,7 +410,7 @@
 
     document.getElementById('itemsTableBody').innerHTML = tableHtml;
 
-    const invId = orderInfo.invId || Math.floor(100000 + Math.random() * 900000);
+    const invId = orderInfo.invId || orderInfo.orderId || Math.floor(100000 + Math.random() * 900000);
     document.getElementById('orderIdNum').textContent = '#' + invId;
     document.getElementById('invNum').textContent = 'SAM-' + invId;
 
@@ -401,19 +418,28 @@
     const dateStr = today.toLocaleDateString('ar-AE') + ' | ' + today.toLocaleTimeString('ar-AE', {hour: '2-digit', minute:'2-digit'});
     document.getElementById('invDate').textContent = 'تاريخ الطلب: ' + dateStr;
 
-    document.getElementById('custName').textContent = orderInfo.name || orderInfo.cardName || '';
-    document.getElementById('custPhone').textContent = orderInfo.phone || orderInfo.whatsapp || '';
-    document.getElementById('custCity').textContent = orderInfo.city || orderInfo.address || '';
-    document.getElementById('payMethodText').textContent = orderInfo.payMethod || 'تقسيط';
+    /* ===== بيانات العميل: تأتي من صفحة بيانات التوصيل (delivery.html) ===== */
+    let delivery = {};
+    try { delivery = JSON.parse(localStorage.getItem('a2delivery') || '{}') || {}; } catch(e) {}
 
-    if (orderInfo.months) {
-      document.getElementById('installMonths').textContent = orderInfo.months + ' شهر';
-    } else {
-      document.getElementById('installMonths').textContent = '3 شهر';
+    document.getElementById('custName').textContent = delivery.name || orderInfo.name || orderInfo.cardName || orderInfo.holderName || '';
+
+    const phoneEl = document.getElementById('custPhone');
+    phoneEl.textContent = delivery.phone || orderInfo.phone || orderInfo.whatsapp || orderInfo.mobile || '';
+    phoneEl.dir = 'ltr';                       /* يعرض +971... بشكل صحيح داخل نص عربي */
+    phoneEl.style.unicodeBidi = 'isolate';
+
+    document.getElementById('custCity').textContent = delivery.address || delivery.city || orderInfo.city || orderInfo.address || '';
+    /* ================================================================ */
+
+    document.getElementById('payMethodText').textContent = orderInfo.payMethod || orderInfo.payment || 'تقسيط';
+
+    let firstPay = 1000.00;
+    if (orderInfo.payMethod && orderInfo.payMethod.includes('Tabby')) {
+      firstPay = Math.round(rawPrice / 4);
+    } else if (rawPrice > 5000) {
+      firstPay = Math.round(rawPrice * 0.1);
     }
-
-    let firstPay = orderInfo.firstPay || Math.round(rawPrice * 0.1);
-    if (firstPay === 0) firstPay = 500;
 
     const formattedTotal = rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' د.إ';
     const formattedFirst = firstPay.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' د.إ';
