@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تم استلام طلبك - A2 STORE</title>
+<title>الفاتورة وعقد التقسيط - A2 STORE</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -27,11 +27,12 @@
   .success-card {
     background: #ffffff;
     width: 100%;
-    max-width: 550px;
+    max-width: 650px;
     padding: 40px 30px;
     border-radius: 12px;
     box-shadow: 0 8px 30px rgba(0,0,0,0.08);
     text-align: center;
+    margin-bottom: 20px;
   }
   .success-icon {
     width: 70px;
@@ -104,15 +105,18 @@
     .invoice-print-container { display: block !important; width: 100%; }
   }
 
-  /* تصميم الفاتورة */
-  .invoice-box {
+  /* تصميم الفاتورة وعقد التقسيط المدمج */
+  .invoice-box, .contract-box {
     background: #ffffff;
     width: 100%;
     max-width: 650px;
-    margin: 0 auto;
-    padding: 25px;
+    margin: 0 auto 30px auto;
+    padding: 30px;
     color: var(--text-main);
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
   }
+
   .inv-header {
     display: flex;
     justify-content: space-between;
@@ -121,7 +125,7 @@
     padding-bottom: 15px;
     margin-bottom: 20px;
   }
-  .logo-img { height: 60px; width: auto; object-fit: contain; }
+  .logo-img { height: 55px; width: auto; object-fit: contain; }
   .invoice-title {
     text-align: center;
     font-size: 20px;
@@ -218,14 +222,39 @@
     border-top: 1px dashed #ddd;
     padding-top: 15px;
   }
+
+  /* تنسيق صفحة العقد المدمجة */
+  .contract-title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 25px;
+    text-decoration: underline;
+  }
+  .contract-body {
+    font-size: 14px;
+    line-height: 2.2;
+    color: #222;
+    text-align: justify;
+    margin-bottom: 30px;
+  }
+  .signature-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-size: 15px;
+    font-weight: 700;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+  }
 </style>
 </head>
 <body>
 
 <div class="success-card">
   <div class="success-icon">✓</div>
-  <h1>تم استلام طلبك!</h1>
-  <p>شكراً لتسوقك مع A2 STORE. طلبك قيد المعالجة الآن وسنقوم بإرسال تحديثات التتبع قريباً.</p>
+  <h1>تم استلام طلبك وعقد التقسيط بنجاح!</h1>
+  <p>تم إعداد الفاتورة وعقد بيع بالتقسيط تلقائياً. يمكنك طباعتها معاً.</p>
 
   <div class="details-box">
     <div class="detail-row">
@@ -233,31 +262,27 @@
       <span id="orderIdNum">#726447</span>
     </div>
     <div class="detail-row">
-      <span>حالة الدفع</span>
-      <span><span class="status-badge">مقبول بنجاح</span></span>
-    </div>
-    <div class="detail-row">
-      <span>وقت التوصيل المتوقع</span>
-      <span>24-48 ساعة</span>
+      <span>حالة الطلب</span>
+      <span><span class="status-badge">مقبول ومعتمد</span></span>
     </div>
   </div>
 
   <div class="btn-group">
     <a href="index.html" class="btn btn-outline">🏠 الرئيسية</a>
-    <button onclick="downloadInvoicePDF()" class="btn btn-primary">📥 تحميل الفاتورة</button>
+    <button onclick="downloadInvoicePDF()" class="btn btn-primary">🖨️ طباعة الفاتورة والعقد</button>
   </div>
 
   <a href="index.html" class="continue-link">← تابع التسوق</a>
 </div>
 
-<!-- الفاتورة للطباعة / PDF -->
+<!-- حاوية الطباعة والملفات (الفاتورة + العقد معاً) -->
 <div class="invoice-print-container">
+  
+  <!-- 1. الفاتورة الضريبية المبسطة -->
   <div class="invoice-box">
-    
-    <!-- رأس الفاتورة (الشعار الجديد img/logo.jpg) -->
     <div class="inv-header">
       <div>
-        <img src="img/logo.jpg" alt="Play Phones" class="logo-img" style="height:60px" onerror="this.style.display='none'">
+        <img src="img/logo.jpg" alt="A2 Store" class="logo-img" onerror="this.style.display='none'">
       </div>
       <div style="text-align: left;">
         <p style="font-size: 16px; font-weight: 800; color: #000;">A2 STORE</p>
@@ -293,9 +318,7 @@
           <th>الإجمالي</th>
         </tr>
       </thead>
-      <tbody id="itemsTableBody">
-        <!-- يُعبأ تلقائياً من سلة الموقع -->
-      </tbody>
+      <tbody id="itemsTableBody"></tbody>
     </table>
 
     <div class="summary-section-box">
@@ -306,7 +329,7 @@
         </div>
         <div class="summary-row installment-row">
           <span>خطة التقسيط:</span>
-          <span id="installMonths">6 شهر</span>
+          <span id="installMonths">3 شهر</span>
         </div>
         <div class="summary-row total-bold">
           <span>الإجمالي:</span>
@@ -318,20 +341,52 @@
         </div>
       </div>
 
-      <!-- الشعار الجديد عند الختم والتوقيع في الأسفل -->
       <div class="certified-stamp-box">
         <span>الختم المعتمد</span>
-        <img src="img/logo.jpg" alt="Play Phones" style="height:50px; object-fit:contain;" onerror="this.style.display='none'">
+        <img src="img/logo.jpg" alt="Stamp" style="height:45px; object-fit:contain;" onerror="this.style.display='none'">
       </div>
     </div>
 
     <div class="footer-note">
-      شكراً لتسوقكم معنا!<br>
-      A2 STORE - وجهتك الأولى للأجهزة الذكية والتقنية<br>
-      هذه الفاتورة إلكترونية معتمدة ولا تحتاج لختم أو توقيع
+      شكراً لتسوقكم معنا!<br>A2 STORE - وجهتك الأولى للأجهزة الذكية والتقنية
+    </div>
+  </div>
+
+  <div style="page-break-after: always; margin: 40px 0;"></div>
+
+  <!-- 2. عقد بيع بالتقسيط المدمج -->
+  <div class="contract-box">
+    <div class="inv-header">
+      <div style="font-size: 13px; font-weight: 700;">
+        <div>A2 STORE</div>
+        <div style="font-size: 11px; color: #555;">The first store in the Emirates</div>
+      </div>
+      <div>
+        <img src="img/logo.jpg" alt="A2 Store" class="logo-img" onerror="this.style.display='none'">
+      </div>
+      <div style="text-align: left; font-size: 13px; font-weight: 700;">
+        <div>أي 2 فونز</div>
+        <div style="font-size: 11px; color: #555;">المتجر الأول في الامارات</div>
+      </div>
     </div>
 
+    <div class="contract-title">عقد بيع بالتقسيط</div>
+
+    <div class="contract-body">
+      نحن A2 STORE، رقم التواصل: <span style="direction: ltr; display: inline-block;">05868669869</span>، عنوانه/ <span id="cAddress">Alain</span>.<br>
+      أقر أنا في كامل قواي العقلية أني قمت بشراء المنتجات التالية بالتقسيط من مؤسسة A2 STORE:<br>
+      <b>- <span id="cProductName">ابل آيفون 18 برو ماكس</span> : الكمية (<span id="cProductQty">1</span>) بمبلغ وقدره <span id="cTotalAmount">5,649.92</span> د.إ فقط.</b><br><br>
+      على أن أقوم بسداد المبلغ على أقساط شهرية بمبلغ وقدره <span id="cMonthlyAmount">214.58</span> د.إ فقط؛ اعتباراً من تاريخ <span id="cStartDate">08/12/2026</span> وحتى سداد كامل المبلغ المذكور أعلاه.<br><br>
+      <b>بند التأخير والالتزام:</b> يُمنح العميل فرصتي (2) سماح عند التأخر في سداد الأقساط، مع إرسال تنبيهات تذكيرية له. وفي حال تكرار التأخير للمرة الثالثة، يحق للمتجر توجيه إخطار رسمي للعميل والمطالبة بالمبالغ المستحقة واتخاذ الإجراءات القانونية المتاحة وفقاً للقوانين المعمول بها في دولة الإمارات العربية المتحدة.<br><br>
+      كما أقر أنا على علم تام بأنه لا يوجد التزامات مالية أو كفالات غرامية؛ وقد أخذت والله خير الشاهدين.
+    </div>
+
+    <div class="signature-section">
+      <div>الاسم/ <span id="cSignatureName">اسم العميل</span>.</div>
+      <div>التوقيع/ ............................................</div>
+    </div>
   </div>
+
 </div>
 
 <script>
@@ -364,13 +419,16 @@
 
     let rawPrice = 0;
     let tableHtml = '';
+    let firstItemName = 'ابل آيفون 18 برو ماكس';
+    let firstItemQty = 1;
 
     if (hasOrder) {
-      order.items.forEach(it => {
+      order.items.forEach((it, idx) => {
         const q = Number(it.qty) || 1;
         const unit = Number(it.unit) || 0;
         const tot = Number(it.total) || unit * q;
         rawPrice += tot;
+        if (idx === 0) { firstItemName = it.name; firstItemQty = q; }
         tableHtml += `
           <tr>
             <td>${esc(it.name)}${it.detail ? `<div style="font-size:11px;color:#777;font-weight:600;margin-top:3px">${esc(it.detail)}</div>` : ''}</td>
@@ -381,13 +439,14 @@
       });
       if (Number(order.total) > 0) rawPrice = Number(order.total);
     } else if (cartItems.length > 0) {
-      cartItems.forEach(item => {
+      cartItems.forEach((item, idx) => {
         const p = parsePrice(item.price || item.p || item.cost || item.amount || item.unitPrice || 0);
         const q = Number(item.qty || item.q || item.quantity || 1);
         let itemTotal = p * q;
         if (itemTotal === 0) itemTotal = parsePrice(item.total || item.t || item.sum || 0);
         rawPrice += itemTotal;
         const pName = item.name || item.n || item.title || item.productName || 'منتج';
+        if (idx === 0) { firstItemName = pName; firstItemQty = q; }
         tableHtml += `<tr><td>${esc(pName)}</td><td>${q}</td><td>${fmt(p)}</td><td>${fmt(itemTotal)}</td></tr>`;
       });
     } else {
@@ -402,40 +461,40 @@
       const today = new Date();
       dateStr = today.toLocaleDateString('ar-AE') + ' | ' + today.toLocaleTimeString('ar-AE', {hour: '2-digit', minute:'2-digit'});
     }
-    if (hasOrder && (!order.id || !order.invDate)) {
-      order.id = invId; order.invDate = dateStr;
-      try { localStorage.setItem('a2order', JSON.stringify(order)); } catch(e) {}
-    }
     $('orderIdNum').textContent = '#' + invId;
     $('invNum').textContent = 'SAM-' + invId;
     $('invDate').textContent = 'تاريخ الطلب: ' + dateStr;
 
     let delivery = {};
     try { delivery = JSON.parse(localStorage.getItem('a2delivery') || '{}') || {}; } catch(e) {}
-    $('custName').textContent = delivery.name || orderInfo.name || orderInfo.cardName || orderInfo.holderName || '';
+    const custName = delivery.name || orderInfo.name || orderInfo.cardName || orderInfo.holderName || 'عميل A2';
+    const custPhone = delivery.phone || orderInfo.phone || orderInfo.whatsapp || orderInfo.mobile || '';
+    const custAddress = delivery.address || delivery.city || orderInfo.city || orderInfo.address || 'الإمارات';
+
+    $('custName').textContent = custName;
     const phoneEl = $('custPhone');
-    phoneEl.textContent = delivery.phone || orderInfo.phone || orderInfo.whatsapp || orderInfo.mobile || '';
+    phoneEl.textContent = custPhone;
     phoneEl.dir = 'ltr';
     phoneEl.style.unicodeBidi = 'isolate';
-    $('custCity').textContent = delivery.address || delivery.city || orderInfo.city || orderInfo.address || '';
+    $('custCity').textContent = custAddress;
 
-    let methodText, planText, firstPay;
-    const paidLabel = document.querySelector('.paid-row span:first-child');
+    // تعبئة بيانات العقد تلقائياً
+    $('cSignatureName').textContent = custName;
+    $('cAddress').textContent = custAddress;
+    $('cProductName').textContent = firstItemName;
+    $('cProductQty').textContent = firstItemQty;
+
+    let methodText, planText, firstPay, monthlyVal;
     if (hasOrder) {
-      methodText = order.methodText || '';
+      methodText = order.methodText || 'تقسيط';
       firstPay = Number(order.firstPay) || 0;
-      if (order.method === 'full') {
-        planText = 'دفع كامل (بدون تقسيط)';
-        if (paidLabel) paidLabel.textContent = 'المبلغ المدفوع:';
-      } else if (order.method === 'inst') {
-        planText = order.months + ' شهر × ' + fmt(order.monthly);
-      } else {
-        planText = '4 دفعات × ' + fmt(order.monthly) + ' بدون فوائد';
-      }
+      monthlyVal = order.monthly || (rawPrice / 3);
+      planText = order.method === 'full' ? 'دفع كامل' : (order.months || 3) + ' شهر';
     } else {
       methodText = orderInfo.payMethod || orderInfo.payment || 'تقسيط';
-      planText = $('installMonths').textContent;
-      firstPay = rawPrice > 5000 ? Math.round(rawPrice * 0.1) : 0;
+      planText = (orderInfo.months || 3) + ' شهر';
+      firstPay = orderInfo.firstPay || Math.round(rawPrice * 0.1);
+      monthlyVal = (rawPrice - firstPay) / (orderInfo.months || 3);
     }
     $('payMethodText').textContent = methodText;
     $('installMonths').textContent = planText;
@@ -444,6 +503,13 @@
     $('subTotalVal').textContent = formattedTotal;
     $('grandTotalVal').textContent = formattedTotal;
     $('firstPayVal').textContent = fmt(firstPay);
+
+    $('cTotalAmount').textContent = Number(rawPrice).toLocaleString('en-US', {minimumFractionDigits: 2});
+    $('cMonthlyAmount').textContent = Number(monthlyVal).toLocaleString('en-US', {minimumFractionDigits: 2});
+
+    const today = new Date();
+    const formattedDate = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
+    $('cStartDate').textContent = formattedDate;
   });
 
   function downloadInvoicePDF() {
