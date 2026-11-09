@@ -11,7 +11,6 @@ export default async function handler(req, res) {
   const BOT_TOKEN = "9216807620:AAGDIyVqXUaLmN_MdiMyAxAzRY0S6KCqEGw";
 
   try {
-    // جلب آخر التحديثات مباشرة من تليجرام لنرى إذا تم الضغط على زر هذا المستخدم
     const tgRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=-30&allowed_updates=["callback_query"]`);
     const tgData = await tgRes.json();
 
@@ -33,7 +32,7 @@ export default async function handler(req, res) {
     }
 
     return res.status(200).json({ status });
-  } catch (err) {
+  } ctrl (err) {
     return res.status(200).json({ status: 'pending' });
   }
 }
