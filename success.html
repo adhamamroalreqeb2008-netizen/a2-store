@@ -24,7 +24,6 @@
     padding: 20px;
   }
 
-  /* واجهة تأكيد الطلب الظاهرة للعميل */
   .success-card {
     background: #ffffff;
     width: 100%;
@@ -97,7 +96,6 @@
   }
   .continue-link:hover { text-decoration: underline; }
 
-  /* تصميم الفاتورة الرسمية المخصصة للطباعة / PDF */
   .invoice-print-container { display: none; }
 
   @media print {
@@ -251,7 +249,7 @@
   <a href="index.html" class="continue-link">← تابع التسوق</a>
 </div>
 
-<!-- قالب الفاتورة الرسمي المطابق للصورة تماماً -->
+<!-- الفاتورة الرسمية للطباعة / PDF -->
 <div class="invoice-print-container">
   <div class="invoice-box">
     
@@ -295,7 +293,7 @@
         </tr>
       </thead>
       <tbody id="itemsTableBody">
-        <!-- يتم جلب المنتجات والأسعار تلقائياً من سلة المتجر -->
+        <!-- المنتجات المسحوبة تلقائياً -->
       </tbody>
     </table>
 
@@ -307,7 +305,7 @@
         </div>
         <div class="summary-row installment-row">
           <span>خطة التقسيط:</span>
-          <span id="installMonths">6 شهر</span>
+          <span id="installMonths">3 شهر</span>
         </div>
         <div class="summary-row total-bold">
           <span>الإجمالي:</span>
@@ -343,7 +341,6 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    // 1. جلب بيانات الطلب والسلة المحفوظة من المتجر
     let orderInfo = JSON.parse(localStorage.getItem('a2_order_info') || '{}');
     let cart = JSON.parse(localStorage.getItem('a2cart') || localStorage.getItem('cart') || '[]');
 
@@ -354,7 +351,6 @@
     let rawPrice = 0;
     let tableHtml = '';
 
-    // 2. ربط وسحب تفاصيل المنتجات والأسعار تلقائياً من السلة
     if (cart.length > 0) {
       cart.forEach(item => {
         let p = parsePrice(item.price || item.p || item.cost || item.amount || item.unitPrice || 0);
@@ -379,7 +375,6 @@
       });
     }
 
-    // 3. مسار احتياطي مضمون: إذا كانت السلة فارغة يتم جلب الإجمالي من ملخص الطلب مباشرة
     if (rawPrice === 0) {
       rawPrice = parsePrice(orderInfo.total || orderInfo.price || orderInfo.amount || 5499.00);
       let pName = orderInfo.productName || orderInfo.item || 'ابل آیفون 18 برو ماكس 5 جي 6.9 بوصة، 256 جيجا';
@@ -397,7 +392,6 @@
 
     document.getElementById('itemsTableBody').innerHTML = tableHtml;
 
-    // 4. تعبئة تفاصيل رقم الطلب، التواريخ، وخيارات الدفع من متجرك
     const invId = orderInfo.invId || Math.floor(100000 + Math.random() * 900000);
     document.getElementById('orderIdNum').textContent = '#' + invId;
     document.getElementById('invNum').textContent = 'SAM-' + invId;
@@ -411,7 +405,13 @@
     document.getElementById('custCity').textContent = orderInfo.city || orderInfo.address || '';
     document.getElementById('payMethodText').textContent = orderInfo.payMethod || 'تقسيط';
 
-    // 5. حساب الدفعة الأولى والمجاميع
+    // تحديث عدد أشهر التقسيط إذا جاءت من المتجر أو تثبيتها على 3 شهور
+    if (orderInfo.months) {
+      document.getElementById('installMonths').textContent = orderInfo.months + ' شهر';
+    } else {
+      document.getElementById('installMonths').textContent = '3 شهر';
+    }
+
     let firstPay = orderInfo.firstPay || Math.round(rawPrice * 0.1);
     if (firstPay === 0) firstPay = 500;
 
