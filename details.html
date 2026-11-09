@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بيانات الشحن والتوصيل - A2 STORE</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f172a; --card: #1e293b; --tx: #f8fafc; --mu: #94a3b8; --gold: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+  body { background: var(--bg); color: var(--tx); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .form-card { background: var(--card); width: 100%; max-width: 500px; padding: 30px; border-radius: 12px; border: 1px solid #334155; box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+  h2 { margin-bottom: 20px; color: var(--gold); text-align: center; font-size: 22px; }
+  .form-group { margin-bottom: 16px; text-align: right; }
+  label { display: block; margin-bottom: 6px; font-size: 14px; color: var(--mu); font-weight: 700; }
+  input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 15px; }
+  input:focus { border-color: var(--gold); outline: none; }
+  .btn { background: var(--gold); color: #000; border: none; padding: 14px; border-radius: 8px; font-weight: 800; cursor: pointer; width: 100%; margin-top: 10px; font-size: 16px; }
+  .btn:hover { opacity: 0.9; }
+</style>
+</head>
+<body>
+
+<div class="form-card">
+  <h2>أدخل بيانات التوصيل</h2>
+  <form id="detailsForm">
+    <div class="form-group">
+      <label>الاسم الكامل</label>
+      <input type="text" id="fullName" required placeholder="أدخل اسمك الكامل">
+    </div>
+    <div class="form-group">
+      <label>رقم التواصل (واتساب)</label>
+      <input type="tel" id="phoneNum" required placeholder="مثال: 971xxxxxxxx+ أو رقم محلي">
+    </div>
+    <div class="form-group">
+      <label>العنوان بالتفصيل (المدينة / الشارع / المبنى)</label>
+      <input type="text" id="userAddress" required placeholder="مثال: دبي، أبوهيل، شارع الرئيسي">
+    </div>
+    <button type="submit" class="btn">متابعة إلى الدفع</button>
+  </form>
+</div>
+
+<script>
+  document.getElementById('detailsForm').onsubmit = (e) => {
+    e.preventDefault();
+
+    // جلب البيانات القديمة الخاصة بالطلب لكي لا تُحذف
+    let orderInfo = JSON.parse(localStorage.getItem('a2_order_info') || '{}');
+
+    // تحديث بيانات العميل الجديدة داخل كائن الطلب
+    orderInfo.name = document.getElementById('fullName').value;
+    orderInfo.phone = document.getElementById('phoneNum').value;
+    orderInfo.city = document.getElementById('userAddress').value;
+
+    // حفظ البيانات المحدثة في الذاكرة المحلية
+    localStorage.setItem('a2_order_info', JSON.stringify(orderInfo));
+
+    // الانتقال إلى صفحة الدفع التالية (أو صفحة النجاح/الفاتورة إذا كانت هي التالية عندك)
+    window.location.href = 'payment.html'; // استبدل 'payment.html' باسم صفحة الدفع لديك
+  };
+</script>
+
+</body>
+</html>
