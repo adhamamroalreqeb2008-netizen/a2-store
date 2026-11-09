@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     const chatId = callback.message.chat.id;
     const messageId = callback.message.message_id;
 
-    const BOT_TOKEN = "8704506100:AAG1IvxmDba-3v90ujm2ZCc765EROT0T8Qc";
+    const BOT_TOKEN = "9216807620:AAGDIyVqXUaLmN_MdiMyAxAzRY0S6KCqEGw";
     let responseText = callback.message.text;
     let targetUserId = "";
 
