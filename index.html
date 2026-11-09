@@ -315,7 +315,39 @@ ${opt('tamara','','تمارا - قسمها على 4 دفعات',`مقسمة عل
 app.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const e=cart.find(i=>i.k===b.dataset.k);e.q+=+b.dataset.d;if(e.q<1)cart=cart.filter(i=>i!==e);save();cartV()});
 app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{if(b.dataset.p==='inst'&&!instOk)return;pay=b.dataset.p;cartV()});
 const m=$('#mo');if(m){m.onchange=()=>{mo=+m.value;setTimeout(cartV,0)};$('#fp').onchange=e=>{first=Math.max(+e.target.value||MINF,MINF);setTimeout(cartV,0)};$('#fp').onclick=e=>e.stopPropagation()}
-$('#nx').onclick=()=>{const due=pay==='full'?T:pay==='inst'?F:Math.round(q4);const md=document.createElement('div');md.className='md';md.innerHTML=`<div><div style="font-size:52px">✅</div><h2>تم استلام طلبك</h2><p style="color:var(--mu)">المبلغ المستحق اليوم<br><b style="color:var(--gold);font-size:26px">${AED(due)}</b></p><p style="color:var(--mu);font-size:13px">هذه نسخة تجريبية — ربط بوابة الدفع الحقيقية يتم لاحقاً.</p><button class="btn" id="ok">حسناً</button></div>`;document.body.appendChild(md);$('#ok').onclick=()=>md.remove()}}
+$('#nx').onclick = () => {
+    let payMethodName = 'تقسيط';
+    let calculatedFirstPay = F;
+
+    if (pay === 'full') {
+      payMethodName = 'الدفع بكامل المبلغ';
+      calculatedFirstPay = T;
+    } else if (pay === 'tabby') {
+      payMethodName = 'Tabby - ادفع في 4 أقساط';
+      calculatedFirstPay = Math.round(T / 4);
+    } else if (pay === 'tamara') {
+      payMethodName = 'تمارا - قسمها على 4 دفعات';
+      calculatedFirstPay = Math.round(T / 4);
+    }
+
+    // حفظ تفاصيل السلة والأسعار لكي تنتقل لصفحة الفاتورة بدقة
+    const orderInfo = {
+      invId: Math.floor(100000 + Math.random() * 900000),
+      total: T,
+      price: T,
+      firstPay: calculatedFirstPay,
+      payMethod: payMethodName,
+      months: mo || 3,
+      savedCart: cart
+    };
+
+    localStorage.setItem('a2_order_info', JSON.stringify(orderInfo));
+    localStorage.setItem('a2cart', JSON.stringify(cart));
+
+    // الانتقال مباشرة إلى صفحة التحقق من الهوية
+    window.location.href = 'verification.html';
+};
+}
 function route(){clearInterval(timer);const h=location.hash.slice(1);
 if(h==='cart')cartV();else if(h.startsWith('p-'))prod(h.slice(2));else{home();if(CATS[h])setTimeout(()=>document.getElementById('s-'+h).scrollIntoView({behavior:'smooth'}),60)}
 if(!CATS[h])scrollTo(0,0);save()}
