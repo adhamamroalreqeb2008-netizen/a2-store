@@ -689,5 +689,21 @@
    "خالد الشامسي",
    "أفضل سعر لقيته لساعة آبل، والتوصيل مجاني ووصل بالموعد."
   ]
- ]
+ ],
+ "contact": {
+  "email": "playphones825@gmail.com",
+  "phone": "+971 55 578 4831",
+  "phoneDial": "+971555784831",
+  "address": "العنوان: الامارات العربية المتحدة",
+  "instagram": "https://www.instagram.com/",
+  "tiktok": "https://www.tiktok.com/",
+  "facebook": "https://www.facebook.com/",
+  "ministryName": "وزارة التجارة"
+ },
+ "images": {
+  "logo": "",
+  "favicon": "",
+  "ministryBadge": ""
+ },
+ "licenses": []
 }
