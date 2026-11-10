@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>لوحة التحكم | Play Phones</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070b14;--card:#101726;--in:#0b101a;--tx:#f4f6fb;--mu:#98a4bb;--ac:#2f8cff;--gold:#e0bd74;--bd:rgba(255,255,255,.12);--ok:#2ecc71;--er:#ff5d5d;color-scheme:dark}
+@media(prefers-color-scheme:light){:root{--bg:#f2f4f9;--card:#fff;--in:#f6f7fb;--tx:#0b1220;--mu:#5b667d;--bd:rgba(0,0,0,.14);color-scheme:light}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:Tajawal,system-ui,sans-serif;padding-top:env(safe-area-inset-top,0px)}
+input,select,textarea,button{font:inherit;color:inherit}
+input,select,textarea{width:100%;background:var(--in);border:1px solid var(--bd);border-radius:8px;padding:9px 11px}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+button{cursor:pointer;border:1px solid var(--bd);background:var(--card);border-radius:8px;padding:8px 14px;font-weight:700}
+.pri{background:var(--ac);border-color:var(--ac);color:#fff}.dg{color:var(--er)}
+label{display:block;font-size:13px;color:var(--mu);margin:12px 0 5px;font-weight:700}
+.wrap{max-width:980px;margin:0 auto;padding:0 14px 60px}
+.conn{max-width:430px;margin:8vh auto;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:26px}
+.conn h1{margin:0 0 4px;font-size:22px}.conn p{color:var(--mu);font-size:13px;line-height:1.7;margin:0 0 6px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--bd);padding:12px 0}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between}
+.top h1{font-size:19px;margin:0}.top h1 span{color:var(--gold)}
+nav{display:flex;gap:6px;margin-top:10px;overflow-x:auto}
+nav button{white-space:nowrap}nav .on{background:var(--tx);color:var(--bg)}
+#st{font-size:13px;color:var(--mu)}#st.d{color:var(--gold)}
+.bar{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}.bar input,.bar select{flex:1;min-width:140px;width:auto}
+.row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px 14px;margin-bottom:8px}
+.row b{display:block}.row small{color:var(--mu)}.row.h{opacity:.55}
+.acts{display:flex;gap:6px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}.g3{display:grid;grid-template-columns:1.2fr 1fr 1.6fr auto;gap:8px;margin-bottom:8px;align-items:center}
+.box{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px;margin-bottom:10px}
+dialog{width:min(560px,94vw);max-height:90vh;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:14px;padding:20px}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+.ck{display:flex;gap:8px;align-items:center;margin-top:14px}.ck input{width:auto}
+.im{width:64px;height:64px;border-radius:8px;object-fit:contain;background:var(--in);border:1px solid var(--bd)}
+#ts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 18px;border-radius:8px;font-weight:700;z-index:99}
+.hint{font-size:12px;color:var(--mu);line-height:1.7}
+@media(max-width:560px){.g3{grid-template-columns:1fr 1fr}}
+</style></head><body>
+<div id="app"></div><dialog id="dlg"></dialog>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const TYPES={phone:'جوال',watch:'ساعة',buds:'سماعات',max:'سماعة رأس',tv:'تلفاز',console:'بلايستيشن',power:'طاقة'};
+let S=null,tab='products',dirty=false,q='',fc='',E=null,eIdx=-1;
+let cfg={};try{cfg=JSON.parse(localStorage.getItem('a2admin')||'{}')}catch(e){}
+function toast(t){const e=document.createElement('div');e.id='ts';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2400)}
+const mark=()=>{dirty=true;const s=$('#st');if(s){s.textContent='تعديلات غير منشورة';s.className='d'}};
+async function api(p,o={}){const r=await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${p}${o.method==='PUT'?'':'?ref='+cfg.branch+'&t='+Date.now()}`,{...o,headers:{Authorization:'Bearer '+cfg.token,Accept:'application/vnd.github+json'}});
+if(r.status===404)return null;const j=await r.json();if(!r.ok)throw new Error(r.status===401?'التوكن غير صحيح':j.message||r.status);return j}
+const enc=s=>{let b='';new TextEncoder().encode(s).forEach(c=>b+=String.fromCharCode(c));return btoa(b)};
+const dec=c=>new TextDecoder().decode(Uint8Array.from(atob(c.replace(/\s/g,'')),x=>x.charCodeAt(0)));
+async function put(path,b64,msg){const old=await api(path);return api(path,{method:'PUT',body:JSON.stringify({message:msg,content:b64,branch:cfg.branch,...(old?{sha:old.sha}:{})})})}
+function connectV(err){$('#app').innerHTML=`<div class="conn"><h1>لوحة التحكم</h1><p>اربط اللوحة بمستودع الموقع على GitHub. التوكن يُحفظ على هذا الجهاز فقط.</p>
+<label>اسم الحساب (Owner)</label><input id="o" value="${esc(cfg.owner)}" dir="ltr"><label>اسم المستودع (Repo)</label><input id="r" value="${esc(cfg.repo)}" dir="ltr">
+<label>الفرع</label><input id="b" value="${esc(cfg.branch||'main')}" dir="ltr"><label>GitHub Token</label><input id="t" type="password" value="${esc(cfg.token)}" dir="ltr" placeholder="github_pat_...">
+<p class="hint" style="margin-top:10px">أنشئ Fine-grained token من إعدادات GitHub ← Developer settings، على هذا المستودع فقط، بصلاحية Contents: Read and write.</p>
+${err?`<p style="color:var(--er);font-weight:700">${esc(err)}</p>`:''}<button class="pri" id="go" style="width:100%;margin-top:12px">اتصال</button></div>`;
+$('#go').onclick=async()=>{cfg={owner:$('#o').value.trim(),repo:$('#r').value.trim(),branch:$('#b').value.trim()||'main',token:$('#t').value.trim()};
+$('#go').textContent='جارٍ الاتصال…';try{const f=await api('data.json');
+if(!f){return connectV('لم أجد data.json في المستودع. ارفع الملف أولاً ثم أعد المحاولة.')}
+S=JSON.parse(dec(f.content));localStorage.setItem('a2admin',JSON.stringify(cfg));main()}catch(e){connectV(e.message)}}}
+function main(){$('#app').innerHTML=`<header><div class="wrap" style="padding-bottom:0"><div class="top"><h1>Play Phones <span>· لوحة التحكم</span></h1><div style="display:flex;gap:10px;align-items:center"><span id="st">${dirty?'تعديلات غير منشورة':'كل شيء منشور'}</span><button class="pri" id="pub">نشر التعديلات</button><button id="out">خروج</button></div></div>
+<nav>${[['products','المنتجات'],['cats','الأقسام'],['hero','السلايدر'],['reviews','آراء العملاء'],['ann','الإعلان']].map(t=>`<button data-t="${t[0]}" class="${tab===t[0]?'on':''}">${t[1]}</button>`).join('')}</nav></div></header><div class="wrap" id="body"></div>`;
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;main()});
+$('#pub').onclick=publish;$('#out').onclick=()=>{if(!dirty||confirm('عندك تعديلات غير منشورة. تخرج؟')){localStorage.removeItem('a2admin');cfg={};S=null;dirty=false;connectV()}};view()}
+async function publish(){const b=$('#pub');b.textContent='جارٍ النشر…';b.disabled=true;
+try{await put('data.json',enc(JSON.stringify(S,null,1)),'Admin: update data.json');dirty=false;$('#st').textContent='كل شيء منشور';$('#st').className='';toast('تم النشر. يظهر على الموقع خلال دقيقة تقريباً')}catch(e){toast('فشل النشر: '+e.message)}b.textContent='نشر التعديلات';b.disabled=false}
+function view(){const B=$('#body');({products:prodV,cats:catV,hero:heroV,reviews:revV,ann:annV})[tab](B)}
+/* ---- المنتجات ---- */
+function prodV(B){B.innerHTML=`<div class="bar"><input id="q" placeholder="ابحث باسم المنتج" value="${esc(q)}"><select id="fc"><option value="">كل الأقسام</option>${Object.entries(S.cats).map(([k,v])=>`<option value="${esc(k)}" ${fc===k?'selected':''}>${esc(v)}</option>`).join('')}</select><button class="pri" id="add">+ منتج جديد</button></div><div id="list"></div>`;
+$('#q').oninput=e=>{q=e.target.value.toLowerCase();list()};$('#fc').onchange=e=>{fc=e.target.value;list()};$('#add').onclick=()=>edit(-1);list()}
+function list(){const L=$('#list');const rows=S.catalog.map((p,i)=>[p,i]).filter(([p])=>(!q||p.n.toLowerCase().includes(q)||p.id.includes(q))&&(!fc||p.cat===fc));
+L.innerHTML=rows.length?rows.map(([p,i])=>`<div class="row${p.hidden?' h':''}"><div><b>${esc(p.n)}</b><small>${esc(S.cats[p.cat]||p.cat)} · من ${Math.min(...p.o.map(o=>o.p)).toLocaleString('en-US')} د.إ${p.hidden?' · مخفي':''}</small></div><div class="acts"><button data-e="${i}">تعديل</button><button data-v="${i}">${p.hidden?'إظهار':'إخفاء'}</button></div></div>`).join(''):'<p class="hint">لا توجد منتجات مطابقة.</p>';
+L.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>edit(+b.dataset.e));L.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{const p=S.catalog[+b.dataset.v];p.hidden=!p.hidden;mark();list()})}
+function edit(i){eIdx=i;E=i<0?{id:'',cat:Object.keys(S.cats)[0],n:'',t:'phone',c:['#2f8cff','#0a1f5c'],o:[{l:'',p:0}],img:'',d:[]}:JSON.parse(JSON.stringify(S.catalog[i]));E.d=E.d||[];E.img=E.img||'';dlgV();$('#dlg').showModal()}
+function dlgV(){const d=$('#dlg');d.innerHTML=`<h2 style="margin:0">${eIdx<0?'منتج جديد':'تعديل المنتج'}</h2>
+<label>اسم المنتج</label><input data-f="n" value="${esc(E.n)}">
+${eIdx<0?`<label>المعرّف (إنجليزي بدون مسافات)</label><input data-f="id" dir="ltr" value="${esc(E.id)}" placeholder="مثال: ip19">`:''}
+<div class="g2"><div><label>القسم</label><select data-f="cat">${Object.entries(S.cats).map(([k,v])=>`<option value="${esc(k)}" ${E.cat===k?'selected':''}>${esc(v)}</option>`).join('')}</select></div>
+<div><label>نوع الرسم الاحتياطي</label><select data-f="t">${Object.entries(TYPES).map(([k,v])=>`<option value="${k}" ${E.t===k?'selected':''}>${v}</option>`).join('')}</select></div></div>
+<label>الخيارات والأسعار (بالدرهم)</label>${E.o.map((o,k)=>`<div class="g2" style="grid-template-columns:1fr 1fr auto"><input data-ol="${k}" value="${esc(o.l)}" placeholder="256GB"><input data-op="${k}" type="number" min="0" value="${o.p}" dir="ltr"><button class="dg" data-od="${k}">حذف</button></div>`).join('')}<button id="oa">+ خيار</button>
+<label>الصورة</label><div style="display:flex;gap:10px;align-items:center">${E.img?`<img class="im" src="${esc(E.img)}" onerror="this.style.opacity=.3">`:''}<input type="file" id="fi" accept="image/*"></div><input data-f="img" dir="ltr" value="${esc(E.img.startsWith('data:')?'':E.img)}" placeholder="أو رابط/مسار الصورة" style="margin-top:6px"><p class="hint">إذا تركتها فارغة يبقى المنتج بصورته الحالية في الموقع.</p>
+<label>الوصف (سطر لكل نقطة)</label><textarea data-f="d" rows="4">${esc(E.d.join('\n'))}</textarea>
+<div class="ck"><input type="checkbox" id="hd" ${E.hidden?'checked':''}><span>مخفي عن الزوار</span></div>
+<div style="display:flex;gap:8px;margin-top:20px"><button class="pri" id="sv" style="flex:1">حفظ</button><button id="cx">إلغاء</button>${eIdx>=0?'<button class="dg" id="dl">حذف المنتج</button>':''}</div>`;
+d.oninput=e=>{const t=e.target;if(t.dataset.f)E[t.dataset.f]=t.dataset.f==='d'?t.value.split('\n').map(x=>x.trim()).filter(Boolean):t.value;
+if(t.dataset.ol!=null)E.o[+t.dataset.ol].l=t.value;if(t.dataset.op!=null)E.o[+t.dataset.op].p=Math.max(0,+t.value||0)};
+d.onclick=e=>{const t=e.target;if(t.dataset.od!=null&&E.o.length>1){E.o.splice(+t.dataset.od,1);dlgV()}};
+$('#oa').onclick=()=>{E.o.push({l:'',p:0});dlgV()};$('#cx').onclick=()=>d.close();
+$('#hd').onchange=e=>E.hidden=e.target.checked;
+$('#fi').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{E.img=await up(f);toast('تم رفع الصورة');dlgV()}catch(x){toast('فشل الرفع: '+x.message)}};
+$('#sv').onclick=()=>{if(!E.n.trim())return toast('اكتب اسم المنتج');if(E.o.some(o=>!o.l.trim()))return toast('اكتب اسم كل خيار (مثل 256GB)');
+if(eIdx<0){E.id=E.id.trim().replace(/[^a-zA-Z0-9_-]/g,'');if(!E.id||S.catalog.some(p=>p.id===E.id))return toast('المعرّف فارغ أو مستخدم مسبقاً')}
+if(!E.img)delete E.img;if(!E.d.length)delete E.d;if(!E.hidden)delete E.hidden;
+eIdx<0?S.catalog.push(E):S.catalog[eIdx]=E;mark();d.close();list()};
+const dl=$('#dl');if(dl)dl.onclick=()=>{if(confirm('حذف المنتج نهائياً من الموقع؟')){S.hero=S.hero.filter(h=>h[0]!==E.id);S.catalog.splice(eIdx,1);mark();d.close();list()}}}
+async function up(f){const im=await createImageBitmap(f),s=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;
+const x=c.getContext('2d');x.drawImage(im,0,0,c.width,c.height);const b=c.toDataURL('image/webp',.88).split(',')[1],p='images/'+(E.id||'p')+'-'+Date.now()+'.webp';
+await put(p,b,'Admin: upload image');return p}
+/* ---- الأقسام ---- */
+function catV(B){B.innerHTML=`<p class="hint">اسم القسم يظهر في الموقع. حذف القسم يخفي منتجاته، فانقلها أولاً.</p>`+Object.entries(S.cats).map(([k,v])=>`<div class="g2" style="grid-template-columns:110px 1fr auto"><input value="${esc(k)}" dir="ltr" disabled><input data-c="${esc(k)}" value="${esc(v)}"><button class="dg" data-x="${esc(k)}">حذف</button></div>`).join('')+`<button class="pri" id="ac">+ قسم جديد</button>`;
+B.oninput=e=>{if(e.target.dataset.c){S.cats[e.target.dataset.c]=e.target.value;mark()}};
+B.onclick=e=>{const k=e.target.dataset.x;if(k){if(S.catalog.some(p=>p.cat===k))return toast('القسم فيه منتجات. انقلها أو احذفها أولاً');delete S.cats[k];mark();catV(B)}};
+$('#ac').onclick=()=>{const k=(prompt('معرّف القسم بالإنجليزي (مثال: laptops)')||'').trim().replace(/[^a-zA-Z0-9_-]/g,'');if(!k||S.cats[k])return;S.cats[k]='قسم جديد';mark();catV(B)}}
+/* ---- السلايدر ---- */
+function heroV(B){B.innerHTML=`<p class="hint">الشرائح الظاهرة أعلى الصفحة الرئيسية.</p>`+S.hero.map((h,i)=>`<div class="box"><div class="g2"><select data-h="${i}.0">${S.catalog.map(p=>`<option value="${esc(p.id)}" ${p.id===h[0]?'selected':''}>${esc(p.n)}</option>`).join('')}</select><input data-h="${i}.1" value="${esc(h[1])}" placeholder="العنوان"></div><input data-h="${i}.2" value="${esc(h[2])}" placeholder="الوصف"><div class="acts" style="margin-top:8px"><button data-m="${i}">↑ للأعلى</button><button class="dg" data-r="${i}">حذف</button></div></div>`).join('')+`<button class="pri" id="ah">+ شريحة</button>`;
+B.oninput=B.onchange=e=>{const h=e.target.dataset.h;if(h){const[i,j]=h.split('.');S.hero[i][j]=e.target.value;mark()}};
+B.onclick=e=>{const d=e.target.dataset;if(d.r!=null){S.hero.splice(+d.r,1);mark();heroV(B)}if(d.m!=null&&+d.m>0){const i=+d.m;[S.hero[i-1],S.hero[i]]=[S.hero[i],S.hero[i-1]];mark();heroV(B)}};
+$('#ah').onclick=()=>{S.hero.push([S.catalog[0].id,'عنوان','وصف قصير']);mark();heroV(B)}}
+/* ---- الآراء ---- */
+function revV(B){B.innerHTML=S.reviews.map((r,i)=>`<div class="box"><input data-v="${i}.0" value="${esc(r[0])}" placeholder="اسم العميل"><textarea data-v="${i}.1" rows="2" style="margin-top:8px" placeholder="الرأي">${esc(r[1])}</textarea><button class="dg" data-r="${i}" style="margin-top:8px">حذف</button></div>`).join('')+`<button class="pri" id="ar">+ رأي جديد</button>`;
+B.oninput=e=>{const v=e.target.dataset.v;if(v){const[i,j]=v.split('.');S.reviews[i][j]=e.target.value;mark()}};
+B.onclick=e=>{if(e.target.dataset.r!=null){S.reviews.splice(+e.target.dataset.r,1);mark();revV(B)}};
+$('#ar').onclick=()=>{S.reviews.push(['','']);mark();revV(B)}}
+/* ---- الإعلان ---- */
+function annV(B){B.innerHTML=`<label>شريط إعلان أعلى الموقع (اتركه فارغاً لإخفائه)</label><input id="an" value="${esc(S.announcement)}" placeholder="مثال: شحن مجاني لكل الإمارات هذا الأسبوع">`;$('#an').oninput=e=>{S.announcement=e.target.value;mark()}}
+window.onbeforeunload=e=>dirty?(e.preventDefault(),''):undefined;
+(async()=>{if(cfg.token&&cfg.owner){try{const f=await api('data.json');if(f){S=JSON.parse(dec(f.content));return main()}}catch(e){}}connectV()})();
+</script></body></html>
