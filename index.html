@@ -451,5 +451,18 @@ app.querySelectorAll('.li').forEach(e=>e.onclick=()=>{const d=document.createEle
 function route(){clearInterval(timer);const h=location.hash.slice(1);
 if(h==='licenses')licV();else if(h==='cart')cartV();else if(h.startsWith('p-'))prod(h.slice(2));else{home();if(CATS[h])setTimeout(()=>document.getElementById('s-'+h).scrollIntoView({behavior:'smooth'}),60)}
 if(!CATS[h])scrollTo(0,0);save()}
-addEventListener('hashchange',route);route();
+/* ===== Admin data (data.json) ===== */
+function applyData(D){try{
+if(D.cats){Object.keys(CATS).forEach(k=>delete CATS[k]);Object.assign(CATS,D.cats)}
+if(D.catalog){const ids=new Set(D.catalog.map(x=>x.id));
+for(let i=P.length-1;i>=0;i--)if(!ids.has(P[i].id))P.splice(i,1);
+D.catalog.forEach(x=>{let p=find(x.id);if(!p){p={id:x.id,t:'phone',c:['#2f8cff','#0a1f5c']};P.push(p)}
+['cat','n','t','c'].forEach(k=>{if(x[k])p[k]=x[k]});p.o=x.o&&x.o.length?x.o:p.o;
+if(x.img)p.img=x.img;if(x.d&&x.d.length)p.d=x.d});
+HIDE.length=0;D.catalog.forEach(x=>{if(x.hidden)HIDE.push(x.id)})}
+if(D.hero){HERO.length=0;D.hero.filter(h=>find(h[0])).forEach(h=>HERO.push(h))}
+if(D.reviews){REV.length=0;D.reviews.forEach(r=>REV.push(r))}
+if(D.announcement){const b=document.createElement('div');b.textContent=D.announcement;b.style.cssText='background:#2f8cff;color:#fff;text-align:center;padding:8px 12px;font-weight:700;font-size:14px';document.body.prepend(b)}
+}catch(e){console.error('data.json',e)}}
+fetch('data.json?t='+Date.now()).then(r=>r.ok?r.json():null).catch(()=>null).then(D=>{if(D)applyData(D);addEventListener('hashchange',route);route()});
 </script></body></html>
