@@ -60,12 +60,15 @@ $('#go').textContent='جارٍ الاتصال…';try{const f=await api('data.js
 if(!f){return connectV('لم أجد data.json في المستودع. ارفع الملف أولاً ثم أعد المحاولة.')}
 S=JSON.parse(dec(f.content));localStorage.setItem('a2admin',JSON.stringify(cfg));main()}catch(e){connectV(e.message)}}}
 function main(){$('#app').innerHTML=`<header><div class="wrap" style="padding-bottom:0"><div class="top"><h1>Play Phones <span>· لوحة التحكم</span></h1><div style="display:flex;gap:10px;align-items:center"><span id="st">${dirty?'تعديلات غير منشورة':'كل شيء منشور'}</span><button class="pri" id="pub">نشر التعديلات</button><button id="out">خروج</button></div></div>
-<nav>${[['products','المنتجات'],['cats','الأقسام'],['hero','السلايدر'],['reviews','آراء العملاء'],['ann','الإعلان']].map(t=>`<button data-t="${t[0]}" class="${tab===t[0]?'on':''}">${t[1]}</button>`).join('')}</nav></div></header><div class="wrap" id="body"></div>`;
+<nav>${[['products','المنتجات'],['cats','الأقسام'],['hero','السلايدر'],['reviews','آراء العملاء'],['contact','بيانات التواصل'],['images','الصور واللوجو'],['ann','الإعلان']].map(t=>`<button data-t="${t[0]}" class="${tab===t[0]?'on':''}">${t[1]}</button>`).join('')}</nav></div></header><div class="wrap" id="body"></div>`;
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;main()});
 $('#pub').onclick=publish;$('#out').onclick=()=>{if(!dirty||confirm('عندك تعديلات غير منشورة. تخرج؟')){localStorage.removeItem('a2admin');cfg={};S=null;dirty=false;connectV()}};view()}
 async function publish(){const b=$('#pub');b.textContent='جارٍ النشر…';b.disabled=true;
 try{await put('data.json',enc(JSON.stringify(S,null,1)),'Admin: update data.json');dirty=false;$('#st').textContent='كل شيء منشور';$('#st').className='';toast('تم النشر. يظهر على الموقع خلال دقيقة تقريباً')}catch(e){toast('فشل النشر: '+e.message)}b.textContent='نشر التعديلات';b.disabled=false}
-function view(){const B=$('#body');({products:prodV,cats:catV,hero:heroV,reviews:revV,ann:annV})[tab](B)}
+function view(){const B=$('#body');({products:prodV,cats:catV,hero:heroV,reviews:revV,contact:contactV,images:imagesV,ann:annV})[tab](B)}
+async function uploadImage(file,prefix){const im=await createImageBitmap(file),s=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;
+const x=c.getContext('2d');x.drawImage(im,0,0,c.width,c.height);const b=c.toDataURL('image/webp',.9).split(',')[1],p='images/'+prefix+'-'+Date.now()+'.webp';
+await put(p,b,'Admin: upload '+prefix+' image');return p}
 /* ---- المنتجات ---- */
 function prodV(B){B.innerHTML=`<div class="bar"><input id="q" placeholder="ابحث باسم المنتج" value="${esc(q)}"><select id="fc"><option value="">كل الأقسام</option>${Object.entries(S.cats).map(([k,v])=>`<option value="${esc(k)}" ${fc===k?'selected':''}>${esc(v)}</option>`).join('')}</select><button class="pri" id="add">+ منتج جديد</button></div><div id="list"></div>`;
 $('#q').oninput=e=>{q=e.target.value.toLowerCase();list()};$('#fc').onchange=e=>{fc=e.target.value;list()};$('#add').onclick=()=>edit(-1);list()}
@@ -94,9 +97,7 @@ if(eIdx<0){E.id=E.id.trim().replace(/[^a-zA-Z0-9_-]/g,'');if(!E.id||S.catalog.so
 if(!E.img)delete E.img;if(!E.d.length)delete E.d;if(!E.hidden)delete E.hidden;
 eIdx<0?S.catalog.push(E):S.catalog[eIdx]=E;mark();d.close();list()};
 const dl=$('#dl');if(dl)dl.onclick=()=>{if(confirm('حذف المنتج نهائياً من الموقع؟')){S.hero=S.hero.filter(h=>h[0]!==E.id);S.catalog.splice(eIdx,1);mark();d.close();list()}}}
-async function up(f){const im=await createImageBitmap(f),s=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;
-const x=c.getContext('2d');x.drawImage(im,0,0,c.width,c.height);const b=c.toDataURL('image/webp',.88).split(',')[1],p='images/'+(E.id||'p')+'-'+Date.now()+'.webp';
-await put(p,b,'Admin: upload image');return p}
+async function up(f){return uploadImage(f,E.id||'p')}
 /* ---- الأقسام ---- */
 function catV(B){B.innerHTML=`<p class="hint">اسم القسم يظهر في الموقع. حذف القسم يخفي منتجاته، فانقلها أولاً.</p>`+Object.entries(S.cats).map(([k,v])=>`<div class="g2" style="grid-template-columns:110px 1fr auto"><input value="${esc(k)}" dir="ltr" disabled><input data-c="${esc(k)}" value="${esc(v)}"><button class="dg" data-x="${esc(k)}">حذف</button></div>`).join('')+`<button class="pri" id="ac">+ قسم جديد</button>`;
 B.oninput=e=>{if(e.target.dataset.c){S.cats[e.target.dataset.c]=e.target.value;mark()}};
@@ -112,6 +113,34 @@ function revV(B){B.innerHTML=S.reviews.map((r,i)=>`<div class="box"><input data-
 B.oninput=e=>{const v=e.target.dataset.v;if(v){const[i,j]=v.split('.');S.reviews[i][j]=e.target.value;mark()}};
 B.onclick=e=>{if(e.target.dataset.r!=null){S.reviews.splice(+e.target.dataset.r,1);mark();revV(B)}};
 $('#ar').onclick=()=>{S.reviews.push(['','']);mark();revV(B)}}
+/* ---- بيانات التواصل ---- */
+function contactV(B){const c=S.contact=S.contact||{};B.innerHTML=`
+<div class="box"><label>البريد الإلكتروني</label><input data-c="email" dir="ltr" value="${esc(c.email)}">
+<div class="g2"><div><label>رقم الهاتف (يظهر للزوار)</label><input data-c="phone" dir="ltr" value="${esc(c.phone)}" placeholder="+971 55 578 4831"></div>
+<div><label>رقم الهاتف للاتصال المباشر (بدون مسافات)</label><input data-c="phoneDial" dir="ltr" value="${esc(c.phoneDial)}" placeholder="+971555784831"></div></div>
+<label>العنوان</label><input data-c="address" value="${esc(c.address)}"></div>
+<div class="box"><label>رابط إنستغرام</label><input data-c="instagram" dir="ltr" value="${esc(c.instagram)}">
+<label>رابط تيك توك</label><input data-c="tiktok" dir="ltr" value="${esc(c.tiktok)}">
+<label>رابط فيسبوك</label><input data-c="facebook" dir="ltr" value="${esc(c.facebook)}"></div>
+<div class="box"><label>اسم الجهة المرخّصة (تظهر فوق شارة الترخيص بالفوتر)</label><input data-c="ministryName" value="${esc(c.ministryName)}"></div>`;
+B.oninput=e=>{const k=e.target.dataset.c;if(k){c[k]=e.target.value;mark()}}}
+/* ---- الصور واللوجو ---- */
+function imagesV(B){const im=S.images=S.images||{};
+const row=(key,title,hint)=>`<div class="box"><label>${title}</label><div style="display:flex;gap:10px;align-items:center">${im[key]?`<img class="im" src="${esc(im[key])}">`:'<div class="im"></div>'}<div style="flex:1"><input type="file" data-fu="${key}" accept="image/*"><p class="hint" style="margin-top:6px">${hint}</p>${im[key]?`<button class="dg" data-cl="${key}" style="margin-top:6px">رجوع للصورة الأصلية</button>`:''}</div></div></div>`;
+B.innerHTML=row('logo','شعار الموقع (الهيدر)','يظهر أعلى يسار الموقع. اترك بدون رفع ليبقى الشعار الحالي.')
++row('favicon','أيقونة التبويب (Favicon)','الأيقونة الصغيرة اللي تظهر باسم التبويب بالمتصفح.')
++row('ministryBadge','شارة الجهة المرخّصة','الصورة اللي تظهر جنب اسم الجهة المرخّصة بأسفل الموقع.')
++`<div class="box"><label>صور التراخيص القانونية (تظهر عند الضغط على "عرض التراخيص القانونية")</label><div id="licL"></div><button id="licA">+ إضافة صورة ترخيص</button><p class="hint" style="margin-top:8px">إذا القائمة فاضية، بتبقى صور التراخيص الحالية بالموقع كما هي.</p></div>`;
+function licL(){S.licenses=S.licenses||[];$('#licL').innerHTML=S.licenses.map((l,i)=>`<div class="g2" style="grid-template-columns:64px 1fr auto;align-items:center;margin-bottom:8px">${l.img?`<img class="im" style="width:48px;height:48px" src="${esc(l.img)}">`:'<div class="im" style="width:48px;height:48px"></div>'}<div><input data-lt="${i}" value="${esc(l.title)}" placeholder="عنوان الصورة"><input type="file" data-lf="${i}" accept="image/*" style="margin-top:6px"></div><button class="dg" data-lr="${i}">حذف</button></div>`).join('')||'<p class="hint">لا توجد صور مضافة بعد.</p>'}
+licL();
+B.onclick=async e=>{const d=e.target.dataset;
+if(d.cl){im[d.cl]='';mark();imagesV(B)}
+if(d.lr!=null){S.licenses.splice(+d.lr,1);mark();licL()}
+if(e.target.id==='licA'){S.licenses.push({img:'',title:''});mark();licL()}};
+B.oninput=e=>{const t=e.target;if(t.dataset.lt!=null){S.licenses[+t.dataset.lt].title=t.value;mark()}};
+B.onchange=async e=>{const t=e.target;
+if(t.dataset.fu){const f=t.files[0];if(!f)return;try{im[t.dataset.fu]=await uploadImage(f,t.dataset.fu);mark();toast('تم رفع الصورة');imagesV(B)}catch(x){toast('فشل الرفع: '+x.message)}}
+if(t.dataset.lf!=null){const f=t.files[0];if(!f)return;try{S.licenses[+t.dataset.lf].img=await uploadImage(f,'license');mark();toast('تم رفع الصورة');licL()}catch(x){toast('فشل الرفع: '+x.message)}}}}
 /* ---- الإعلان ---- */
 function annV(B){B.innerHTML=`<label>شريط إعلان أعلى الموقع (اتركه فارغاً لإخفائه)</label><input id="an" value="${esc(S.announcement)}" placeholder="مثال: شحن مجاني لكل الإمارات هذا الأسبوع">`;$('#an').oninput=e=>{S.announcement=e.target.value;mark()}}
 window.onbeforeunload=e=>dirty?(e.preventDefault(),''):undefined;
