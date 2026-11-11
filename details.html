@@ -26,13 +26,29 @@ body::before{content:"";position:fixed;inset:0;z-index:-2;
 /* ---------- top ---------- */
 .top{max-width:1120px;margin:0 auto;padding:22px 20px 6px;display:flex;align-items:center;justify-content:space-between;gap:16px}
 .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
-.brand img{height:78px;width:auto;object-fit:contain;border-radius:10px;display:block;transform-origin:center;
-  animation:logoIn .9s cubic-bezier(.2,1.4,.4,1) both,logoPulse 3.5s ease-in-out 1s infinite;
-  filter:drop-shadow(0 6px 18px rgba(224,189,116,.25));transition:transform .35s cubic-bezier(.3,1.6,.5,1),filter .35s}
-.brand:hover img{animation-play-state:paused;transform:scale(1.14) rotate(-3deg);filter:drop-shadow(0 8px 26px rgba(224,189,116,.55))}
-@keyframes logoIn{from{opacity:0;transform:scale(.4) rotate(-12deg)}to{opacity:1;transform:scale(1) rotate(0)}}
-@keyframes logoPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-@media(max-width:620px){.brand img{height:62px}}
+.logo{position:relative;display:block;border-radius:16px;overflow:hidden;flex:none;
+  transform:perspective(700px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) scale(var(--s,1));
+  transition:transform .25s ease-out;
+  animation:logoIn 1.3s cubic-bezier(.17,1.3,.35,1) backwards,logoGlow 3.2s ease-in-out 1.3s infinite;
+  filter:drop-shadow(0 8px 22px rgba(224,189,116,.3))}
+.logo img{height:104px;width:auto;object-fit:contain;display:block;
+  animation:logoFloat 4.2s ease-in-out 1.3s infinite}
+.logo::after{content:"";position:absolute;top:-20%;bottom:-20%;width:38%;left:-70%;
+  background:linear-gradient(105deg,transparent,rgba(255,255,255,.75),transparent);
+  transform:skewX(-22deg);animation:logoShine 4s ease-in-out 1.8s infinite;pointer-events:none}
+.brand:hover .logo{--s:1.14}
+@keyframes logoIn{
+  0%{opacity:0;transform:perspective(700px) rotateY(-100deg) scale(.2);filter:blur(16px) drop-shadow(0 0 0 rgba(224,189,116,0))}
+  60%{opacity:1;transform:perspective(700px) rotateY(12deg) scale(1.15);filter:blur(0) drop-shadow(0 0 40px rgba(224,189,116,.9))}
+  100%{opacity:1;transform:perspective(700px) rotateY(0) scale(1)}}
+@keyframes logoGlow{
+  0%,100%{filter:drop-shadow(0 8px 22px rgba(224,189,116,.25))}
+  50%{filter:drop-shadow(0 10px 40px rgba(224,189,116,.8))}}
+@keyframes logoFloat{
+  0%,100%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-6px) scale(1.07)}}
+@keyframes logoShine{0%,55%{left:-70%}100%{left:150%}}
+@media(max-width:620px){.logo img{height:78px}}
 .brand b{font-size:20px;letter-spacing:.5px;font-weight:800;display:none}
 .secure{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mu);border:1px solid var(--bd);background:var(--card);padding:8px 14px;border-radius:999px}
 .secure svg{width:16px;height:16px;stroke:var(--ok)}
@@ -155,7 +171,7 @@ select.inp option{background:#10172a;color:#f3f5f9}
 
 <header class="top">
   <a class="brand" href="index.html" aria-label="A2 STORE">
-    <img src="img/logo.jpg" alt="Stamp" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <span class="logo"><img src="img/logo.jpg" alt="Stamp" onerror="this.parentElement.style.display='none';this.parentElement.nextElementSibling.style.display='block'"></span>
     <b>A2 STORE</b>
   </a>
   <div class="secure"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>بياناتك محمية ومشفّرة</span></div>
@@ -388,6 +404,21 @@ form.addEventListener('submit', e => {
     setTimeout(() => { window.location.href = NEXT_URL; }, 1000);
   }, 450);
 });
+
+/* ---------- ميلان ثلاثي الأبعاد للوجو مع حركة الماوس ---------- */
+(function(){
+  const logo = document.querySelector('.logo'); if (!logo) return;
+  const brand = logo.parentElement;
+  brand.addEventListener('mousemove', e => {
+    const r = logo.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+    logo.style.setProperty('--ry', (x * 22) + 'deg');
+    logo.style.setProperty('--rx', (-y * 22) + 'deg');
+  });
+  brand.addEventListener('mouseleave', () => {
+    logo.style.setProperty('--rx', '0deg'); logo.style.setProperty('--ry', '0deg');
+  });
+})();
 </script>
 </body>
 </html>
