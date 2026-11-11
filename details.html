@@ -26,7 +26,13 @@ body::before{content:"";position:fixed;inset:0;z-index:-2;
 /* ---------- top ---------- */
 .top{max-width:1120px;margin:0 auto;padding:22px 20px 6px;display:flex;align-items:center;justify-content:space-between;gap:16px}
 .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
-.brand img{height:54px;width:auto;border-radius:10px;display:block}
+.brand img{height:78px;width:auto;object-fit:contain;border-radius:10px;display:block;transform-origin:center;
+  animation:logoIn .9s cubic-bezier(.2,1.4,.4,1) both,logoPulse 3.5s ease-in-out 1s infinite;
+  filter:drop-shadow(0 6px 18px rgba(224,189,116,.25));transition:transform .35s cubic-bezier(.3,1.6,.5,1),filter .35s}
+.brand:hover img{animation-play-state:paused;transform:scale(1.14) rotate(-3deg);filter:drop-shadow(0 8px 26px rgba(224,189,116,.55))}
+@keyframes logoIn{from{opacity:0;transform:scale(.4) rotate(-12deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+@keyframes logoPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@media(max-width:620px){.brand img{height:62px}}
 .brand b{font-size:20px;letter-spacing:.5px;font-weight:800;display:none}
 .secure{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mu);border:1px solid var(--bd);background:var(--card);padding:8px 14px;border-radius:999px}
 .secure svg{width:16px;height:16px;stroke:var(--ok)}
@@ -149,7 +155,7 @@ select.inp option{background:#10172a;color:#f3f5f9}
 
 <header class="top">
   <a class="brand" href="index.html" aria-label="A2 STORE">
-    <img src="img/logo.jpg" alt="Stamp" style="height:45px; object-fit:contain;" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <img src="img/logo.jpg" alt="Stamp" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
     <b>A2 STORE</b>
   </a>
   <div class="secure"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>بياناتك محمية ومشفّرة</span></div>
