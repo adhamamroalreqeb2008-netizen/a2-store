@@ -508,7 +508,7 @@ function cartV(){
 if(!cart.length){try{localStorage.removeItem('a2order')}catch(e){}app.innerHTML=`<main style="text-align:center;padding:100px 20px"><div style="font-size:64px">🛒</div><h2>عربة التسوق فارغة</h2><p style="color:var(--mu)">أضف منتجاً لتبدأ طلبك</p><a class="btn" href="#home">تصفّح المنتجات</a></main>`;return}
 const T=cart.reduce((s,i)=>{const p=find(i.id);return s+price(p,i.o,i.r)*i.q},0);
 const items=cart.map(i=>{const p=find(i.id),u=price(p,i.o,i.r);return `<div class="it"><div class="t">${visC(p,i.c)}</div><div class="i"><b${p.t==='power'?' class="ar"':''}>${p.n}</b><small>${p.o[i.o].l}${i.r?' · '+(i.r==='us'?'أمريكي':'شرق أوسط'):''}${i.c!=null&&COL[i.id]&&COL[i.id][i.c]?' · '+COL[i.id][i.c][0]:''}</small><div class="pr">${AED(u*i.q)}</div></div><div class="q"><button data-k="${i.k}" data-d="1">+</button>${i.q}<button data-k="${i.k}" data-d="-1">−</button></div></div>`}).join('');
-const MINF=500,instOk=T>MINF;if(!instOk&&pay==='inst')pay='full';if(![500,1000,1500].includes(first))first=500;const F=instOk?Math.min(Math.max(first,MINF),T-1):T,rest=(T-F)/mo,now=new Date();
+const MINF=500,instOk=T>MINF;if(!instOk&&pay==='inst')pay='full';const UQ=cart.reduce((a,i)=>a+i.q,0),F=instOk?Math.min(MINF*UQ,T-1):T,rest=(T-F)/mo,now=new Date();
 const sched=`<div class="sch"><div class="rw"><span>الدفعة الأولى (اليوم)</span><b>${AED(F)}</b></div>${Array.from({length:mo},(_,i)=>`<div class="rw"><span>الشهر ${i+1} · ${fd(addM(now,i+1))}</span><b>${AED(Math.round(rest))}</b></div>`).join('')}</div>`;
 const q4=T/4;saveOrder(T,F,rest,q4);const opt=(k,r,h,d)=>`<div class="po${pay===k?' on':''}${k==='inst'&&!instOk?' dis':''}" data-p="${k}"><div class="r"></div><div class="d"><strong>${h}</strong>${pay===k?d:''}</div>${k==='tabby'?'<span class="lg tb">tabby</span>':k==='tamara'?'<span class="lg tm">tamara</span>':''}</div>`;
 app.innerHTML=`<main style="max-width:820px"><h2 style="margin-top:34px">إتمام الطلب</h2>
@@ -516,13 +516,13 @@ app.innerHTML=`<main style="max-width:820px"><h2 style="margin-top:34px">إتم�
 <div class="bx"><h3>ملخص الطلب</h3><div class="rw"><span>المجموع الفرعي</span><span>${AED(T)}</span></div><div class="rw"><span>التوصيل</span><span class="free">مجاني</span></div><div class="rw t"><span>المبلغ الإجمالي</span><span style="color:var(--gold)">${AED(T)}</span></div></div>
 <div class="bx"><h3>خيار الدفع</h3>
 ${opt('full','','الدفع بكامل المبلغ','')}
-${opt('inst','','الدفع بالتقسيط'+(instOk?'':' (متاح للطلبات فوق 500 د.إ)'),`<div class="lb" style="margin:10px 0 6px">اختر عدد شهور التقسيط</div><select id="mo">${Array.from({length:24},(_,i)=>i+1).map(n=>`<option value="${n}" ${n===mo?'selected':''}>${n} شهر</option>`).join('')}</select><div class="lb" style="margin:10px 0 6px">اختر الدفعة الأولى (د.إ)</div><select id="fp">${[500,1000,1500].map(v=>`<option value="${v}"${F===v?' selected':''}${v>=T?' disabled':''}>${v} د.إ × 1 = ${v} د.إ</option>`).join('')}</select><div class="lb" style="margin:10px 0 0">جدول الأقساط الشهرية</div>${sched}`)}
+${opt('inst','','الدفع بالتقسيط'+(instOk?'':' (متاح للطلبات فوق 500 د.إ)'),`<div class="lb" style="margin:10px 0 6px">اختر عدد شهور التقسيط</div><select id="mo">${Array.from({length:24},(_,i)=>i+1).map(n=>`<option value="${n}" ${n===mo?'selected':''}>${n} شهر</option>`).join('')}</select><div class="lb" style="margin:10px 0 6px">الدفعة الأولى (حسب عدد الأجهزة)</div><div id="fp" style="padding:10px 12px;border:1px solid var(--bd);border-radius:8px;font-weight:800">${MINF} د.إ × ${UQ} ${UQ===1?'جهاز':'أجهزة'} = ${AED(F)}</div><div class="lb" style="margin:10px 0 0">جدول الأقساط الشهرية</div>${sched}`)}
 ${opt('tabby','','Tabby - ادفع في 4 أقساط بدون فوائد',`سيتم توجيهك لتحديد شروط الدفع الخاصة بك وإكمال الطلب<br>بدون فوائد أو رسوم إضافية<br>يتم قبول أي بطاقة خصم أو ائتمان<br>ادفع ${AED(Math.round(q4))} (25%) والباقي على 3 شهور`)}
 ${opt('tamara','','تمارا - قسمها على 4 دفعات',`مقسمة على أربع دفعات، واحدة اليوم والباقي خلال 60 يوماً<br>${AED(Math.round(q4))} × 4`)}
 <button class="btn nx" id="nx">التالي</button></div></main>`;
 app.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const e=cart.find(i=>i.k===b.dataset.k);e.q+=+b.dataset.d;if(e.q<1)cart=cart.filter(i=>i!==e);save();cartV()});
 app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{if(b.dataset.p==='inst'&&!instOk)return;pay=b.dataset.p;cartV()});
-const m=$('#mo');if(m){m.onchange=()=>{mo=+m.value;setTimeout(cartV,0)};$('#fp').onchange=e=>{first=+e.target.value;setTimeout(cartV,0)};$('#fp').onclick=e=>e.stopPropagation();m.onclick=e=>e.stopPropagation()}
+const m=$('#mo');if(m){m.onchange=()=>{mo=+m.value;setTimeout(cartV,0)};m.onclick=e=>e.stopPropagation()}
 $('#nx').onclick = () => {
     let payMethodName = 'تقسيط';
     let calculatedFirstPay = F;
