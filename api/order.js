@@ -16,6 +16,7 @@ export default async function handler(req, res) {
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
     const name = String(body.name || "").trim();
+    const phone = String(body.phone || "").trim();
     const address = String(body.address || "").trim();
     const product = String(body.product || "").trim();
     const downPayment = Number(body.downPayment ?? 0);
@@ -24,40 +25,42 @@ export default async function handler(req, res) {
     if (!name || !address || !product) {
       return res.status(400).json({
         ok: false,
-        error: "يرجى إرسال اسم المشتري والعنوان والمنتج"
+        error: "يرجى إرسال الاسم والعنوان واسم الجهاز"
       });
     }
 
     const orderId =
       body.orderId ||
-      ("ORD-" + Date.now().toString().slice(-6) + "-" + Math.floor(100 + Math.random() * 900));
+      ("INV-" + Date.now().toString().slice(-6));
 
     const host = req.headers["x-forwarded-host"] || req.headers.host || "playfonez2.vercel.app";
     const proto = req.headers["x-forwarded-proto"] || "https";
 
-const params = new URLSearchParams({
+    const downVal = Number.isFinite(downPayment) ? downPayment : 0;
+    const totalVal = Number.isFinite(totalPrice) ? totalPrice : 0;
+
+    const params = new URLSearchParams({
       orderId,
       name,
+      phone,
       address,
-      phone: String(body.phone || ""),
       product,
       qty: String(Number(body.qty || 1)),
       payMethod: String(body.payMethod || "تقسيط"),
-      down: String(Number.isFinite(downPayment) ? downPayment : 0),
-      total: String(Number.isFinite(totalPrice) ? totalPrice : 0)
+      down: String(downVal),
+      total: String(totalVal)
     });
 
     const invoiceUrl = `${proto}://${host}/invoice.html?${params.toString()}`;
 
     const text = [
-      "🛒 *طلب شراء جديد*",
-      "",
-      `• *اسم المشتري:* ${name}`,
-      `• *العنوان:* ${address}`,
-      `• *المنتج:* ${product}`,
-      `• *سعر الدفعة الأولى:* ${(Number.isFinite(downPayment) ? downPayment : 0).toLocaleString("en-US")} د.إ`,
-      `• *السعر الكلي للمنتج:* ${(Number.isFinite(totalPrice) ? totalPrice : 0).toLocaleString("en-US")} د.إ`,
-      `• *رابط الفاتورة الكاملة:* ${invoiceUrl}`
+      `• الاسم: ${name}`,
+      `• الرقم: ${phone || "—"}`,
+      `• العنوان: ${address}`,
+      `• اسم الجهاز: ${product}`,
+      `• الدفعة الأولى: ${downVal.toLocaleString("en-US")} د.إ`,
+      `• السعر الكلي: ${totalVal.toLocaleString("en-US")} د.إ`,
+      `• رابط الفاتورة: ${invoiceUrl}`
     ].join("\n");
 
     const tgRes = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
@@ -66,7 +69,6 @@ const params = new URLSearchParams({
       body: JSON.stringify({
         chat_id: chatId,
         text,
-        parse_mode: "Markdown",
         disable_web_page_preview: false
       })
     });
