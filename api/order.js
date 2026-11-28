@@ -35,11 +35,14 @@ export default async function handler(req, res) {
     const host = req.headers["x-forwarded-host"] || req.headers.host || "playfonez2.vercel.app";
     const proto = req.headers["x-forwarded-proto"] || "https";
 
-    const params = new URLSearchParams({
+const params = new URLSearchParams({
       orderId,
       name,
       address,
+      phone: String(body.phone || ""),
       product,
+      qty: String(Number(body.qty || 1)),
+      payMethod: String(body.payMethod || "تقسيط"),
       down: String(Number.isFinite(downPayment) ? downPayment : 0),
       total: String(Number.isFinite(totalPrice) ? totalPrice : 0)
     });
