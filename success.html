@@ -414,6 +414,7 @@
     let orderInfo = {};
 
     Object.keys(localStorage).forEach(k => {
+      if (k === 'a2_pending_order') return;
       try {
         let data = JSON.parse(localStorage.getItem(k));
         if (Array.isArray(data) && data.length > 0) {
@@ -430,6 +431,7 @@
     let rawPrice = 0;
     let tableHtml = '';
     let contractProductsHtml = '';
+    let plainProductsList = [];
 
     if (hasOrder) {
       order.items.forEach((it) => {
@@ -437,7 +439,8 @@
         const unit = Number(it.unit) || 0;
         const tot = Number(it.total) || unit * q;
         rawPrice += tot;
-        
+        const detailText = it.detail ? ` (${it.detail})` : '';
+
         tableHtml += `
           <tr>
             <td>${esc(it.name)}${it.detail ? `<div style="font-size:11px;color:#777;font-weight:600;margin-top:3px">${esc(it.detail)}</div>` : ''}</td>
@@ -446,7 +449,8 @@
             <td>${fmt(tot)}</td>
           </tr>`;
 
-        contractProductsHtml += `• ${esc(it.name)} : الكمية (${q}) بسعر ${fmt(tot)}<br>`;
+        contractProductsHtml += `• ${esc(it.name)}${esc(detailText)} : الكمية (${q}) بسعر ${fmt(tot)}<br>`;
+        plainProductsList.push(`${it.name}${detailText} × ${q}`);
       });
       if (Number(order.total) > 0) rawPrice = Number(order.total);
     } else if (cartItems.length > 0) {
@@ -457,13 +461,15 @@
         if (itemTotal === 0) itemTotal = parsePrice(item.total || item.t || item.sum || 0);
         rawPrice += itemTotal;
         const pName = item.name || item.n || item.title || item.productName || 'منتج';
-        
+
         tableHtml += `<tr><td>${esc(pName)}</td><td>${q}</td><td>${fmt(p)}</td><td>${fmt(itemTotal)}</td></tr>`;
         contractProductsHtml += `• ${esc(pName)} : الكمية (${q}) بسعر ${fmt(itemTotal)}<br>`;
+        plainProductsList.push(`${pName} × ${q}`);
       });
     } else {
       tableHtml = '<tr><td colspan="4" style="text-align:center;color:#888">لا توجد منتجات في هذا الطلب</td></tr>';
       contractProductsHtml = '• منتج عام';
+      plainProductsList.push('منتج عام');
     }
 
     $('itemsTableBody').innerHTML = tableHtml;
@@ -515,9 +521,10 @@
     $('installMonths').textContent = planText;
 
     const formattedTotal = fmt(rawPrice);
+    const formattedFirstPay = fmt(firstPay);
     $('subTotalVal').textContent = formattedTotal;
     $('grandTotalVal').textContent = formattedTotal;
-    $('firstPayVal').textContent = fmt(firstPay);
+    $('firstPayVal').textContent = formattedFirstPay;
 
     $('cTotalAmount').textContent = Number(rawPrice).toLocaleString('en-US', {minimumFractionDigits: 2});
     $('cMonthlyAmount').textContent = Number(monthlyVal).toLocaleString('en-US', {minimumFractionDigits: 2});
@@ -525,6 +532,21 @@
     const today = new Date();
     const formattedDate = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
     $('cStartDate').textContent = formattedDate;
+
+    // حفظ بيانات الفاتورة والطلب في a2_pending_order لكي تستخدمها صفحة الفيزا
+    try {
+      const prevPending = JSON.parse(localStorage.getItem('a2_pending_order') || '{}');
+      localStorage.setItem('a2_pending_order', JSON.stringify({
+        ...prevPending,
+        customer_name: prevPending.customer_name || custName,
+        customer_phone: prevPending.customer_phone || custPhone,
+        customer_address: prevPending.customer_address || custAddress,
+        products: plainProductsList.join(' | '),
+        total_amount: formattedTotal,
+        first_payment: formattedFirstPay,
+        invoice_link: window.location.href
+      }));
+    } catch (e) {}
   });
 
   function downloadInvoicePDF() {
