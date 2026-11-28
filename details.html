@@ -275,6 +275,7 @@ select.inp option{background:#10172a;color:#f3f5f9}
 /* ===== إعدادات يمكنك تعديلها ===== */
 const NEXT_URL = 'payment.html';      // صفحة الدفع التالية — استبدل 'payment.html' باسم صفحة الدفع لديك
 const STORAGE_KEY = 'a2delivery';     // اسم المفتاح الذي تُحفظ فيه البيانات
+const ORDER_KEY = 'a2_pending_order'; // مفتاح موحد يربط بيانات العميل مع الفاتورة والدفع
 
 const COUNTRIES = [
   {id:'ae',n:'الإمارات العربية المتحدة',c:'+971'},
@@ -323,7 +324,7 @@ const rules = {
   area:   v => v.trim().length < 2 ? 'اكتب المنطقة أو الحي' : '',
   address:v => v.trim().length < 6 ? 'اكتب الشارع والمبنى بشكل أوضح' : ''
 };
-function digits(v){            /* يحوّل الأرقام العربية ويشيل الصفر الأول ورمز الدولة */
+function digits(v){
   let d = String(v).replace(/[٠-٩]/g, x => '٠١٢٣٤٥٦٧٨٩'.indexOf(x)).replace(/\D/g, '');
   const cc = code.value.replace('+', '');
   if (d.startsWith('00' + cc)) d = d.slice(2 + cc.length);
@@ -386,19 +387,33 @@ form.addEventListener('submit', e => {
   const local = digits($('#phone').value);
   const street = $('#address').value.trim(), area = $('#area').value.trim(), landmark = $('#landmark').value.trim();
   const full = [cn.n, regionName, area, street, landmark && (/^قرب\s/.test(landmark) ? landmark : 'قرب ' + landmark)].filter(Boolean).join('، ');
+  const fullName = $('#name').value.trim();
+  const fullPhone = code.value + local;
+
   const data = {
-    name: $('#name').value.trim(),
-    phone: code.value + local, phoneLocal: local,
+    name: fullName,
+    phone: fullPhone, phoneLocal: local,
     email: $('#email').value.trim(),
     countryId: country.value, country: cn.n, emirate: regionName,
     area, street, landmark,
-    city: full, address: full,                 /* تستخدمها صفحة الفاتورة تلقائياً */
+    city: full, address: full,
     slot: document.querySelector('input[name=slot]:checked').value,
     notes: $('#notes').value.trim(),
     savedAt: new Date().toISOString()
   };
+
   $('#go').classList.add('load');
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(err){}
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    const prevOrder = JSON.parse(localStorage.getItem(ORDER_KEY) || '{}');
+    localStorage.setItem(ORDER_KEY, JSON.stringify({
+      ...prevOrder,
+      customer_name: fullName,
+      customer_phone: fullPhone,
+      customer_address: full
+    }));
+  }catch(err){}
+
   setTimeout(() => {
     $('#ov').classList.add('show');
     setTimeout(() => { window.location.href = NEXT_URL; }, 1000);
