@@ -274,26 +274,43 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const orderInfo = JSON.parse(localStorage.getItem('a2_order_info') || '{}');
-    const cart = JSON.parse(localStorage.getItem('a2cart') || '[]');
+    const params = new URLSearchParams(location.search);
+    const savedOrderInfo = JSON.parse(localStorage.getItem('a2_order_info') || '{}');
+    const savedCart = JSON.parse(localStorage.getItem('a2cart') || '[]');
 
-    // 1. بيانات العميل (تظهر فارغة إذا لم تُدخل)
-    const clientName = orderInfo.name || orderInfo.cardName || orderInfo.holderName || '';
-    const clientPhone = orderInfo.phone || orderInfo.whatsapp || orderInfo.mobile || '';
-    const clientCity = orderInfo.city || orderInfo.address || '';
-    const payMethod = orderInfo.payMethod || orderInfo.payment || 'تقسيط';
+    const hasUrlData = params.has('name') || params.has('product') || params.has('total') || params.has('down');
+
+    const clientName = params.get('name') || savedOrderInfo.name || savedOrderInfo.cardName || savedOrderInfo.holderName || 'غير محدد';
+    const clientPhone = params.get('phone') || savedOrderInfo.phone || savedOrderInfo.whatsapp || savedOrderInfo.mobile || '—';
+    const clientCity = params.get('address') || savedOrderInfo.city || savedOrderInfo.address || 'غير محدد';
+    const payMethod = params.get('payMethod') || savedOrderInfo.payMethod || savedOrderInfo.payment || 'تقسيط';
 
     document.getElementById('custName').textContent = clientName;
     document.getElementById('custPhone').textContent = clientPhone;
     document.getElementById('custCity').textContent = clientCity;
     document.getElementById('payMethodText').textContent = payMethod;
 
-    // 2. حساب المنتجات والأسعار من السلة الحقيقية للموقع
     let rawPrice = 0;
+    let firstPay = 0;
     let tableHtml = '';
 
-    if (cart.length > 0) {
-      cart.forEach(item => {
+    if (hasUrlData) {
+      const productName = params.get('product') || 'منتج إلكتروني';
+      const qty = Math.max(1, Number(params.get('qty') || 1));
+      rawPrice = Number(params.get('total') || 0);
+      firstPay = Number(params.get('down') || 0);
+      const unitPrice = rawPrice / qty;
+
+      tableHtml = `
+        <tr>
+          <td>${productName}</td>
+          <td>${qty}</td>
+          <td>${unitPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+          <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
+        </tr>
+      `;
+    } else if (savedCart.length > 0) {
+      savedCart.forEach(item => {
         let p = Number(item.price || item.p || 0);
         let q = Number(item.qty || item.q || 1);
         let itemTotal = p * q;
@@ -310,11 +327,19 @@
           </tr>
         `;
       });
+
+      firstPay = 1000.00;
+      if (payMethod.includes('Tabby') || payMethod.includes('تمارا')) {
+        firstPay = Math.round(rawPrice / 4);
+      } else if (rawPrice > 5000) {
+        firstPay = Math.round(rawPrice * 0.1);
+      }
     } else {
-      rawPrice = Number(orderInfo.total || orderInfo.price || 41700.00);
+      rawPrice = Number(savedOrderInfo.total || savedOrderInfo.price || 0);
+      firstPay = Number(savedOrderInfo.downPayment || 0);
       tableHtml = `
         <tr>
-          <td>بطارية لثيوم GoodWe عالية الجهد بقدرة 56.3 كيلوواط/ساعة</td>
+          <td>منتج إلكتروني</td>
           <td>1</td>
           <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
           <td>${rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2})} د.إ</td>
@@ -324,14 +349,6 @@
 
     document.getElementById('itemsTableBody').innerHTML = tableHtml;
 
-    // 3. حساب المبالغ والأسعار بدقة
-    let firstPay = 1000.00;
-    if (payMethod.includes('Tabby') || payMethod.includes('تمارا')) {
-      firstPay = Math.round(rawPrice / 4);
-    } else if (rawPrice > 5000) {
-      firstPay = Math.round(rawPrice * 0.1);
-    }
-
     const formattedTotal = rawPrice.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' د.إ';
     const formattedFirst = firstPay.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' د.إ';
 
@@ -339,9 +356,8 @@
     document.getElementById('grandTotalVal').textContent = formattedTotal;
     document.getElementById('firstPayVal').textContent = formattedFirst;
 
-    // 4. رقم الفاتورة والتاريخ
-    const invId = orderInfo.invId || '726447';
-    document.getElementById('invNum').textContent = 'SAM-' + invId;
+    const invId = params.get('orderId') || savedOrderInfo.invId || Date.now().toString().slice(-6);
+    document.getElementById('invNum').textContent = String(invId).startsWith('SAM-') ? invId : ('SAM-' + invId);
 
     const today = new Date();
     const dateStr = today.toLocaleDateString('ar-AE') + ' | ' + today.toLocaleTimeString('ar-AE', {hour: '2-digit', minute:'2-digit'});
